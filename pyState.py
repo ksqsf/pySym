@@ -1,6 +1,7 @@
 import z3
 import ast
 import logging
+from copy import copy 
 
 logger = logging.getLogger("State")
 
@@ -177,3 +178,14 @@ class State():
         
         # Made it! Return it as an int
         return int(value.as_string(),10)
+    
+    def copy(self):
+        """
+        Return a copy of the current state
+        """
+        
+        return State(
+            localVars=copy(self.localVars),
+            globalVars=copy(self.globalVars)
+            )
+        

@@ -4,6 +4,7 @@ import logging
 from pyState import State
 from prettytable import PrettyTable
 import sys
+from copy import deepcopy
 
 logger = logging.getLogger("Path")
 
@@ -28,9 +29,14 @@ class Path():
     def step(self):
         """
         Move the current path forward by one step
+        Note, this actually makes a copy/s and returns them. The initial path isn't modified.
+        Returns: A list of paths
         """
         # Get the current instruction
         inst = self.path.pop(0)
+        
+        # Get a new path
+        
 
         if type(inst) == ast.Assign:
             self.state.handleAssign(inst)
@@ -58,3 +64,19 @@ class Path():
                 inst])
         
         print(table)
+    
+    def copy(self):
+        """
+        Input:
+            Nothing
+        Action:
+            Create a copy of the current Path
+        Returns:
+            Copy of the path
+        """
+        return Path(
+                path=deepcopy(self.path),
+                backtrace=deepcopy(self.backtrace),
+                state=self.state.copy(),
+                source=deepcopy(self.source)
+                )
