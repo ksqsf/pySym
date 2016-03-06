@@ -3,6 +3,7 @@ import ast
 import logging
 from pyState import State
 from prettytable import PrettyTable
+import sys
 
 logger = logging.getLogger("Path")
 
@@ -34,8 +35,9 @@ class Path():
         if type(inst) == ast.Assign:
             self.state.handleAssign(inst)
         else:
-            logger.error("step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset))
-            exit(1)
+            err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
+            logger.error(err)
+            raise Exception(err)
 
         # Once we're done, push this instruction to the done column
         self.backtrace.insert(0,inst)

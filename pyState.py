@@ -43,8 +43,9 @@ class State():
         
         # Right now only know how to deal with int
         if type(valueActual) != int:
-            logger.error("Cannot handle non-int {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual)))
-            exit(1)
+            err = "Cannot handle non-int {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
+            logger.error(err)
+            raise Exception(err)
     
         # Create local var if we don't have it already
         if varName not in self.localVars:
@@ -71,8 +72,9 @@ class State():
     
         # Only handling single targets for now
         if len(targets) != 1:
-            logger.error("Cannot handle multiple variable set at Line {0} Col {1}".format(element.lineno,element.col_offset))
-            exit(1)
+            err = "Cannot handle multiple variable set at Line {0} Col {1}".format(element.lineno,element.col_offset)
+            logger.error(err)
+            raise Exception(err)
     
         # Clear up the naming
         target = targets[0]
@@ -82,8 +84,9 @@ class State():
             self._handleAssignNum(target,value)
     
         else:
-            logger.error("Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset))
-            exit(1)
+            err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
+            logger.error()
+            raise Exception(err)
     
     def isSat(self):
         """
