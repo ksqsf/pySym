@@ -7,4 +7,9 @@ Python Symbolic Execution
 This is just for me to mess around with symbolic execution of python scripts. Likely not going to work/be broken so probably not something you care to play with.
 
 # Tests
-py.test --cov=. --cov-config=.coveragerc
+Tests need to be done from somewhere that has z3 access. For my env, this means the virtual environment.
+
+```bash
+$ workon z3
+(z3)$ py.test --cov=. --cov-config=.coveragerc
+```
