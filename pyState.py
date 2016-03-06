@@ -3,7 +3,6 @@ import ast
 import logging
 
 logger = logging.getLogger("State")
-logger.setLevel(logging.DEBUG)
 
 class State():
     """

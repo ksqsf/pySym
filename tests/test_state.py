@@ -5,7 +5,7 @@ sys.path.insert(0, myPath + '/../')
 import symbolicExecutor
 import ast
 import z3
-from state import State
+from pyState import State
 
 test1 = "x = 1"
 test2 = "x = 2"
