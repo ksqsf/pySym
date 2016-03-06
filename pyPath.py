@@ -47,9 +47,12 @@ class Path():
         source = self.source
         source = source.split("\n") if source != None else None
         
-        table = PrettyTable(header=False,border=False,field_names=["line","element"])
+        table = PrettyTable(header=False,border=False,field_names=["lineno","line","element"])
         
-        for inst in self.backtrace:
-            table.add_row([source[inst.lineno-1] if source != None else " ",inst])
+        for inst in self.backtrace[::-1]:
+            table.add_row([
+                "Line {0}".format(inst.lineno),
+                source[inst.lineno-1] if source != None else " ",
+                inst])
         
         print(table)
