@@ -24,10 +24,11 @@ class State():
     """
 
     
-    def __init__(self,localVars={},globalVars={},solver=z3.Solver()):
+    def __init__(self,localVars={},globalVars={},solver=None):
+    
         self.localVars = localVars
         self.globalVars = globalVars
-        self.solver = solver
+        self.solver = z3.Solver() if solver == None else solver
     
     
     def _handleAssignNum(self,target,value):

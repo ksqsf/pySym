@@ -12,7 +12,7 @@ class Path():
     Defines a path of execution.
     """
     
-    def __init__(self,path=[],backtrace=[],state=State(),source=None):
+    def __init__(self,path=[],backtrace=[],state=None,source=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse
         (optional) backtrace = list of asts that happened before the current one
@@ -22,7 +22,7 @@ class Path():
         
         self.path = path
         self.backtrace = backtrace
-        self.state = state
+        self.state = State() if state == None else state
         self.source = source
 
     def step(self):
