@@ -14,12 +14,12 @@ def test_assignInt():
     s = State()
     assign = ast.parse(test1).body[0]
     pyState.Assign.handle(s,assign)
-    
+
     # Basic dict checks
     assert "x" in s.localVars
     assert type(s.localVars["x"]["eval"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
-    assert len(s.localVars['x']['expr']) == 1
+    assert len(s.solver.assertions()) == 1
     
     # Try solving it to ensure that works correctly
     assert s.isSat()
@@ -35,7 +35,7 @@ def test_assignInt():
     assert "x" in s.localVars
     assert type(s.localVars["x"]["eval"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
-    assert len(s.localVars['x']['expr']) == 1
+    assert len(s.solver.assertions()) == 1
     
     # Try solving it to ensure that works correctly
     assert s.isSat()

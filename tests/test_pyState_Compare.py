@@ -201,11 +201,14 @@ def test_pySym_CompareRightNum():
     p = Path(b,source=compare2.format(1,5,">"))
     # Step through the "if" statement
     p = p.step()[0]
+    print(p.state.solver)
     p = p.step()[0]
+    print(p.state.solver)
     p2 = p.step()
     ifSide = p2[0]
     elseSide = p2[1]
-
+    print(ifSide.state.solver)
+    print(elseSide.state.solver)
     # If side should not be possible
     assert not ifSide.state.isSat()
     assert elseSide.state.isSat()

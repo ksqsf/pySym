@@ -24,7 +24,7 @@ def _handleAssignNum(state,target,value):
 
     # Set up temporary variable to create expression
     x = z3.Int(varName)
-    state.addConstraint(varName,x == valueActual,assign=True)
+    state.addConstraint(varName,x == valueActual,assign=True,varType="z3.Int('{0}')".format(varName))
 
 
 def handle(state,element):

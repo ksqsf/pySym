@@ -2,6 +2,7 @@ import z3
 import ast
 import logging
 from copy import copy, deepcopy
+import z3util
 
 logger = logging.getLogger("State")
 
@@ -56,41 +57,62 @@ class State():
         return None
 
 
-    def addConstraint(self,varName,constraint,assign=False):
+    def addConstraint(self,varName,constraint,assign=False,varType=None):
         """
         Input:
             varName = String representation of the variable name (i.e.: 'x')
             constraint = A z3 expression to use as a constraint
             (optional) assign = Is this an assignment? If so, we destroy all
                                 the old constraints on it
+            (optional) varType = String to eval to get this var (i.e.: "z3.Int('x')")
         Action:
             Add constraint given
         Returns:
             Nothing
         """
-        # TODO: Rework how I handle constraints.. This structure doesn't work.
         
         # Sanity checks
         assert type(varName) == str
         assert "z3." in str(type(constraint))
+        assert type(assign) == bool
+        assert type(varType) in [type(None),str]
         
-        # Create local var if we don't have it already
-        # TODO: Something in this if statement is corrupting something.. Double-linked list corruption and python crash on exit
-        if varName not in self.localVars:
+        if assign:
+            assert type(varType) == str
+        
+            # Since we're assigning, create the var
             self.localVars[varName] = {
-                'eval': "z3.Int('{0}')".format(varName),
-                'expr': []
+                'eval': varType,
             }
         
+        # TODO: This is hackish... Re-work to be better 
         # If we're assigning
         if assign:
-            self.localVars[varName]['expr'] = [constraint]
+            # Get a copy of the var
+            var = eval(varType)
+            # Create a new solver too
+            newSolver = z3.Solver()
+            
+            # Clear matching constraints here..
+            for asrt in self.solver.assertions():
+                shouldAdd = True
+                # Only copy over constraints that do not constrain the new variable
+                for x in z3util.get_vars(asrt):
+                    # If this is our var
+                    if x.eq(var):
+                        shouldAdd = False
+                        break
 
-        # Otherwise just add it is as an expression
-        else:
-            self.localVars[varName]['expr'].append(constraint)
+                if shouldAdd:
+                    newSolver.add(asrt)
+            
+            # Change our solver to the new one
+            self.solver = newSolver
+            
 
-    
+        # Add our new constraint to the solver
+        self.solver.add(constraint)
+        
 
     def isSat(self):
         """
@@ -104,21 +126,11 @@ class State():
         """
         # Get and clear our solver
         s = self.solver
-        s.reset()
-        
-        localVars = self.localVars
-        
-        # TODO: This is a bit dangerous... If I can get the concept working using eval needs to change
-        # Populate the solver
-        for var in localVars:
-            s.add(localVars[var]['expr'])
-            # Add in every expr we know
-            #for expr in localVars[var]['expr']:
-            #    s.add(eval(expr))
-        
-        # Check sat
+
+        # Changing how I manage constraints. They're all going into the solver directly now
+        # Just need to ask for updated SAT
         return s.check() == z3.sat
-    
+        
     def printVars(self):
         """
         Input:
@@ -186,23 +198,14 @@ class State():
         """
         Return a copy of the current state
         """
-        def _copyVars(var):
-            """
-            Need to manually do copy for now since deep copy won't work on ctype
-            This copy is basically a "deep-shallow" crossover copy
-            Returns new copy
-            """
-            cp = {}
-            for v in var:
-                cp[v] = {
-                    'eval': copy(var[v]['eval']),
-                    'expr': [x for x in var[v]['expr']]
-                }
-            return cp
+
+        # Copy the solver state
+        solverCopy = z3.Solver()
+        solverCopy.add(self.solver.assertions())
         
         return State(
-            localVars=_copyVars(self.localVars),
-            globalVars=_copyVars(self.globalVars)
+            localVars=deepcopy(self.localVars),
+            globalVars=deepcopy(self.globalVars),
+            solver=solverCopy
             )
-
         
