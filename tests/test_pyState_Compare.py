@@ -28,6 +28,17 @@ else:
     x = 7
 """
 
+compare3 = """
+x = {0}
+y = 12
+if {1} {2} x: 
+    print("One")
+else:
+    print("Two")
+    x = 7
+"""
+
+
 
 def test_pySym_Compare():
     ################
@@ -322,6 +333,151 @@ def test_pySym_CompareRightNum():
     #############
     b = ast.parse(compare2.format(1,5,"!=")).body
     p = Path(b,source=compare2.format(1,5,"!="))
+    # Step through the "if" statement
+    p = p.step()[0]
+    p = p.step()[0]
+    p2 = p.step()
+    ifSide = p2[0]
+    elseSide = p2[1]
+
+    # If side should be correct
+    assert ifSide.state.isSat()
+    assert not elseSide.state.isSat()
+
+    # Track expected number of assertions
+    assert len(ifSide.state.solver.assertions()) == 3
+    assert len(elseSide.state.solver.assertions()) == 3
+
+    # Make sure the answer makes sense
+    assert ifSide.state.any_int('x') == 1
+    assert elseSide.state.any_int('x') == None
+
+
+def test_pySym_CompareLeftNum():
+    ################
+    # Greater Than #
+    ################
+    b = ast.parse(compare3.format(1,5,">")).body
+    p = Path(b,source=compare3.format(1,5,">"))
+    # Step through the "if" statement
+    p = p.step()[0]
+    p = p.step()[0]
+    p2 = p.step()
+    ifSide = p2[0]
+    elseSide = p2[1]
+    # If side should be right
+    assert ifSide.state.isSat()
+    assert not elseSide.state.isSat()
+
+    # Track expected number of assertions
+    assert len(ifSide.state.solver.assertions()) == 3
+    assert len(elseSide.state.solver.assertions()) == 3
+
+    # Make sure the answer makes sense
+    assert ifSide.state.any_int('x') == 1
+    assert elseSide.state.any_int('x') == None
+
+    #########################
+    # Greater Than Or Equal #
+    #########################
+    b = ast.parse(compare3.format(2,2,">=")).body
+    p = Path(b,source=compare3.format(2,2,">="))
+    # Step through the "if" statement
+    p = p.step()[0]
+    p = p.step()[0]
+    p2 = p.step()
+    ifSide = p2[0]
+    elseSide = p2[1]
+
+    # If side should be correct
+    assert ifSide.state.isSat()
+    assert not elseSide.state.isSat()
+
+    # Track expected number of assertions
+    assert len(ifSide.state.solver.assertions()) == 3
+    assert len(elseSide.state.solver.assertions()) == 3
+
+    # Make sure the answer makes sense
+    assert ifSide.state.any_int('x') == 2
+    assert elseSide.state.any_int('x') == None
+
+    #############
+    # Less Than #
+    #############
+    b = ast.parse(compare3.format(1,5,"<")).body
+    p = Path(b,source=compare3.format(1,5,"<"))
+    # Step through the "if" statement
+    p = p.step()[0]
+    p = p.step()[0]
+    p2 = p.step()
+    ifSide = p2[0]
+    elseSide = p2[1]
+
+    # If else should be correct
+    assert not ifSide.state.isSat()
+    assert elseSide.state.isSat()
+
+    # Track expected number of assertions
+    assert len(ifSide.state.solver.assertions()) == 3
+    assert len(elseSide.state.solver.assertions()) == 3
+
+    # Make sure the answer makes sense
+    assert ifSide.state.any_int('x') == None
+    assert elseSide.state.any_int('x') == 1
+
+    ######################
+    # Less Than Or Equal #
+    ######################
+    b = ast.parse(compare3.format(3,5,"<=")).body
+    p = Path(b,source=compare3.format(3,5,"<="))
+    # Step through the "if" statement
+    p = p.step()[0]
+    p = p.step()[0]
+    p2 = p.step()
+    ifSide = p2[0]
+    elseSide = p2[1]
+    
+    # Else side should be correct
+    assert not ifSide.state.isSat()
+    assert elseSide.state.isSat()
+
+    # Track expected number of assertions
+    assert len(ifSide.state.solver.assertions()) == 3
+    assert len(elseSide.state.solver.assertions()) == 3
+
+    # Make sure the answer makes sense
+    assert ifSide.state.any_int('x') == None
+    assert elseSide.state.any_int('x') == 3
+
+    #########
+    # Equal #
+    #########
+    b = ast.parse(compare3.format(1,5,"==")).body
+    p = Path(b,source=compare3.format(1,5,"=="))
+    # Step through the "if" statement
+    p = p.step()[0]
+    p = p.step()[0]
+    p2 = p.step()
+    ifSide = p2[0]
+    elseSide = p2[1]
+
+    # If side should not be correct
+    assert not ifSide.state.isSat()
+    assert elseSide.state.isSat()
+
+    # Track expected number of assertions
+    assert len(ifSide.state.solver.assertions()) == 3
+    assert len(elseSide.state.solver.assertions()) == 3
+
+    # Make sure the answer makes sense
+    assert ifSide.state.any_int('x') == None
+    assert elseSide.state.any_int('x') == 1
+
+    #############
+    # Not Equal #
+    #############
+    b = ast.parse(compare3.format(1,5,"!=")).body
+    p = Path(b,source=compare3.format(1,5,"!="))
     # Step through the "if" statement
     p = p.step()[0]
     p = p.step()[0]
