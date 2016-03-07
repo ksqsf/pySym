@@ -13,18 +13,21 @@ class Path():
     Defines a path of execution.
     """
     
-    def __init__(self,path=[],backtrace=[],state=None,source=None):
+    def __init__(self,path=None,backtrace=None,state=None,source=None,callStack=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse
         (optional) backtrace = list of asts that happened before the current one
         (optional) state = State object for current path
         (optional) source = source code that we're looking at. This can make things prettier
+        (optional) callStack = list of lists containing previous instruction list. This gets
+                               pushed and popd when we call functions or go through if statements
         """
         
-        self.path = path
-        self.backtrace = backtrace
-        self.state = State() if state == None else state
+        self.path = [] if path is None else path
+        self.backtrace = [] if backtrace is None else backtrace
+        self.state = State() if state is None else state
         self.source = source
+        self.callStack = [] if callStack is None else callStack
 
     def step(self):
         """
@@ -42,6 +45,14 @@ class Path():
             path = self.copy()
             ret_paths = [path]
             path.state.handleAssign(inst)
+        
+        elif type(inst) == ast.If:
+            # On If statements we want to take both options
+            path = self.copy()
+            path2 = self.copy()
+            ret_paths = [path,path2]
+            
+        
         else:
             err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
             logger.error(err)
@@ -84,5 +95,6 @@ class Path():
                 path=deepcopy(self.path),
                 backtrace=deepcopy(self.backtrace),
                 state=self.state.copy(),
-                source=deepcopy(self.source)
+                source=deepcopy(self.source),
+                callStack=deepcopy(self.callStack)
                 )
