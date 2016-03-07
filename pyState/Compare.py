@@ -49,6 +49,26 @@ def _handleLeftVar(stateTrue,stateFalse,element,left):
         stateTrue.addConstraint(leftStr, left > right )
         stateFalse.addConstraint(leftStr, left <= right )
     
+    elif type(ops) == ast.GtE:
+        stateTrue.addConstraint(leftStr, left >= right )
+        stateFalse.addConstraint(leftStr, left < right )
+
+    elif type(ops) == ast.Lt:
+        stateTrue.addConstraint(leftStr, left < right )
+        stateFalse.addConstraint(leftStr, left >= right )
+
+    elif type(ops) == ast.LtE:
+        stateTrue.addConstraint(leftStr, left <= right )
+        stateFalse.addConstraint(leftStr, left > right )
+
+    elif type(ops) == ast.Eq:
+        stateTrue.addConstraint(leftStr, left == right )
+        stateFalse.addConstraint(leftStr, left != right )
+
+    elif type(ops) == ast.NotEq:
+        stateTrue.addConstraint(leftStr, left != right )
+        stateFalse.addConstraint(leftStr, left == right )
+
     else:
         err = "Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
         logger.error(err)

@@ -186,7 +186,6 @@ class State():
         """
         Return a copy of the current state
         """
-        
         def _copyVars(var):
             """
             Need to manually do copy for now since deep copy won't work on ctype
@@ -205,4 +204,5 @@ class State():
             localVars=_copyVars(self.localVars),
             globalVars=_copyVars(self.globalVars)
             )
+
         
