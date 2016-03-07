@@ -7,10 +7,19 @@ Python Symbolic Execution
 # Disclaimer
 This is just for me to mess around with symbolic execution of python scripts. Likely not going to work/be broken so probably not something you care to play with.
 
+# Install
+Basic installation requires installing z3 with python bindings. It's recommended to install this into a python virtualenv to keep things a bit more clean.
+
+I created a setup script. It works on Ubuntu 15.04. It is untested on other releases.
+
+```bash
+$ ./setup.sh
+```
+
 # Tests
 Tests need to be done from somewhere that has z3 access. For my env, this means the virtual environment.
 
 ```bash
-$ workon z3
+$ workon pySym
 (z3)$ py.test --cov=. --cov-config=.coveragerc
 ```
