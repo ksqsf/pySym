@@ -5,6 +5,7 @@ from pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import deepcopy
+import pyState.Assign
 
 logger = logging.getLogger("Path")
 
@@ -44,7 +45,7 @@ class Path():
         if type(inst) == ast.Assign:
             path = self.copy()
             ret_paths = [path]
-            path.state.handleAssign(inst)
+            pyState.Assign.handle(path.state,inst)
         
         elif type(inst) == ast.If:
             # On If statements we want to take both options

@@ -23,7 +23,6 @@ class State():
         }
     }
     """
-
     
     def __init__(self,localVars=None,globalVars=None,solver=None):
     
@@ -31,66 +30,7 @@ class State():
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
     
-    
-    def _handleAssignNum(self,target,value):
-        """
-        Handle assigning a number to a variable (i.e.: x = 1)
-        Update local variable dict and return
-        """
-        # The "x" part of "x" = 1
-        varName = target.id
-    
-        # Grab the actual value
-        valueActual = value.n
-        
-        # Right now only know how to deal with int
-        if type(valueActual) != int:
-            err = "Cannot handle non-int {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
-            logger.error(err)
-            raise Exception(err)
-        
-        # Create local var if we don't have it already
-        # TODO: Something in this if statement is corrupting something.. Double-linked list corruption and python crash on exit
-        if varName not in self.localVars:
-            self.localVars[varName] = {
-                'var': z3.Int(varName),
-                'expr': []
-            }
-    
-        # Since this is a set of a concrete, we throw away the old
-        # constraints and just set this new one
-        self.localVars[varName]['expr'] = [self.localVars[varName]['var'] == valueActual]
-    
 
-    def handleAssign(self,element):
-        """
-        Attempt to handle the assign element
-        """
-    
-        # Targets are what is being set
-        targets = element.targets
-    
-        # Value is what to set them to
-        value = element.value
-    
-        # Only handling single targets for now
-        if len(targets) != 1:
-            err = "Cannot handle multiple variable set at Line {0} Col {1}".format(element.lineno,element.col_offset)
-            logger.error(err)
-            raise Exception(err)
-    
-        # Clear up the naming
-        target = targets[0]
-
-        # Call appropriate handlers
-        if type(value) == ast.Num:
-            self._handleAssignNum(target,value)
-    
-        else:
-            err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
-            logger.error()
-            raise Exception(err)
-    
     def isSat(self):
         """
         Input:

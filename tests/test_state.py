@@ -5,6 +5,7 @@ sys.path.insert(0, myPath + '/../')
 import ast
 import z3
 from pyState import State
+import pyState.Assign
 
 test1 = "x = 1"
 test2 = "x = 2"
@@ -12,7 +13,7 @@ test2 = "x = 2"
 def test_assignInt():
     s = State()
     assign = ast.parse(test1).body[0]
-    s.handleAssign(assign)
+    pyState.Assign.handle(s,assign)
     
     # Basic dict checks
     assert "x" in s.localVars
@@ -27,7 +28,7 @@ def test_assignInt():
     
     # Try assigning again
     assign = ast.parse(test2).body[0]
-    s.handleAssign(assign)
+    pyState.Assign.handle(s,assign)
     
     # Basic dict checks
     assert "x" in s.localVars
@@ -50,14 +51,14 @@ def test_copy():
     assert s != s2
     
     # Add something to one and make sure the other is empty
-    s.handleAssign(assign)
+    pyState.Assign.handle(s,assign)
     assert s.localVars != {}
     assert s2.localVars == {}
 
 def test_any_int():
     s = State()
     assign = ast.parse("x = 12").body[0]
-    s.handleAssign(assign)
+    pyState.Assign.handle(s,assign)
 
     assert s.any_int('x') == 12
     assert s.any_int('q') == None
