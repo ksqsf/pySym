@@ -173,12 +173,14 @@ class State():
         m = self.solver.model()
         
         # Check if we have it in our localVars
-        if var not in self.localVars:
+        if self.getZ3Var(var) == None:
             logger.debug("any_int: var '{0}' not in known localVars".format(var))
             return None
+
+        var = self.getZ3Var(var)
         
         # Try getting the value
-        value = m.eval(self.getZ3Var(var))
+        value = m.eval(var)
         
         # Check if we have a known solution
         # Assuming local for now
@@ -189,12 +191,60 @@ class State():
 
         # Check the type of the value
         if type(value) != z3.IntNumRef:
-            logger.warn("any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value)))
-            return None
+            err = "any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value))
+            logger.err("any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value)))
+            raise Exception(err)
         
         # Made it! Return it as an int
         return int(value.as_string(),10)
-    
+
+    def any_real(self,var):
+        """
+        Input:
+            var == variable name. i.e.: "x"
+        Action:
+            Resolve possible value for this variable
+        Return:
+            Discovered variable or None if none found
+            Note: this function will cast an Int to a Real implicitly if found
+        """
+
+        # Solve model first
+        if not self.isSat():
+            logger.debug("any_real: No valid model found")
+            # No valid ints
+            return None
+
+        # Get model
+        m = self.solver.model()
+
+        if self.getZ3Var(var) == None:
+            logger.debug("any_real: var '{0}' not found".format(var))
+            return None
+        
+        var = self.getZ3Var(var)
+
+        # Try getting the value
+        value = m.eval(var)
+
+        # Check if we have a known solution
+        # Assuming local for now
+        if type(value) == z3.ArithRef:
+            logger.debug("any_real: var '{0}' not found in solution".format(var))
+            # No known solution
+            return None
+
+        # Check the type of the value
+        if type(value) not in [z3.IntNumRef,z3.RatNumRef]:
+            err = "any_real: var '{0}' not of type int or real, of type '{1}'".format(var,type(value))
+            logger.error(err)
+            raise Exception(err) 
+
+        # Made it! Return it as a real/float
+        return float(eval(value.as_string()))
+
+
+ 
     def copy(self):
         """
         Return a copy of the current state

@@ -17,14 +17,26 @@ def _handleAssignNum(state,target,value):
     valueActual = value.n
 
     # Right now only know how to deal with int
-    if type(valueActual) != int:
+    if type(valueActual) not in [int,float]:
         err = "Cannot handle non-int {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
         logger.error(err)
         raise Exception(err)
 
     # Set up temporary variable to create expression
-    x = z3.Int(varName)
-    state.addConstraint(x == valueActual,assign=True,varType="z3.Int('{0}')".format(varName),varName=varName)
+    if type(valueActual) == int:
+        x = z3.Int(varName)
+        varType = "z3.Int('{0}')".format(varName)
+
+    elif type(valueActual) == float:
+        x = z3.Real(varName)
+        varType = "z3.Real('{0}')".format(varName)
+
+    else:
+        err = "Unknown value type {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
+        logger.error(err)
+        raise Exception(err)
+
+    state.addConstraint(x == valueActual,assign=True,varType=varType,varName=varName)
 
 
 def handle(state,element):

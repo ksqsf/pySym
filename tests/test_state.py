@@ -6,9 +6,11 @@ import ast
 import z3
 from pyState import State
 import pyState.Assign
+import pytest
 
 test1 = "x = 1"
 test2 = "x = 2"
+test3 = "x = 3.1415"
 
 def test_assignInt():
     s = State()
@@ -19,6 +21,7 @@ def test_assignInt():
     assert "x" in s.localVars
     assert type(s.localVars["x"]["eval"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
+    assert s.getZ3Var("x").is_int()
     assert len(s.solver.assertions()) == 1
     
     # Try solving it to ensure that works correctly
@@ -35,6 +38,7 @@ def test_assignInt():
     assert "x" in s.localVars
     assert type(s.localVars["x"]["eval"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
+    assert s.getZ3Var("x").is_int()
     assert len(s.solver.assertions()) == 1
     
     # Try solving it to ensure that works correctly
@@ -42,6 +46,28 @@ def test_assignInt():
     
     # Ensure we're getting expected output
     assert s.any_int('x') == 2
+
+
+def test_assignFloat():
+    s = State()
+    assign = ast.parse(test3).body[0]
+    pyState.Assign.handle(s,assign)
+    # Basic dict checks
+    assert "x" in s.localVars
+    assert type(s.localVars["x"]["eval"]) == str
+    assert type(s.getZ3Var("x")) == z3.ArithRef
+    assert s.getZ3Var("x").is_real()
+    assert len(s.solver.assertions()) == 1
+
+    # Try solving it to ensure that works correctly
+    assert s.isSat()
+
+    # This isn't an int, it will raise exception
+    with pytest.raises(Exception):
+       s.any_int('x')
+    
+    # We should get this back
+    assert s.any_real('x') == 3.1415
 
 def test_copy():
     s = State()
