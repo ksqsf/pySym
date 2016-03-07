@@ -2,7 +2,6 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import symbolicExecutor
 import ast
 import z3
 from pyPath import Path
