@@ -4,8 +4,8 @@ import logging
 from pyState import State
 from prettytable import PrettyTable
 import sys
-from copy import deepcopy
-import pyState.Assign
+from copy import deepcopy, copy
+import pyState.Assign, pyState.If
 
 logger = logging.getLogger("Path")
 
@@ -37,7 +37,7 @@ class Path():
         Returns: A list of paths
         """
         # Get the current instruction
-        inst = self.path.pop(0)
+        inst = self.path[0]
         
         # Return paths
         ret_paths = []
@@ -51,20 +51,32 @@ class Path():
             # On If statements we want to take both options
             
             # path == we take the if statement
-            path = self.copy()
+            pathIf = self.copy()
             
             # path2 == we take the else statement
-            path2 = self.copy()
-            ret_paths = [path,path2]
+            pathElse = self.copy()
+            ret_paths = [pathIf,pathElse]
             
             # Check if statement. We'll have at least one instruction here, so treat this as a call
-            # Saving off the current path so we can return to it
-            path.callStack.append(copy(path.path))
+            # Saving off the current path so we can return to it and pick up at the next instruction
+            cs = deepcopy(pathIf.path[1:])
+            # Only push our stack if it's not empty
+            if len(cs) > 0:
+                pathIf.callStack.append(cs)
+            
             # Our new path becomes the inside of the if statement
-            path.path = inst.body
+            pathIf.path = [pathIf.path[0]] + inst.body
             
+            # Update the else's path
+            # Check if there is an else path we need to take
+            if len(inst.orelse) > 0:
+                cs = deepcopy(pathElse.path[1:])
+                if len(cs) > 0:
+                    pathElse.callStack.append(cs)
+                pathElse.path = [pathElse.path[0]] + inst.orelse
             
-            # For now we're ignoring the else statement
+            pyState.If.handle(pathIf.state,pathElse.state,inst)
+
             
         
         else:
@@ -72,8 +84,9 @@ class Path():
             logger.error(err)
             raise Exception(err)
 
+        # Move instruction to the done pile :-)
         for path in ret_paths:
-            # Once we're done, push this instruction to the done column
+            inst = path.path.pop(0)
             path.backtrace.insert(0,inst)
         
         # Return the paths

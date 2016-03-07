@@ -17,7 +17,8 @@ def test_assignInt():
     
     # Basic dict checks
     assert "x" in s.localVars
-    assert type(s.localVars["x"]["var"]) == z3.ArithRef
+    assert type(s.localVars["x"]["eval"]) == str
+    assert type(s.getZ3Var("x")) == z3.ArithRef
     assert len(s.localVars['x']['expr']) == 1
     
     # Try solving it to ensure that works correctly
@@ -32,7 +33,8 @@ def test_assignInt():
     
     # Basic dict checks
     assert "x" in s.localVars
-    assert type(s.localVars["x"]["var"]) == z3.ArithRef
+    assert type(s.localVars["x"]["eval"]) == str
+    assert type(s.getZ3Var("x")) == z3.ArithRef
     assert len(s.localVars['x']['expr']) == 1
     
     # Try solving it to ensure that works correctly
@@ -62,4 +64,12 @@ def test_any_int():
 
     assert s.any_int('x') == 12
     assert s.any_int('q') == None
+    
+
+def test_getZ3Var():
+    s = State()
+    assign = ast.parse("x = 12").body[0]
+    pyState.Assign.handle(s,assign)
+    x = s.getZ3Var('x')
+    assert type(x) == z3.ArithRef
     

@@ -15,7 +15,7 @@ class State():
     
     localVars = {
         'x': {
-            'var': x, # This is the actual z3.Int/z3.Array, etc object
+            'eval': "z3.Int('x')", # Eval string to re-create the object on the fly. This is because z3 kept on crashing everything :-(
             'expr': [
                 'localVars['x']['var'] > 1',    # Actual expressions to go into solver
                 'localVars['x']['var'] * 5 > 7'
@@ -31,6 +31,31 @@ class State():
         self.solver = z3.Solver() if solver is None else solver
 
 
+    def getZ3Var(self,varName,local=True):
+        """
+        Input:
+            varName = Variable name to retrieve Z3 object of
+            (optional) local = Boolean if we're dealing with local scope
+        Action:
+            Look-up variable
+        Returns:
+            z3 object variable with given name or None if it cannot be found
+        """
+        # It's important to look this up since we might not know going in
+        # what the variable type is. This keeps track of that state.
+        
+        # If we're looking up local variable
+        if local and varName in self.localVars:
+            return eval(self.localVars[varName]['eval'])
+        
+        # Try global
+        if varName in self.globalVars:
+            return eval(self.globalVars[varName]['eval'])
+        
+        # We failed :-(
+        return None
+
+
     def addConstraint(self,varName,constraint,assign=False):
         """
         Input:
@@ -43,6 +68,8 @@ class State():
         Returns:
             Nothing
         """
+        # TODO: Rework how I handle constraints.. This structure doesn't work.
+        
         # Sanity checks
         assert type(varName) == str
         assert "z3." in str(type(constraint))
@@ -51,10 +78,10 @@ class State():
         # TODO: Something in this if statement is corrupting something.. Double-linked list corruption and python crash on exit
         if varName not in self.localVars:
             self.localVars[varName] = {
-                'var': z3.Int(varName),
+                'eval': "z3.Int('{0}')".format(varName),
                 'expr': []
             }
-
+        
         # If we're assigning
         if assign:
             self.localVars[varName]['expr'] = [constraint]
@@ -138,7 +165,7 @@ class State():
             return None
         
         # Try getting the value
-        value = m.eval(self.localVars[var]['var'])
+        value = m.eval(self.getZ3Var(var))
         
         # Check if we have a known solution
         # Assuming local for now
@@ -169,7 +196,7 @@ class State():
             cp = {}
             for v in var:
                 cp[v] = {
-                    'var': copy(var[v]['var']),
+                    'eval': copy(var[v]['eval']),
                     'expr': [x for x in var[v]['expr']]
                 }
             return cp
