@@ -57,14 +57,15 @@ class State():
         return None
 
 
-    def addConstraint(self,varName,constraint,assign=False,varType=None):
+    def addConstraint(self,constraint,assign=False,varType=None,varName=None):
         """
         Input:
-            varName = String representation of the variable name (i.e.: 'x')
             constraint = A z3 expression to use as a constraint
             (optional) assign = Is this an assignment? If so, we destroy all
                                 the old constraints on it
             (optional) varType = String to eval to get this var (i.e.: "z3.Int('x')")
+            (optional) varName = String representation of the variable name (i.e.: 'x')
+                                 needed only if assign is True
         Action:
             Add constraint given
         Returns:
@@ -72,7 +73,7 @@ class State():
         """
         
         # Sanity checks
-        assert type(varName) == str
+        assert type(varName) in [str,type(None)]
         assert "z3." in str(type(constraint))
         assert type(assign) == bool
         assert type(varType) in [type(None),str]

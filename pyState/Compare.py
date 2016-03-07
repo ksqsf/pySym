@@ -4,15 +4,17 @@ import ast
 
 logger = logging.getLogger("pyState:Compare")
 
-def _handleLeftVar(stateTrue,stateFalse,element,left):
+def _handleLeftVarInt(stateTrue,stateFalse,element,left):
     """
     Input:
         stateTrue = State object for the True evaluation of the compare
         stateFalse = State object for the False evaluation of the compare
         element = ast element object for the if statement (type ast.If)
-        left = Left variable name (i.e.: 'x')
+        left = Left variable name or int (i.e.: 'x' or 5)
     Action:
-        Handle compare where left side is a variable
+        Handle compare where left side is a variable or int
+        Note: left is treated as an object and used directly in the constraint.
+              therefor it must be either an int or a z3 object type
         ex: if x > 5
     Return:
         Nothing. Modify state objects in place
@@ -30,10 +32,6 @@ def _handleLeftVar(stateTrue,stateFalse,element,left):
     ops = ops[0]
     comp = comp[0]
 
-    # Look-up the variable we're dealing with
-    leftStr = left
-    left = stateTrue.getZ3Var(left)    
-
     # Determine what's on the right hand side of the compare
     if type(comp) == ast.Name:
         # Right hand side is another variable
@@ -47,31 +45,31 @@ def _handleLeftVar(stateTrue,stateFalse,element,left):
         err = "_handleLeftVar: Don't know how to handle right-hand type '{0}' at line {1} column {2}".format(type(comp),element.lineno,element.col_offset)
         logger.error(err)
         raise Exception(err)
-
+    
     # Assume success. Add constraints
     if type(ops) == ast.Gt:
-        stateTrue.addConstraint(leftStr, left > right )
-        stateFalse.addConstraint(leftStr, left <= right )
+        stateTrue.addConstraint(left > right )
+        stateFalse.addConstraint(left <= right )
     
     elif type(ops) == ast.GtE:
-        stateTrue.addConstraint(leftStr, left >= right )
-        stateFalse.addConstraint(leftStr, left < right )
+        stateTrue.addConstraint(left >= right )
+        stateFalse.addConstraint(left < right )
 
     elif type(ops) == ast.Lt:
-        stateTrue.addConstraint(leftStr, left < right )
-        stateFalse.addConstraint(leftStr, left >= right )
+        stateTrue.addConstraint(left < right )
+        stateFalse.addConstraint(left >= right )
 
     elif type(ops) == ast.LtE:
-        stateTrue.addConstraint(leftStr, left <= right )
-        stateFalse.addConstraint(leftStr, left > right )
+        stateTrue.addConstraint(left <= right )
+        stateFalse.addConstraint(left > right )
 
     elif type(ops) == ast.Eq:
-        stateTrue.addConstraint(leftStr, left == right )
-        stateFalse.addConstraint(leftStr, left != right )
+        stateTrue.addConstraint(left == right )
+        stateFalse.addConstraint(left != right )
 
     elif type(ops) == ast.NotEq:
-        stateTrue.addConstraint(leftStr, left != right )
-        stateFalse.addConstraint(leftStr, left == right )
+        stateTrue.addConstraint(left != right )
+        stateFalse.addConstraint(left == right )
 
     else:
         err = "_handleLeftVar: Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
@@ -98,8 +96,12 @@ def handle(stateTrue,stateFalse,element):
     
     # Make sure we understand how to deal with this
     if type(left) == ast.Name:
-        left = left.id
-        _handleLeftVar(stateTrue,stateFalse,element,left)
+        left = stateTrue.getZ3Var(left.id)
+        _handleLeftVarInt(stateTrue,stateFalse,element,left)
+    
+    elif type(left) == ast.Num:
+        left = left.n
+        _handleLeftVarInt(stateTrue,stateFalse,element,left)
     
     else:
         err = "Unknown type '{0}' at line {1} column {2}".format(type(left),left.lineno,left.col_offset)
