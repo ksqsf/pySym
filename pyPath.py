@@ -35,18 +35,24 @@ class Path():
         # Get the current instruction
         inst = self.path.pop(0)
         
-        # Get a new path
-        
+        # Return paths
+        ret_paths = []
 
         if type(inst) == ast.Assign:
-            self.state.handleAssign(inst)
+            path = self.copy()
+            ret_paths = [path]
+            path.state.handleAssign(inst)
         else:
             err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
             logger.error(err)
             raise Exception(err)
 
-        # Once we're done, push this instruction to the done column
-        self.backtrace.insert(0,inst)
+        for path in ret_paths:
+            # Once we're done, push this instruction to the done column
+            path.backtrace.insert(0,inst)
+        
+        # Return the paths
+        return ret_paths
     
     def printBacktrace(self):
         """
