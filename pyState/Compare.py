@@ -23,7 +23,7 @@ def _handleLeftVar(stateTrue,stateFalse,element,left):
     comp = element.comparators
     
     if len(ops) > 1 or len(comp) > 1:
-        err = "Don't know how to handle multiple operations '{0}' at line {1} column {2}".format(ops,element.lineno,element.col_offset)
+        err = "_handleLeftVar: Don't know how to handle multiple operations '{0}' at line {1} column {2}".format(ops,element.lineno,element.col_offset)
         logger.error(err)
         raise Exception(err)
     
@@ -39,8 +39,12 @@ def _handleLeftVar(stateTrue,stateFalse,element,left):
         # Right hand side is another variable
         right = stateTrue.getZ3Var(comp.id)
     
+    elif type(comp) == ast.Num:
+        # Right hand side is a number
+        right = comp.n
+
     else:
-        err = "Don't know how to handle type '{0}' at line {1} column {2}".format(type(comp),element.lineno,element.col_offset)
+        err = "_handleLeftVar: Don't know how to handle right-hand type '{0}' at line {1} column {2}".format(type(comp),element.lineno,element.col_offset)
         logger.error(err)
         raise Exception(err)
 
@@ -70,7 +74,7 @@ def _handleLeftVar(stateTrue,stateFalse,element,left):
         stateFalse.addConstraint(leftStr, left == right )
 
     else:
-        err = "Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
+        err = "_handleLeftVar: Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
         logger.error(err)
         raise Exception(err)
        
