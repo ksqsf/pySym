@@ -53,3 +53,12 @@ def test_copy():
     s.handleAssign(assign)
     assert s.localVars != {}
     assert s2.localVars == {}
+
+def test_any_int():
+    s = State()
+    assign = ast.parse("x = 12").body[0]
+    s.handleAssign(assign)
+
+    assert s.any_int('x') == 12
+    assert s.any_int('q') == None
+    
