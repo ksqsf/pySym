@@ -49,9 +49,22 @@ class Path():
         
         elif type(inst) == ast.If:
             # On If statements we want to take both options
+            
+            # path == we take the if statement
             path = self.copy()
+            
+            # path2 == we take the else statement
             path2 = self.copy()
             ret_paths = [path,path2]
+            
+            # Check if statement. We'll have at least one instruction here, so treat this as a call
+            # Saving off the current path so we can return to it
+            path.callStack.append(copy(path.path))
+            # Our new path becomes the inside of the if statement
+            path.path = inst.body
+            
+            
+            # For now we're ignoring the else statement
             
         
         else:

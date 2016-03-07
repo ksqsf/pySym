@@ -29,6 +29,40 @@ class State():
         self.localVars = {} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
+
+
+    def addConstraint(self,varName,constraint,assign=False):
+        """
+        Input:
+            varName = String representation of the variable name (i.e.: 'x')
+            constraint = A z3 expression to use as a constraint
+            (optional) assign = Is this an assignment? If so, we destroy all
+                                the old constraints on it
+        Action:
+            Add constraint given
+        Returns:
+            Nothing
+        """
+        # Sanity checks
+        assert type(varName) == str
+        assert "z3." in str(type(constraint))
+        
+        # Create local var if we don't have it already
+        # TODO: Something in this if statement is corrupting something.. Double-linked list corruption and python crash on exit
+        if varName not in self.localVars:
+            self.localVars[varName] = {
+                'var': z3.Int(varName),
+                'expr': []
+            }
+
+        # If we're assigning
+        if assign:
+            self.localVars[varName]['expr'] = [constraint]
+
+        # Otherwise just add it is as an expression
+        else:
+            self.localVars[varName]['expr'].append(constraint)
+
     
 
     def isSat(self):

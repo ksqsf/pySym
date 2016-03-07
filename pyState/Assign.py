@@ -22,17 +22,9 @@ def _handleAssignNum(state,target,value):
         logger.error(err)
         raise Exception(err)
 
-    # Create local var if we don't have it already
-    # TODO: Something in this if statement is corrupting something.. Double-linked list corruption and python crash on exit
-    if varName not in state.localVars:
-        state.localVars[varName] = {
-            'var': z3.Int(varName),
-            'expr': []
-        }
-
-    # Since this is a set of a concrete, we throw away the old
-    # constraints and just set this new one
-    state.localVars[varName]['expr'] = [state.localVars[varName]['var'] == valueActual]
+    # Set up temporary variable to create expression
+    x = z3.Int(varName)
+    state.addConstraint(varName,x == valueActual,assign=True)
 
 
 def handle(state,element):
