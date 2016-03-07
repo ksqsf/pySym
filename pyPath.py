@@ -70,7 +70,7 @@ class Path():
         Input:
             Nothing
         Action:
-            Create a copy of the current Path
+            Create a copy of the current Path object
         Returns:
             Copy of the path
         """

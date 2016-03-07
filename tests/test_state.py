@@ -41,3 +41,16 @@ def test_assignInt():
     # Ensure we're getting expected output
     assert s.any_int('x') == 2
 
+def test_copy():
+    s = State()
+    assign = ast.parse("a = 1").body[0]
+
+    s2 = s.copy()
+    
+    # Ensure it's actually being copied
+    assert s != s2
+    
+    # Add something to one and make sure the other is empty
+    s.handleAssign(assign)
+    assert s.localVars != {}
+    assert s2.localVars == {}

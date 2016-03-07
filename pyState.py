@@ -1,7 +1,7 @@
 import z3
 import ast
 import logging
-from copy import copy 
+from copy import copy, deepcopy
 
 logger = logging.getLogger("State")
 
@@ -25,11 +25,11 @@ class State():
     """
 
     
-    def __init__(self,localVars={},globalVars={},solver=None):
+    def __init__(self,localVars=None,globalVars=None,solver=None):
     
-        self.localVars = localVars
-        self.globalVars = globalVars
-        self.solver = z3.Solver() if solver == None else solver
+        self.localVars = {} if localVars is None else localVars
+        self.globalVars = {} if globalVars is None else globalVars
+        self.solver = z3.Solver() if solver is None else solver
     
     
     def _handleAssignNum(self,target,value):
@@ -48,8 +48,9 @@ class State():
             err = "Cannot handle non-int {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
             logger.error(err)
             raise Exception(err)
-    
+        
         # Create local var if we don't have it already
+        # TODO: Something in this if statement is corrupting something.. Double-linked list corruption and python crash on exit
         if varName not in self.localVars:
             self.localVars[varName] = {
                 'var': z3.Int(varName),
@@ -58,7 +59,7 @@ class State():
     
         # Since this is a set of a concrete, we throw away the old
         # constraints and just set this new one
-        self.localVars[varName]['expr'] = ['localVars[\'{0}\'][\'var\'] == {1}'.format(varName,valueActual)]
+        self.localVars[varName]['expr'] = [self.localVars[varName]['var'] == valueActual]
     
 
     def handleAssign(self,element):
@@ -109,9 +110,10 @@ class State():
         # TODO: This is a bit dangerous... If I can get the concept working using eval needs to change
         # Populate the solver
         for var in localVars:
+            s.add(localVars[var]['expr'])
             # Add in every expr we know
-            for expr in localVars[var]['expr']:
-                s.add(eval(expr))
+            #for expr in localVars[var]['expr']:
+            #    s.add(eval(expr))
         
         # Check sat
         return s.check() == z3.sat
@@ -184,8 +186,22 @@ class State():
         Return a copy of the current state
         """
         
+        def _copyVars(var):
+            """
+            Need to manually do copy for now since deep copy won't work on ctype
+            This copy is basically a "deep-shallow" crossover copy
+            Returns new copy
+            """
+            cp = {}
+            for v in var:
+                cp[v] = {
+                    'var': copy(var[v]['var']),
+                    'expr': [x for x in var[v]['expr']]
+                }
+            return cp
+        
         return State(
-            localVars=copy(self.localVars),
-            globalVars=copy(self.globalVars)
+            localVars=_copyVars(self.localVars),
+            globalVars=_copyVars(self.globalVars)
             )
         
