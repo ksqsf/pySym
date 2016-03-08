@@ -86,6 +86,11 @@ class State():
             # Get previous
             if previous:
                 count -= 1
+            
+            # Set varType if asked for
+            if type(varType) != type(None):
+                self.localVars[varName]['varType'] = self._varTypeToString(varType)
+            
             return z3util.mk_var("{0}_{1}".format(varName,count),eval(self.localVars[varName]['varType']))
         
         # If we want to increment but we didn't find it, create it
@@ -107,6 +112,11 @@ class State():
             count = self.globalVars[varName]['count']
             if previous:
                 count -= 1
+            
+            # Set varType if asked for
+            if varType != None:
+                self.localVars[varName]['varType'] = self._varTypeToString(varType)
+            
             return z3util.mk_var("{0}_{1}".format(varName,count),eval(self.globalVars[varName]['varType']))
 
         

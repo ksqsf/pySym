@@ -4,41 +4,30 @@ import ast
 
 logger = logging.getLogger("pyState:AugAssign")
 
-
-def _handleAssignNum(state,target,value):
+def _isRealVal(val):
     """
-    Handle assigning a number to a variable (i.e.: x = 1)
-    Update local variable dict and return
+    Input:
+        val = Value to check for real-ness
+    Action:
+        Determine val type (z3 object, int/float, etc).
+    Returns:
+        True fif val is of Real type, False otherwise
     """
-    # The "x" part of "x" = 1
-    varName = target.id
+    t = type(val)
 
-    # Grab the actual value
-    valueActual = value.n
+    if t == int:
+        return False
 
-    # Right now only know how to deal with int
-    if type(valueActual) not in [int,float]:
-        err = "Cannot handle non-int {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
-        logger.error(err)
-        raise Exception(err)
+    elif t == float:
+        return True
 
-    # Set up temporary variable to create expression
-    if type(valueActual) == int:
-        #x = z3.Int(varName)
-        #varType = "z3.Int('{0}')".format(varName)
-        x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
-
-    elif type(valueActual) == float:
-        #x = z3.Real(varName)
-        #varType = "z3.Real('{0}')".format(varName)
-        x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
-
+    elif t == z3.ArithRef:
+        return val.is_real()
+    
     else:
-        err = "Unknown value type {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
+        err = "Can't determine if object '{0}' is real type or not".format(val)
         logger.error(err)
         raise Exception(err)
-
-    state.addConstraint(x == valueActual) #,assign=True,varType=varType,varName=varName)
 
 
 def handle(state,element):
@@ -66,9 +55,12 @@ def handle(state,element):
         logger.error(err)
         raise Exception(err)
 
-    # Call appropriate handlers
+    # Figure out value type
     if type(value) == ast.Num:
         value = value.n
+
+    elif type(value) == ast.Name:
+        value = state.getZ3Var(value.id)
 
     else:
         err = "Don't know how to handle value type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
@@ -78,7 +70,12 @@ def handle(state,element):
     # Basic sanity checks complete. For augment assigns we will always need to update the vars.
     # Grab the old var and create a new now
     oldTargetVar = state.getZ3Var(target)
-    newTargetVar = state.getZ3Var(target,increment=True)
+    
+    # Z3 gets confused if we don't change our var to Real when comparing w/ Real
+    if _isRealVal(value):
+        newTargetVar = state.getZ3Var(target,increment=True,varType=z3.RealSort())
+    else:
+        newTargetVar = state.getZ3Var(target,increment=True)
     
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
