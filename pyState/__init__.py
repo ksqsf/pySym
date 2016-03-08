@@ -3,6 +3,7 @@ import ast
 import logging
 from copy import copy, deepcopy
 import z3util
+import pyState.BinOp
 
 logger = logging.getLogger("State")
 
@@ -27,6 +28,35 @@ class State():
         self.localVars = {} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
+
+    def resolveObject(self,obj):
+        """
+        Input:
+            obj = Some ast object (i.e.: ast.Name, ast.Num, etc)
+        Action:
+            Resolve object into something that can be used in a constraint
+        Return:
+            Resolved object
+                ast.Num == int (i.e.: 6)
+                ast.Name == z3 Object
+                ast.BinOp == z3 expression of BinOp (i.e.: x + y)
+        """
+        t = type(obj)
+        
+        if t == ast.Name:
+            return self.getZ3Var(obj.id)
+        
+        elif t == ast.Num:
+            return obj.n
+        
+        elif t == ast.BinOp:
+            return pyState.BinOp.handle(self,obj)
+
+        else:
+            err = "resolveObject: unable to resolve object '{0}'".format(obj)
+            logger.error(err)
+            raise Exception(err)
+
 
     def _varTypeToString(self,varType):
         """
@@ -220,7 +250,7 @@ class State():
         # Check the type of the value
         if type(value) != z3.IntNumRef:
             err = "any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value))
-            logger.error("any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value)))
+            logger.error(err)
             raise Exception(err)
         
         # Made it! Return it as an int

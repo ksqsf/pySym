@@ -1,6 +1,7 @@
 import logging
-import z3
+import z3, z3util
 import ast
+from  . import BinOp
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -9,36 +10,20 @@ def _handleAssignNum(state,target,value):
     """
     Handle assigning a number to a variable (i.e.: x = 1)
     Update local variable dict and return
+    value should already be resolved via state.resolveObject (meaning it is now an expression)
     """
     # The "x" part of "x" = 1
     varName = target.id
 
-    # Grab the actual value
-    valueActual = value.n
-
-    # Right now only know how to deal with int
-    if type(valueActual) not in [int,float]:
-        err = "Cannot handle non-int {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
-        logger.error(err)
-        raise Exception(err)
-
-    # Set up temporary variable to create expression
-    if type(valueActual) == int:
-        #x = z3.Int(varName)
-        #varType = "z3.Int('{0}')".format(varName)
-        x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
-
-    elif type(valueActual) == float:
-        #x = z3.Real(varName)
-        #varType = "z3.Real('{0}')".format(varName)
+    # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
+    if (type(value) == z3.ArithRef and max([x.is_real() for x in z3util.get_vars(value)])) or (type(value) == float):
         x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
 
-    else:
-        err = "Unknown value type {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
-        logger.error(err)
-        raise Exception(err)
+    else: # type(valueActual) == float:
+        print("expr: {0}".format(value))
+        x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
 
-    state.addConstraint(x == valueActual) #,assign=True,varType=varType,varName=varName)
+    state.addConstraint(x == value)
 
 
 def handle(state,element):
@@ -62,8 +47,8 @@ def handle(state,element):
     target = targets[0]
 
     # Call appropriate handlers
-    if type(value) == ast.Num:
-        _handleAssignNum(state,target,value)
+    if type(value) in [ast.Num, ast.Name, ast.BinOp]:
+        _handleAssignNum(state,target,state.resolveObject(value))
 
     else:
         err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
