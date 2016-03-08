@@ -129,6 +129,9 @@ class State():
         # Add our new constraint to the solver
         self.solver.add(constraint)
         
+        # Using iterative engine
+        self.solver.push()
+        
 
     def isSat(self):
         """
@@ -207,7 +210,7 @@ class State():
         # Check the type of the value
         if type(value) != z3.IntNumRef:
             err = "any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value))
-            logger.err("any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value)))
+            logger.error("any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value)))
             raise Exception(err)
         
         # Made it! Return it as an int
