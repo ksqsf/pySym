@@ -17,11 +17,9 @@ def _handleAssignNum(state,target,value):
 
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
     if hasRealComponent(value):
-        print("Assuming this is a real: {0}".format(value))
         x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
 
-    else: # type(valueActual) == float:
-        print("Assuming this is an int: {0}".format(value))
+    else: 
         x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
 
     state.addConstraint(x == value)
