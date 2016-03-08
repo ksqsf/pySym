@@ -226,6 +226,32 @@ class State():
         # Made it! Return it as an int
         return int(value.as_string(),10)
 
+    """
+    def any_num(self,var):
+        Input:
+            var == variable name. i.e.: "x"
+        Action:
+            Resolve possible value for this variable
+        Return:
+            Discovered variable or None if none found
+            This will attempt to discover the correct type of variable (int/real) and return
+            that type.
+        
+        # TODO: Do better than this... Check stuff first. Try/Catch isn't a great practice
+        
+        ret = None
+        try:
+            ret = self.any_int(var)
+        except:
+            pass
+        
+        if ret != None:
+            return ret
+        
+        # Intentionally not catching exceptions here
+        return self.any_real(var)
+    """
+
     def any_real(self,var):
         """
         Input:
