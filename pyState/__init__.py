@@ -136,34 +136,38 @@ class State():
         # It's important to look this up since we might not know going in
         # what the variable type is. This keeps track of that state.
         
+        # Variable naming convention. Intentionally breaking legal python variable naming conventions
+        # <Count><VarName>
+        
         #TODO: Optimize this
         
         # If we're looking up local variable
-        if local and varName in self.localVars:
-            # Increment the counter if asked
-            if increment:
-                self.localVars[varName]['count'] += 1
-            count = self.localVars[varName]['count']
-            # Get previous
-            if previous:
-                count -= 1
+        if local:
+            if varName in self.localVars:
+                # Increment the counter if asked
+                if increment:
+                    self.localVars[varName]['count'] += 1
+                count = self.localVars[varName]['count']
+                # Get previous
+                if previous:
+                    count -= 1
             
-            # Set varType if asked for
-            if type(varType) != type(None):
-                self.localVars[varName]['varType'] = self._varTypeToString(varType)
-            
-            return z3util.mk_var("{0}_{1}".format(varName,count),eval(self.localVars[varName]['varType']))
+                # Set varType if asked for
+                if type(varType) != type(None):
+                    self.localVars[varName]['varType'] = self._varTypeToString(varType)
+                
+                return z3util.mk_var("{0}{1}".format(count,varName),eval(self.localVars[varName]['varType']))
         
-        # If we want to increment but we didn't find it, create it
-        if local and varName not in self.localVars and increment:
-            assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
-            
-            # Time to create a new var!
-            self.localVars[varName] = {
-                'count': 0,
-                'varType': self._varTypeToString(varType)
-            }
-            return z3util.mk_var("{0}_{1}".format(varName,self.localVars[varName]['count']),varType)
+            # If we want to increment but we didn't find it, create it
+            elif increment:
+                assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
+                
+                # Time to create a new var!
+                self.localVars[varName] = {
+                    'count': 0,
+                    'varType': self._varTypeToString(varType)
+                }
+                return z3util.mk_var("{0}{1}".format(self.localVars[varName]['count'],varName),varType)
         
         # Try global
         if varName in self.globalVars:
@@ -178,7 +182,7 @@ class State():
             if varType != None:
                 self.localVars[varName]['varType'] = self._varTypeToString(varType)
             
-            return z3util.mk_var("{0}_{1}".format(varName,count),eval(self.globalVars[varName]['varType']))
+            return z3util.mk_var("{0}{1}".format(count,varName),eval(self.globalVars[varName]['varType']))
 
         
         # We failed :-(
