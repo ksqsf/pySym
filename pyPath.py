@@ -5,7 +5,7 @@ from pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import deepcopy, copy
-import pyState.Assign, pyState.If
+import pyState.Assign, pyState.If, pyState.AugAssign
 
 logger = logging.getLogger("Path")
 
@@ -76,8 +76,11 @@ class Path():
                 pathElse.path = [pathElse.path[0]] + inst.orelse
             
             pyState.If.handle(pathIf.state,pathElse.state,inst)
-
-            
+        
+        elif type(inst) == ast.AugAssign:
+            path = self.copy()
+            ret_paths = [path]
+            pyState.AugAssign.handle(path.state,inst)
         
         else:
             err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
