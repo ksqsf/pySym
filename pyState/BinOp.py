@@ -23,6 +23,12 @@ def handle(state,element):
     left = state.resolveObject(element.left)
     right = state.resolveObject(element.right)
     op = element.op
+    
+    # Due to Z3 qirk, we need to cast vars to Real if one var is a float
+    #if type(left) == float and type(right) == z3.ArithRef and right.is_int():
+    #    right = z3.ToReal(right)
+    #elif type(right) == float and type(left) == z3.ArithRef and left.is_int():
+    #    left = z3.ToReal(left)
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:

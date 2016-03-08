@@ -1,11 +1,41 @@
-import z3
+import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-import z3util
 import pyState.BinOp
 
 logger = logging.getLogger("State")
+
+def get_all(f,rs=[]):
+    """
+    >>> x,y = Ints('x y')
+    >>> a,b = Bools('a b')
+    >>> get_all(Implies(And(x+y==0,x*2==10),Or(a,Implies(a,b==False))))
+    [x, y, a, b]
+    """
+    if __debug__:
+        assert z3util.is_expr(f)
+
+    if z3util.is_const(f):
+        return z3util.vset(rs + [f],str)
+
+    else:
+        for f_ in f.children():
+            rs = get_all(f_,rs)
+
+        return z3util.vset(rs,str)
+
+def hasRealComponent(expr):
+    """
+    Input:
+        expr = expression object
+    Action:
+        Checks if expression contains a real/non-int value or variable
+    Returns:
+        True if it has real componenet, False otherwise
+    """
+    return max([x.is_real() for x in get_all(expr)])
+
 
 class State():
     """
@@ -47,7 +77,8 @@ class State():
             return self.getZ3Var(obj.id)
         
         elif t == ast.Num:
-            return obj.n
+            # Return real val or int val
+            return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         
         elif t == ast.BinOp:
             return pyState.BinOp.handle(self,obj)

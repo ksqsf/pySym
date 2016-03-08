@@ -1,7 +1,7 @@
 import logging
 import z3, z3util
 import ast
-from  . import BinOp
+from  . import BinOp, hasRealComponent
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -16,11 +16,12 @@ def _handleAssignNum(state,target,value):
     varName = target.id
 
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
-    if (type(value) == z3.ArithRef and max([x.is_real() for x in z3util.get_vars(value)])) or (type(value) == float):
+    if hasRealComponent(value):
+        print("Assuming this is a real: {0}".format(value))
         x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
 
     else: # type(valueActual) == float:
-        print("expr: {0}".format(value))
+        print("Assuming this is an int: {0}".format(value))
         x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
 
     state.addConstraint(x == value)
