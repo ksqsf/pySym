@@ -24,19 +24,21 @@ def _handleAssignNum(state,target,value):
 
     # Set up temporary variable to create expression
     if type(valueActual) == int:
-        x = z3.Int(varName)
-        varType = "z3.Int('{0}')".format(varName)
+        #x = z3.Int(varName)
+        #varType = "z3.Int('{0}')".format(varName)
+        x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
 
     elif type(valueActual) == float:
-        x = z3.Real(varName)
-        varType = "z3.Real('{0}')".format(varName)
+        #x = z3.Real(varName)
+        #varType = "z3.Real('{0}')".format(varName)
+        x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
 
     else:
         err = "Unknown value type {2} set at line {0} col {1}".format(value.lineno,value.col_offset,type(valueActual))
         logger.error(err)
         raise Exception(err)
 
-    state.addConstraint(x == valueActual,assign=True,varType=varType,varName=varName)
+    state.addConstraint(x == valueActual) #,assign=True,varType=varType,varName=varName)
 
 
 def handle(state,element):
@@ -65,6 +67,6 @@ def handle(state,element):
 
     else:
         err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
-        logger.error()
+        logger.error(err)
         raise Exception(err)
 

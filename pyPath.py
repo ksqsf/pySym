@@ -100,6 +100,7 @@ class Path():
         source = source.split("\n") if source != None else None
         
         table = PrettyTable(header=False,border=False,field_names=["lineno","line","element"])
+        table.align = 'l'
         
         for inst in self.backtrace[::-1]:
             table.add_row([

@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+# Check OS
+. setup_detectOS.sh
+
+if [[ "$OS" = "linux" ]] && [[ "$DistroBasedOn" = "debian" ]]; then
+    sudo apt-get update
+    sudo apt-get install -y make gcc g++
+else
+    echo "Don't know prereqs for your distro. You should help me!"
+fi
+
 # Figure out where we are
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

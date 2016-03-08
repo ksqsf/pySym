@@ -16,11 +16,8 @@ class State():
     
     localVars = {
         'x': {
-            'eval': "z3.Int('x')", # Eval string to re-create the object on the fly. This is because z3 kept on crashing everything :-(
-            'expr': [
-                'localVars['x']['var'] > 1',    # Actual expressions to go into solver
-                'localVars['x']['var'] * 5 > 7'
-            ]
+            'varType': "z3.IntSort()", # Eval string to re-create the object's type on the fly. This is because z3 kept on crashing everything :-(
+            'count': 0 # This helps us keep track of Static Single Assignment forms
         }
     }
     """
@@ -31,12 +28,45 @@ class State():
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
 
+    def _varTypeToString(self,varType):
+        """
+        Input:
+            varType = z3 var sort (i.e.: z3.IntSort())
+        Action:
+            Resolves input type back to it's string (i.e.: "z3.IntSort()")
+        Returns:
+            String representation of varType
+        """
+        assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
+        
+        if type(varType) == z3.ArithSortRef:
+            if varType.is_real():
+                return "z3.RealSort()"
+            elif varType.is_int():
+                return "z3.IntSort()"
+            else:
+                raise Exception("Got unknown ArithSortRef type {0}".format(varType))
 
-    def getZ3Var(self,varName,local=True):
+        elif type(varType) == z3.BoolSortRef:
+            if varType.is_bool():
+                return "z3.BoolSort()"
+            else:
+                raise Exception("Got unknown BoolSortRef type {0}".format(varType))
+
+
+    def getZ3Var(self,varName,local=True,increment=False,varType=None,previous=False):
         """
         Input:
             varName = Variable name to retrieve Z3 object of
             (optional) local = Boolean if we're dealing with local scope
+            (optional) increment = Increment the counter. This is if we want to do
+                                   something new with this variable. If variable
+                                   does not exist, it will be created in the scope
+                                   defined by the "local" param
+            (optional) varType = Type of var to create. Used when increment=True
+                                 and var cannot be found. (i.e: z3.IntSort())
+            (optional) previous = Bool of do you want one that is one older
+                                  i.e.: current is x_1, return x_0
         Action:
             Look-up variable
         Returns:
@@ -45,13 +75,40 @@ class State():
         # It's important to look this up since we might not know going in
         # what the variable type is. This keeps track of that state.
         
+        #TODO: Optimize this
+        
         # If we're looking up local variable
         if local and varName in self.localVars:
-            return eval(self.localVars[varName]['eval'])
+            # Increment the counter if asked
+            if increment:
+                self.localVars[varName]['count'] += 1
+            count = self.localVars[varName]['count']
+            # Get previous
+            if previous:
+                count -= 1
+            return z3util.mk_var("{0}_{1}".format(varName,count),eval(self.localVars[varName]['varType']))
+        
+        # If we want to increment but we didn't find it, create it
+        if local and varName not in self.localVars and increment:
+            assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
+            
+            # Time to create a new var!
+            self.localVars[varName] = {
+                'count': 0,
+                'varType': self._varTypeToString(varType)
+            }
+            return z3util.mk_var("{0}_{1}".format(varName,self.localVars[varName]['count']),varType)
         
         # Try global
         if varName in self.globalVars:
-            return eval(self.globalVars[varName]['eval'])
+            # Increment the counter if asked
+            if increment:
+                self.localVars[varName]['count'] += 1
+            count = self.globalVars[varName]['count']
+            if previous:
+                count -= 1
+            return z3util.mk_var("{0}_{1}".format(varName,count),eval(self.globalVars[varName]['varType']))
+
         
         # We failed :-(
         return None
@@ -63,7 +120,7 @@ class State():
             constraint = A z3 expression to use as a constraint
             (optional) assign = Is this an assignment? If so, we destroy all
                                 the old constraints on it
-            (optional) varType = String to eval to get this var (i.e.: "z3.Int('x')")
+            (optional) varType = Type of var this is (i.e.: z3.BoolSort(), z3.IntSort(), z3.RealSort()) # String to eval to get this var (i.e.: "z3.Int('x')")
             (optional) varName = String representation of the variable name (i.e.: 'x')
                                  needed only if assign is True
         Action:
@@ -71,14 +128,23 @@ class State():
         Returns:
             Nothing
         """
-        
+        # z3util.mk_var("x",z3.IntSort())
         # Sanity checks
+        #assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
         assert type(varName) in [str,type(None)]
         assert "z3." in str(type(constraint))
         assert type(assign) == bool
-        assert type(varType) in [type(None),str]
+        #assert type(varType) in [type(None),str]
         
+        """ 
+        # If we're assigning, increment our var number
         if assign:
+            var = getZ3Var(self,varName,local=True,increment=False,varType=None)
+        
+        # If we're referencing, just get the latest
+        else:
+            var = getZ3Var(self,varName,local=True,increment=False,varType=None)
+        
             assert type(varType) == str
         
             # Since we're assigning, create the var
@@ -89,10 +155,14 @@ class State():
         # TODO: This is hackish... Re-work to be better 
         # If we're assigning
         if assign:
+            var = self.getZ3Var(varName,
+            
             # Get a copy of the var
-            var = eval(varType)
+            var = z3util.mk_var(varName + "_0",varType)
+            
+            
             # Create a new solver too
-            newSolver = z3.Solver()
+            # newSolver = z3.Solver()
             
             # Clear matching constraints here..
             for asrt in self.solver.assertions():
@@ -106,9 +176,10 @@ class State():
 
                 if shouldAdd:
                     newSolver.add(asrt)
+        """
             
-            # Change our solver to the new one
-            self.solver = newSolver
+        # Change our solver to the new one
+        # self.solver = newSolver
             
 
         # Add our new constraint to the solver

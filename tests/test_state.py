@@ -19,7 +19,7 @@ def test_assignInt():
 
     # Basic dict checks
     assert "x" in s.localVars
-    assert type(s.localVars["x"]["eval"]) == str
+    assert type(s.localVars["x"]["varType"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
     assert s.getZ3Var("x").is_int()
     assert len(s.solver.assertions()) == 1
@@ -36,10 +36,10 @@ def test_assignInt():
     
     # Basic dict checks
     assert "x" in s.localVars
-    assert type(s.localVars["x"]["eval"]) == str
+    assert type(s.localVars["x"]["varType"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
     assert s.getZ3Var("x").is_int()
-    assert len(s.solver.assertions()) == 1
+    assert len(s.solver.assertions()) == 2
     
     # Try solving it to ensure that works correctly
     assert s.isSat()
@@ -54,7 +54,7 @@ def test_assignFloat():
     pyState.Assign.handle(s,assign)
     # Basic dict checks
     assert "x" in s.localVars
-    assert type(s.localVars["x"]["eval"]) == str
+    assert type(s.localVars["x"]["varType"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
     assert s.getZ3Var("x").is_real()
     assert len(s.solver.assertions()) == 1
