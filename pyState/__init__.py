@@ -114,74 +114,18 @@ class State():
         return None
 
 
-    def addConstraint(self,constraint,assign=False,varType=None,varName=None):
+    def addConstraint(self,constraint):
         """
         Input:
             constraint = A z3 expression to use as a constraint
-            (optional) assign = Is this an assignment? If so, we destroy all
-                                the old constraints on it
-            (optional) varType = Type of var this is (i.e.: z3.BoolSort(), z3.IntSort(), z3.RealSort()) # String to eval to get this var (i.e.: "z3.Int('x')")
-            (optional) varName = String representation of the variable name (i.e.: 'x')
-                                 needed only if assign is True
         Action:
             Add constraint given
         Returns:
             Nothing
         """
-        # z3util.mk_var("x",z3.IntSort())
         # Sanity checks
-        #assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
-        assert type(varName) in [str,type(None)]
         assert "z3." in str(type(constraint))
-        assert type(assign) == bool
-        #assert type(varType) in [type(None),str]
         
-        """ 
-        # If we're assigning, increment our var number
-        if assign:
-            var = getZ3Var(self,varName,local=True,increment=False,varType=None)
-        
-        # If we're referencing, just get the latest
-        else:
-            var = getZ3Var(self,varName,local=True,increment=False,varType=None)
-        
-            assert type(varType) == str
-        
-            # Since we're assigning, create the var
-            self.localVars[varName] = {
-                'eval': varType,
-            }
-        
-        # TODO: This is hackish... Re-work to be better 
-        # If we're assigning
-        if assign:
-            var = self.getZ3Var(varName,
-            
-            # Get a copy of the var
-            var = z3util.mk_var(varName + "_0",varType)
-            
-            
-            # Create a new solver too
-            # newSolver = z3.Solver()
-            
-            # Clear matching constraints here..
-            for asrt in self.solver.assertions():
-                shouldAdd = True
-                # Only copy over constraints that do not constrain the new variable
-                for x in z3util.get_vars(asrt):
-                    # If this is our var
-                    if x.eq(var):
-                        shouldAdd = False
-                        break
-
-                if shouldAdd:
-                    newSolver.add(asrt)
-        """
-            
-        # Change our solver to the new one
-        # self.solver = newSolver
-            
-
         # Add our new constraint to the solver
         self.solver.add(constraint)
         
