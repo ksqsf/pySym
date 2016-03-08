@@ -18,6 +18,31 @@ else:
     x = 2
 """
 
+testIfReturn = """
+x = 1
+y = 1.2
+if y > x:
+    x += 1
+else:
+    x -= 1
+
+y += 1
+"""
+
+def test_ifReturn():
+    b = ast.parse(testIfReturn).body
+    p = Path(b,source=testIfReturn)
+    p = p.step()[0].step()[0]
+    ifSide,elseSide = p.step()
+    ifSide = ifSide.step()[0].step()[0]
+    elseSide = elseSide.step()[0].step()[0]
+    
+    assert ifSide.state.any_int('x') == 2
+    assert ifSide.state.any_real('y') == 2.2
+    assert elseSide.state.any_int('x') == None
+    assert elseSide.state.any_real('y') == None # Else side is wonky because it's not a possible path
+
+
 def test_basicPathStep():
     b = ast.parse(test1).body
     p1 = Path(b,source=test1)

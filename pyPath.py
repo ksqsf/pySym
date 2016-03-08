@@ -34,8 +34,18 @@ class Path():
         """
         Move the current path forward by one step
         Note, this actually makes a copy/s and returns them. The initial path isn't modified.
-        Returns: A list of paths
+        Returns: A list of paths or empty list if the path is done 
         """
+        
+        # Check if we're out of instructions
+        if len(self.path) == 0:
+            # Check if we have somewhere to return to
+            if len(self.callStack) == 0:
+                return []
+            
+            # Pop the callStack back on to the run queue
+            self.path = self.callStack.pop()
+
         # Get the current instruction
         inst = self.path[0]
         

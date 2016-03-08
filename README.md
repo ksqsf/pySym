@@ -21,5 +21,5 @@ Tests need to be done from somewhere that has z3 access. For my env, this means 
 
 ```bash
 $ workon pySym
-(z3)$ py.test --cov=. --cov-config=.coveragerc
+(pySym)$ py.test --cov=. --cov-config=.coveragerc
 ```
