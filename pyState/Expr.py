@@ -22,6 +22,9 @@ def handle(state,element):
 
     # What is this expression?
     value = element.value
+
+    # Pop instruction 
+    state.path.pop(0)
     
     if type(value) == ast.Call:
         return Call.handle(state,value)
@@ -30,4 +33,4 @@ def handle(state,element):
         err = "Expr: Don't know how to handle expr type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
         logger.error(err)
         raise Exception(err)
-
+    

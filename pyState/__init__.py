@@ -184,7 +184,8 @@ class State():
                 })
 
             # Our new path becomes the inside of the if statement
-            stateIf.path = [stateIf.path[0]] + inst.body
+            #stateIf.path = [stateIf.path[0]] + inst.body
+            stateIf.path = inst.body
 
             # Update the else's path
             # Check if there is an else path we need to take
@@ -195,7 +196,8 @@ class State():
                         'path': cs,
                         'ctx': self.ctx
                     })
-                stateElse.path = [stateElse.path[0]] + inst.orelse
+                #stateElse.path = [stateElse.path[0]] + inst.orelse
+                stateElse.path = inst.orelse
 
             If.handle(stateIf,stateElse,inst)
 
@@ -206,22 +208,12 @@ class State():
             FunctionDef.handle(state,inst)
 
         elif type(inst) == ast.Expr:
-            r = Expr.handle(state,inst)
-            # If return is a list of length greater than 0, we just made a call
-            if len(r) > 0:
-                cs = deepcopy(state.path[1:])
-                if len(cs) > 0:
-                    state.callStack.append({
-                        'path': cs,
-                        'ctx': self.ctx
-                    })
-                state.path = [state.path[0]] + r
+            Expr.handle(state,inst)
 
         # TODO: Rework this...
         elif type(inst) == ast.Return:
             Return.handle(state,inst)
-            inst = state.path.pop(0)
-            #state.backtrace.insert(0,inst)
+            # If we have nothing to return to, we're done
             if not state.popCallStack():
                 return []
             return ret_states
@@ -234,7 +226,6 @@ class State():
 
         # Move instruction to the done pile :-)
         for state in ret_states:
-            inst = state.path.pop(0)
             state.backtrace.insert(0,inst)
 
         # Return the paths
@@ -246,7 +237,7 @@ class State():
         Input:
             retElement = ast.Return element
         Action:
-            Set return variable appropriately
+            Set return variable appropriately and remove the rest of the instructions in the queue
         Returns:
             Nothing for now
         """
@@ -263,10 +254,10 @@ class State():
         
         # Add the constraint
         self.addConstraint(self.retVar == obj)
-
-        # We need to re-cast now that we know what type we're dealing with
-        #retVar =
         
+        # Remove the remaining instructions in this function
+        self.path = []
+
 
     def Call(self,call):
         """
@@ -310,6 +301,10 @@ class State():
         oldCtx = self.ctx
         self.ctx = hash(call.func.ctx)
         
+        ######################
+        # Populate Variables #
+        ######################
+
         # Create local vars dict
         self.localVars[self.ctx] = {}
         
@@ -341,10 +336,27 @@ class State():
             caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
             dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
             self.addConstraint(dest_arg == caller_arg)
-        
+       
+        ####################
+        # Setup Return Var #
+        ####################
+ 
         # Setup return var. Use Int for now, but recast when actually returning
         # ctx of 1 is our return ctx
         self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1)
+        
+        ##################
+        # Save CallStack #
+        ##################
+        cs = deepcopy(self.path)
+        if len(cs) > 0:
+            self.callStack.append({
+                'path': cs,
+                'ctx': oldCtx
+            })
+        
+        self.path = func.body
+        
         # Return the new instruction body
         return func.body
 

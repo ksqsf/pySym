@@ -20,3 +20,6 @@ def handle(state,element):
     assert type(element) == ast.FunctionDef
     
     state.registerFunction(element)
+    
+    # Pop instruction
+    state.path.pop(0)

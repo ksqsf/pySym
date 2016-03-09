@@ -98,3 +98,5 @@ def handle(state,element):
         logger.error(err)
         raise Exception(err)
 
+    # Pop the instruction off
+    state.path.pop(0)

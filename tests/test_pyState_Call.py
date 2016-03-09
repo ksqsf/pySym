@@ -58,15 +58,19 @@ def test_pySym_callwithKeyWordAndDefaultReturn():
     
     assert p.state.isSat()
     assert p.state.any_int('x') == None
-
+    assert p.state.any_int('a') == 1
+    assert p.state.any_int('b') == 2
+    assert p.state.any_real('c') == 2
+    print(p.state.path)
     p = p.step()[0]
+    print(p.state.path)
     p = p.step()[0]
-    
+    print(p.state.path)
     assert p.state.isSat()
     assert p.state.any_int('ret',ctx=1) == 1+2
-    
+    print(p.state.path,p.state.callStack)
     p = p.step()[0]
-    
+
     assert p.state.isSat()
     assert p.state.any_int('a') == 1
     assert p.state.any_real('b') == 2.2

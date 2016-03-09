@@ -29,7 +29,7 @@ def handle(state,element):
     """
     Attempt to handle the assign element
     """
-    
+
     # Targets are what is being set
     targets = element.targets
 
@@ -53,4 +53,6 @@ def handle(state,element):
         err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
         logger.error(err)
         raise Exception(err)
-
+    
+    # Pop the instruction off
+    state.path.pop(0) if len(state.path) > 0 else None
