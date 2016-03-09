@@ -46,21 +46,73 @@ class State():
     localVars and globalVars are dicts containing variables and their constraint expressions
     
     localVars = {
-        'x': {
-            'varType': "z3.IntSort()", # Eval string to re-create the object's type on the fly. This is because z3 kept on crashing everything :-(
-            'count': 0 # This helps us keep track of Static Single Assignment forms
+        <contextID> : {
+            'x': {
+                'varType': "z3.IntSort()", # Eval string to re-create the object's type on the fly. This is because z3 kept on crashing everything :-(
+                'count': 0 # This helps us keep track of Static Single Assignment forms
+            }
         }
     }
     """
     
     def __init__(self,localVars=None,globalVars=None,solver=None,ctx=None,functions=None):
-    
-        self.localVars = {} if localVars is None else localVars
+   
+        self.ctx = 0 if ctx is None else ctx
+        self.localVars = {self.ctx: {}} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
-        self.ctx = 0 if ctx is None else ctx
         # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
+
+
+    def Call(self,call):
+        """
+        Input:
+            call = ast.Call object
+        Action:
+            Modify state in accordance w/ call
+        Returns:
+            New call process block
+        """
+        
+        assert type(call) == ast.Call
+        
+        funcName = call.func.id
+    
+        # Check that this function has been registered
+        if funcName not in self.functions:
+            err = "call: function '{0}' doesn't appear to be registered yet.".format(funcName)
+            logger.error(err)
+            raise Exception(err)
+        
+        # Grab the function
+        func = self.functions[funcName]
+        
+        # If the body is empty, don't actually call, just return []
+        if len(func.body) == 0:
+            logger.warn("Just made call to empty function {0}".format(funcName))
+            return []
+        
+        # I don't support everything right now
+        if len(func.args.args) > 0 or len(call.args) > 0:
+            err = "call: I don't support function variables right now"
+            logger.error(err)
+            raise Exception(err)
+        
+        if len(func.args.defaults) > 0:
+            err = "call: I don't support function defaults right now"
+            logger.error(err)
+            raise Exception(err)
+        
+        # Grab a new context
+        self.ctx = hash(call.func.ctx)
+        
+        # Create local vars dict
+        self.localVars[self.ctx] = {}
+
+        # Return the new instruction body
+        return func.body
+
 
     def registerFunction(self,func):
         """
@@ -160,31 +212,31 @@ class State():
         
         # If we're looking up local variable
         if local:
-            if varName in self.localVars:
+            if varName in self.localVars[self.ctx]:
                 # Increment the counter if asked
                 if increment:
-                    self.localVars[varName]['count'] += 1
-                count = self.localVars[varName]['count']
+                    self.localVars[self.ctx][varName]['count'] += 1
+                count = self.localVars[self.ctx][varName]['count']
                 # Get previous
                 if previous:
                     count -= 1
             
                 # Set varType if asked for
                 if type(varType) != type(None):
-                    self.localVars[varName]['varType'] = self._varTypeToString(varType)
+                    self.localVars[self.ctx][varName]['varType'] = self._varTypeToString(varType)
                 
-                return z3util.mk_var("{0}{1}@{2}".format(count,varName,self.ctx),eval(self.localVars[varName]['varType']))
+                return z3util.mk_var("{0}{1}@{2}".format(count,varName,self.ctx),eval(self.localVars[self.ctx][varName]['varType']))
         
             # If we want to increment but we didn't find it, create it
             elif increment:
                 assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
                 
                 # Time to create a new var!
-                self.localVars[varName] = {
+                self.localVars[self.ctx][varName] = {
                     'count': 0,
                     'varType': self._varTypeToString(varType)
                 }
-                return z3util.mk_var("{0}{1}@{2}".format(self.localVars[varName]['count'],varName,self.ctx),varType)
+                return z3util.mk_var("{0}{1}@{2}".format(self.localVars[self.ctx][varName]['count'],varName,self.ctx),varType)
         
         # Try global
         """

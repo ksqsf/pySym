@@ -18,8 +18,8 @@ def test_assignInt():
     pyState.Assign.handle(s,assign)
 
     # Basic dict checks
-    assert "x" in s.localVars
-    assert type(s.localVars["x"]["varType"]) == str
+    assert "x" in s.localVars[s.ctx]
+    assert type(s.localVars[s.ctx]["x"]["varType"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
     assert s.getZ3Var("x").is_int()
     assert len(s.solver.assertions()) == 1
@@ -35,8 +35,8 @@ def test_assignInt():
     pyState.Assign.handle(s,assign)
     
     # Basic dict checks
-    assert "x" in s.localVars
-    assert type(s.localVars["x"]["varType"]) == str
+    assert "x" in s.localVars[s.ctx]
+    assert type(s.localVars[s.ctx]["x"]["varType"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
     assert s.getZ3Var("x").is_int()
     assert len(s.solver.assertions()) == 2
@@ -53,8 +53,8 @@ def test_assignFloat():
     assign = ast.parse(test3).body[0]
     pyState.Assign.handle(s,assign)
     # Basic dict checks
-    assert "x" in s.localVars
-    assert type(s.localVars["x"]["varType"]) == str
+    assert "x" in s.localVars[s.ctx]
+    assert type(s.localVars[s.ctx]["x"]["varType"]) == str
     assert type(s.getZ3Var("x")) == z3.ArithRef
     assert s.getZ3Var("x").is_real()
     assert len(s.solver.assertions()) == 1
@@ -80,8 +80,8 @@ def test_copy():
     
     # Add something to one and make sure the other is empty
     pyState.Assign.handle(s,assign)
-    assert s.localVars != {}
-    assert s2.localVars == {}
+    assert s.localVars != {0: {}}
+    assert s2.localVars == {0: {}}
 
 def test_any_int():
     s = State()

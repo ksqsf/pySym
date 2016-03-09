@@ -5,7 +5,7 @@ from pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import deepcopy, copy
-import pyState.Assign, pyState.If, pyState.AugAssign, pyState.FunctionDef
+import pyState.Assign, pyState.If, pyState.AugAssign, pyState.FunctionDef, pyState.Expr
 from random import random
 
 logger = logging.getLogger("Path")
@@ -119,6 +119,21 @@ class Path():
             path = self.copy()
             ret_paths = [path]
             pyState.FunctionDef.handle(path.state,inst)
+        
+        elif type(inst) == ast.Expr:
+            path = self.copy()
+            ret_paths = [path]
+            r = pyState.Expr.handle(path.state,inst)
+            # If return is a list of length greater than 0, we just made a call
+            if len(r) > 0:
+                cs = deepcopy(path.path[1:])
+                if len(cs) > 0:
+                    path.callStack.append({
+                        'path': cs,
+                        'ctx': self.state.ctx
+                    })
+                path.path = [path.path[0]] + r 
+
 
         else:
             err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
