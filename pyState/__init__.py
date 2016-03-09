@@ -53,12 +53,27 @@ class State():
     }
     """
     
-    def __init__(self,localVars=None,globalVars=None,solver=None,ctx=None):
+    def __init__(self,localVars=None,globalVars=None,solver=None,ctx=None,functions=None):
     
         self.localVars = {} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
         self.ctx = 0 if ctx is None else ctx
+        # functions = {'func_name': ast.function declaration}
+        self.functions = {} if functions is None else functions
+
+    def registerFunction(self,func):
+        """
+        Input:
+            func = ast func definition
+        Action:
+            Register's this function as being known to this state
+        Returns:
+            Nothing
+        """
+        assert type(func) == ast.FunctionDef
+        
+        self.functions[func.name] = func
 
     def resolveObject(self,obj):
         """
@@ -380,6 +395,7 @@ class State():
             localVars=deepcopy(self.localVars),
             globalVars=deepcopy(self.globalVars),
             solver=solverCopy,
-            ctx=self.ctx
+            ctx=self.ctx,
+            functions=self.functions
             )
         

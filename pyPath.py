@@ -5,7 +5,7 @@ from pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import deepcopy, copy
-import pyState.Assign, pyState.If, pyState.AugAssign
+import pyState.Assign, pyState.If, pyState.AugAssign, pyState.FunctionDef
 from random import random
 
 logger = logging.getLogger("Path")
@@ -50,6 +50,7 @@ class Path():
         Note, this actually makes a copy/s and returns them. The initial path isn't modified.
         Returns: A list of paths or empty list if the path is done 
         """
+        # TODO: REALLY need to clean this method up..
         
         # Check if we're out of instructions
         if len(self.path) == 0:
@@ -114,6 +115,11 @@ class Path():
             ret_paths = [path]
             pyState.AugAssign.handle(path.state,inst)
         
+        elif type(inst) == ast.FunctionDef:
+            path = self.copy()
+            ret_paths = [path]
+            pyState.FunctionDef.handle(path.state,inst)
+
         else:
             err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
             logger.error(err)
