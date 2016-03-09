@@ -53,11 +53,12 @@ class State():
     }
     """
     
-    def __init__(self,localVars=None,globalVars=None,solver=None):
+    def __init__(self,localVars=None,globalVars=None,solver=None,ctx=None):
     
         self.localVars = {} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
+        self.ctx = 0 if ctx is None else ctx
 
     def resolveObject(self,obj):
         """
@@ -376,6 +377,7 @@ class State():
         return State(
             localVars=deepcopy(self.localVars),
             globalVars=deepcopy(self.globalVars),
-            solver=solverCopy
+            solver=solverCopy,
+            ctx=self.ctx
             )
         
