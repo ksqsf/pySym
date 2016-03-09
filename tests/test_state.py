@@ -12,6 +12,7 @@ test1 = "x = 1"
 test2 = "x = 2"
 test3 = "x = 3.1415"
 
+
 def test_assignInt():
     s = State()
     assign = ast.parse(test1).body[0]

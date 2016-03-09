@@ -4,6 +4,7 @@ import logging
 from copy import copy, deepcopy
 #from pyState import BinOp, Assign, If, AugAssign, FunctionDef, Expr, Return
 import pyState.BinOp
+from . import Pass
 
 
 logger = logging.getLogger("State")
@@ -210,6 +211,9 @@ class State():
         elif type(inst) == ast.Expr:
             Expr.handle(state,inst)
 
+        elif type(inst) == ast.Pass:
+            Pass.handle(state,inst)
+
         # TODO: Rework this...
         elif type(inst) == ast.Return:
             Return.handle(state,inst)
@@ -285,11 +289,6 @@ class State():
         if len(func.body) == 0:
             logger.warn("Just made call to empty function {0}".format(funcName))
             return []
-        
-        #if len(func.args.defaults) > 0:
-        #    err = "call: I don't support function defaults right now"
-        #    logger.error(err)
-        #    raise Exception(err)
         
         if len(func.args.args) - len(func.args.defaults) > len(call.args):
             err = "call: number of arguments don't match expected, line {0} col {1}".format(call.lineno,call.col_offset)

@@ -106,10 +106,8 @@ Much work left to do as I have only implimented a limited set of operations. How
 Here's a list of things I have left to implement. This is really just a subset of things, but these are high on my list.
 
 * ifelse inline (x = 1 if 1 > 2 else 2)
-* pass statement
 * list comprehensions
 * function calls (mostly completed)
- * x = test()
  * kwargs
  * starargs
 * Functions inside functions (function scope)
