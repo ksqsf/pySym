@@ -6,6 +6,45 @@ import pyState.BinOp
 
 logger = logging.getLogger("State")
 
+def duplicateSort(obj):
+    """
+    Input:
+        obj = z3 object to duplicate kind (i.e.: z3.IntSort())
+    Action:
+        Figure out details of the object and make duplicate sort
+    Return:
+        Duplicate Sort object
+    """
+    
+    if type(obj) in [z3.IntNumRef,z3.RatNumRef]:
+        kind = obj.sort_kind()
+     
+    else:
+        # Lookup Kind
+        kind = obj.kind()
+    
+    kindTable = {
+        z3.Z3_INT_SORT: z3.IntSort(),
+        z3.Z3_REAL_SORT: z3.RealSort(),
+        z3.Z3_BOOL_SORT: z3.BoolSort()
+    }
+    
+    if kind in kindTable:
+        return kindTable[kind]
+
+    elif kind == z3.Z3_ARRAY_SORT:
+        return z3.ArraySort(obj.domain().kind(),obj.range.kind())
+
+    elif kind == z3.Z3_BV_SORT:
+        return z3.BitVecSort(obj.size())
+    
+    else:
+        err = "duplicateSort: unable to determine object sort '{0}'".format(obj)
+        logger.error(err)
+        raise Exception(err)
+
+
+
 def get_all(f,rs=[]):
     """
     >>> x,y = Ints('x y')
@@ -93,22 +132,29 @@ class State():
             logger.warn("Just made call to empty function {0}".format(funcName))
             return []
         
-        # I don't support everything right now
-        if len(func.args.args) > 0 or len(call.args) > 0:
-            err = "call: I don't support function variables right now"
-            logger.error(err)
-            raise Exception(err)
-        
         if len(func.args.defaults) > 0:
             err = "call: I don't support function defaults right now"
             logger.error(err)
             raise Exception(err)
+        
+        if len(func.args.args) != len(call.args):
+            err = "call: number of arguments don't match expected, line {0} col {1}".format(call.lineno,call.col_offset)
+            logger.error(err)
+            raise Exception(err)
+
         
         # Grab a new context
         self.ctx = hash(call.func.ctx)
         
         # Create local vars dict
         self.localVars[self.ctx] = {}
+        
+        # If there are arguments, fill them in
+        for i in range(len(call.args)):
+            caller_arg = self.resolveObject(call.args[i])
+            dest_arg = self.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg))
+            self.addConstraint(dest_arg == caller_arg)
+            
 
         # Return the new instruction body
         return func.body
