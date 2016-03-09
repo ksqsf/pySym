@@ -138,7 +138,8 @@ class State():
         # what the variable type is. This keeps track of that state.
         
         # Variable naming convention. Intentionally breaking legal python variable naming conventions
-        # <Count><VarName>
+        # <Count><VarName>@<context>
+        # example: 07MyVar@1
         
         #TODO: Optimize this
         
@@ -157,7 +158,7 @@ class State():
                 if type(varType) != type(None):
                     self.localVars[varName]['varType'] = self._varTypeToString(varType)
                 
-                return z3util.mk_var("{0}{1}".format(count,varName),eval(self.localVars[varName]['varType']))
+                return z3util.mk_var("{0}{1}@{2}".format(count,varName,self.ctx),eval(self.localVars[varName]['varType']))
         
             # If we want to increment but we didn't find it, create it
             elif increment:
@@ -168,9 +169,10 @@ class State():
                     'count': 0,
                     'varType': self._varTypeToString(varType)
                 }
-                return z3util.mk_var("{0}{1}".format(self.localVars[varName]['count'],varName),varType)
+                return z3util.mk_var("{0}{1}@{2}".format(self.localVars[varName]['count'],varName,self.ctx),varType)
         
         # Try global
+        """
         if varName in self.globalVars:
             # Increment the counter if asked
             if increment:
@@ -184,7 +186,7 @@ class State():
                 self.localVars[varName]['varType'] = self._varTypeToString(varType)
             
             return z3util.mk_var("{0}{1}".format(count,varName),eval(self.globalVars[varName]['varType']))
-
+        """
         
         # We failed :-(
         return None

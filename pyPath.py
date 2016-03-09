@@ -6,6 +6,7 @@ from prettytable import PrettyTable
 import sys
 from copy import deepcopy, copy
 import pyState.Assign, pyState.If, pyState.AugAssign
+from random import random
 
 logger = logging.getLogger("Path")
 
@@ -28,7 +29,20 @@ class Path():
         self.backtrace = [] if backtrace is None else backtrace
         self.state = State() if state is None else state
         self.source = source
+        # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1}
         self.callStack = [] if callStack is None else callStack
+
+    def newContext(self):
+        """
+        Input:
+            Nothing
+        Action:
+            Generate a "Context" (really just a random number to represent state)
+        Returns:
+            Nothing
+        """
+        # Probably a better way to do this. Oh well.
+        return hash(random())
 
     def step(self):
         """
@@ -44,7 +58,9 @@ class Path():
                 return []
             
             # Pop the callStack back on to the run queue
-            self.path = self.callStack.pop()
+            cs = self.callStack.pop()
+            self.path = cs["path"]
+            self.state.ctx = cs["ctx"]
 
         # Get the current instruction
         inst = self.path[0]
@@ -72,7 +88,10 @@ class Path():
             cs = deepcopy(pathIf.path[1:])
             # Only push our stack if it's not empty
             if len(cs) > 0:
-                pathIf.callStack.append(cs)
+                pathIf.callStack.append({
+                    'path': cs,
+                    'ctx': self.state.ctx #self.newContext()
+                })
             
             # Our new path becomes the inside of the if statement
             pathIf.path = [pathIf.path[0]] + inst.body
@@ -82,7 +101,10 @@ class Path():
             if len(inst.orelse) > 0:
                 cs = deepcopy(pathElse.path[1:])
                 if len(cs) > 0:
-                    pathElse.callStack.append(cs)
+                    pathElse.callStack.append({
+                        'path': cs,
+                        'ctx': self.state.ctx # self.newContext()
+                    })
                 pathElse.path = [pathElse.path[0]] + inst.orelse
             
             pyState.If.handle(pathIf.state,pathElse.state,inst)
