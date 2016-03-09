@@ -32,18 +32,6 @@ class Path():
         # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1}
         self.callStack = [] if callStack is None else callStack
 
-    def newContext(self):
-        """
-        Input:
-            Nothing
-        Action:
-            Generate a "Context" (really just a random number to represent state)
-        Returns:
-            Nothing
-        """
-        # Probably a better way to do this. Oh well.
-        return hash(random())
-
     def step(self):
         """
         Move the current path forward by one step
