@@ -32,20 +32,7 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
     ops = ops[0]
     comp = comp[0]
     
-    # Determine what's on the right hand side of the compare
-    #if type(comp) == ast.Name:
-    #    # Right hand side is another variable
-    #    right = stateTrue.getZ3Var(comp.id)
-    
-    #elif type(comp) == ast.Num:
-    #    # Right hand side is a number
-    #    right = comp.n
     right = stateTrue.resolveObject(comp)
-
-    #else:
-    #    err = "_handleLeftVar: Don't know how to handle right-hand type '{0}' at line {1} column {2}".format(type(comp),element.lineno,element.col_offset)
-    #    logger.error(err)
-    #    raise Exception(err)
 
     # Assume success. Add constraints
     if type(ops) == ast.Gt:
@@ -95,17 +82,5 @@ def handle(stateTrue,stateFalse,element):
     # The left side of the compare
     left = element.left
     
-    # Make sure we understand how to deal with this
-    if type(left) == ast.Name:
-        left = stateTrue.getZ3Var(left.id)
-        _handleLeftVarInt(stateTrue,stateFalse,element,left)
-    
-    elif type(left) == ast.Num:
-        left = left.n
-        _handleLeftVarInt(stateTrue,stateFalse,element,left)
-    
-    else:
-        err = "Unknown type '{0}' at line {1} column {2}".format(type(left),left.lineno,left.col_offset)
-        logger.error(err)
-        raise Exception(err)
-        
+    # TODO: Probably need to add checks or consolidate here...
+    _handleLeftVarInt(stateTrue,stateFalse,element,stateTrue.resolveObject(left))
