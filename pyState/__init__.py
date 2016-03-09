@@ -156,19 +156,18 @@ class State():
         # Get the current instruction
         inst = self.path[0]
 
-        # Return paths
-        ret_states = []
+        # Return initial return state
+        state = self.copy()
+        ret_states = [state]
 
         if type(inst) == ast.Assign:
-            state = self.copy()
-            ret_states = [state]
             Assign.handle(state,inst)
 
         elif type(inst) == ast.If:
             # On If statements we want to take both options
 
             # path == we take the if statement
-            stateIf = self.copy()
+            stateIf = state
 
             # path2 == we take the else statement
             stateElse = self.copy()
@@ -201,18 +200,12 @@ class State():
             If.handle(stateIf,stateElse,inst)
 
         elif type(inst) == ast.AugAssign:
-            state = self.copy()
-            ret_states = [state]
             AugAssign.handle(state,inst)
 
         elif type(inst) == ast.FunctionDef:
-            state = self.copy()
-            ret_states = [state]
             FunctionDef.handle(state,inst)
 
         elif type(inst) == ast.Expr:
-            state = self.copy()
-            ret_states = [state]
             r = Expr.handle(state,inst)
             # If return is a list of length greater than 0, we just made a call
             if len(r) > 0:
@@ -226,8 +219,6 @@ class State():
 
         # TODO: Rework this...
         elif type(inst) == ast.Return:
-            state = self.copy()
-            ret_states = [state]
             Return.handle(state,inst)
             inst = state.path.pop(0)
             #state.backtrace.insert(0,inst)
