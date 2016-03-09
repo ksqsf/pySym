@@ -110,7 +110,6 @@ Here's a list of things I have left to implement. This is really just a subset o
 * function calls (mostly completed)
  * kwargs
  * starargs
-* Functions inside functions (function scope)
 * imports
 * "global" keyword
 * symbolic strings

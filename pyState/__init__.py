@@ -251,13 +251,16 @@ class State():
         
         # Check for int vs real
         if hasRealComponent(obj):
-            self.retVar = self.getZ3Var('ret',varType=z3.RealSort(),ctx=1)
+            #self.retVar = self.getZ3Var('ret',varType=z3.RealSort(),ctx=1)
+            retVar = self.getZ3Var('ret',varType=z3.RealSort(),ctx=1,increment=True)
         
         else:
-            self.retVar = self.getZ3Var('ret',varType=z3.IntSort(),ctx=1)
+            #self.retVar = self.getZ3Var('ret',varType=z3.IntSort(),ctx=1)
+            retVar = self.getZ3Var('ret',varType=z3.IntSort(),ctx=1,increment=True)
         
         # Add the constraint
-        self.addConstraint(self.retVar == obj)
+        #self.addConstraint(self.retVar == obj)
+        self.addConstraint(retVar == obj)
         
         # Remove the remaining instructions in this function
         self.path = []
@@ -356,9 +359,6 @@ class State():
         
         self.path = func.body
         
-        # Return the new instruction body
-        return func.body
-
 
     def registerFunction(self,func):
         """

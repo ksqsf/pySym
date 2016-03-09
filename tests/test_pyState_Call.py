@@ -57,6 +57,35 @@ x = test()
 z = 1
 """
 
+test6 = """
+def test2():
+    return 3
+
+def test():
+    x = test2()
+    return x + 2
+
+x = test()
+z = 1
+"""
+
+def test_pySym_functionNesting():
+    # Test out calling functions from functions
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    
+    assert p.state.isSat()
+    assert p.state.any_int('x') == 5
+
+
 def test_pySym_returnToAssign():
     # Testing that we can return a function to a variable
     b = ast.parse(test5).body
