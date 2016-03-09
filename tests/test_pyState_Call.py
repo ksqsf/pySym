@@ -25,6 +25,36 @@ test(1,2.2,3.5)
 y = 1
 """
 
+test3 = """
+def test(a,b=2,c=5.5):
+    x = 5
+
+x = 1.5
+test(1,c=x+1)
+y = 1
+"""
+
+
+def test_pySym_callwithKeyWordAndDefault():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    # Step through program
+    p = p.step()[0]
+    p = p.step()[0]
+
+    assert p.state.isSat()
+    assert p.state.any_real('x') == 1.5
+    
+    p = p.step()[0]
+    
+    assert p.state.isSat()
+    assert p.state.any_int('a') == 1
+    assert p.state.any_int('b') == 2
+    assert p.state.any_real('c') == 2.5
+    assert p.state.any_int('x') == None
+
+
+
 def test_pySym_callThreeArgs():
     b = ast.parse(test2).body
     p = Path(b,source=test2)

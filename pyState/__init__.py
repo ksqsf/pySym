@@ -16,7 +16,7 @@ def duplicateSort(obj):
         Duplicate Sort object
     """
     
-    if type(obj) in [z3.IntNumRef,z3.RatNumRef]:
+    if type(obj) in [z3.IntNumRef,z3.RatNumRef,z3.ArithRef]:
         kind = obj.sort_kind()
      
     else:
@@ -132,18 +132,19 @@ class State():
             logger.warn("Just made call to empty function {0}".format(funcName))
             return []
         
-        if len(func.args.defaults) > 0:
-            err = "call: I don't support function defaults right now"
-            logger.error(err)
-            raise Exception(err)
+        #if len(func.args.defaults) > 0:
+        #    err = "call: I don't support function defaults right now"
+        #    logger.error(err)
+        #    raise Exception(err)
         
-        if len(func.args.args) != len(call.args):
+        if len(func.args.args) - len(func.args.defaults) < len(call.args):
             err = "call: number of arguments don't match expected, line {0} col {1}".format(call.lineno,call.col_offset)
             logger.error(err)
             raise Exception(err)
 
         
         # Grab a new context
+        oldCtx = self.ctx
         self.ctx = hash(call.func.ctx)
         
         # Create local vars dict
@@ -151,11 +152,33 @@ class State():
         
         # If there are arguments, fill them in
         for i in range(len(call.args)):
-            caller_arg = self.resolveObject(call.args[i])
+            caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             dest_arg = self.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg))
             self.addConstraint(dest_arg == caller_arg)
-            
+        
+        # Grab any unset vars
+        unsetArgs = func.args.args[len(call.args):]
+        
+        # Handle any keyword vars
+        for i in range(len(call.keywords)):
+            # Make sure this is a valid keyword
+            if call.keywords[i].arg not in [x.arg for x in unsetArgs]:
+                err = "call: Attempting to set invalid keyword '{0}' line {1} col {2}".format(call.keywords[i].arg,call.keywords[i].arg.lineno,call.keywords[i].arg.col_offset)
+                logger.error(err)
+                raise Exception(err)
+            caller_arg = self.resolveObject(call.keywords[i].value,ctx=oldCtx)
+            dest_arg = self.getZ3Var(call.keywords[i].arg,increment=True,varType=duplicateSort(caller_arg)) 
+            self.addConstraint(dest_arg == caller_arg)
+            # Remove arg after it has been satisfied
+            unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
 
+        # Handle any defaults
+        for arg in unsetArgs:
+            argIndex = func.args.args.index(arg) - (len(func.args.args) - len(func.args.defaults))
+            caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
+            dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
+            self.addConstraint(dest_arg == caller_arg)
+        
         # Return the new instruction body
         return func.body
 
@@ -173,10 +196,11 @@ class State():
         
         self.functions[func.name] = func
 
-    def resolveObject(self,obj):
+    def resolveObject(self,obj,ctx=None):
         """
         Input:
             obj = Some ast object (i.e.: ast.Name, ast.Num, etc)
+            (optional) ctx = Context other than current to resolve in
         Action:
             Resolve object into something that can be used in a constraint
         Return:
@@ -185,17 +209,18 @@ class State():
                 ast.Name == z3 Object
                 ast.BinOp == z3 expression of BinOp (i.e.: x + y)
         """
+        ctx = self.ctx if ctx is None else ctx
         t = type(obj)
         
         if t == ast.Name:
-            return self.getZ3Var(obj.id)
+            return self.getZ3Var(obj.id,ctx=ctx)
         
         elif t == ast.Num:
             # Return real val or int val
             return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         
         elif t == ast.BinOp:
-            return pyState.BinOp.handle(self,obj)
+            return pyState.BinOp.handle(self,obj,ctx=ctx)
 
         else:
             err = "resolveObject: unable to resolve object '{0}'".format(obj)
@@ -229,7 +254,7 @@ class State():
                 raise Exception("Got unknown BoolSortRef type {0}".format(varType))
 
 
-    def getZ3Var(self,varName,local=True,increment=False,varType=None,previous=False):
+    def getZ3Var(self,varName,local=True,increment=False,varType=None,previous=False,ctx=None):
         """
         Input:
             varName = Variable name to retrieve Z3 object of
@@ -242,6 +267,7 @@ class State():
                                  and var cannot be found. (i.e: z3.IntSort())
             (optional) previous = Bool of do you want one that is one older
                                   i.e.: current is x_1, return x_0
+            (optional) ctx = context to resolve in if not the current one
         Action:
             Look-up variable
         Returns:
@@ -256,33 +282,35 @@ class State():
         
         #TODO: Optimize this
         
+        ctx = self.ctx if ctx is None else ctx
+
         # If we're looking up local variable
         if local:
-            if varName in self.localVars[self.ctx]:
+            if varName in self.localVars[ctx]:
                 # Increment the counter if asked
                 if increment:
-                    self.localVars[self.ctx][varName]['count'] += 1
-                count = self.localVars[self.ctx][varName]['count']
+                    self.localVars[ctx][varName]['count'] += 1
+                count = self.localVars[ctx][varName]['count']
                 # Get previous
                 if previous:
                     count -= 1
             
                 # Set varType if asked for
                 if type(varType) != type(None):
-                    self.localVars[self.ctx][varName]['varType'] = self._varTypeToString(varType)
+                    self.localVars[ctx][varName]['varType'] = self._varTypeToString(varType)
                 
-                return z3util.mk_var("{0}{1}@{2}".format(count,varName,self.ctx),eval(self.localVars[self.ctx][varName]['varType']))
+                return z3util.mk_var("{0}{1}@{2}".format(count,varName,ctx),eval(self.localVars[ctx][varName]['varType']))
         
             # If we want to increment but we didn't find it, create it
             elif increment:
                 assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
                 
                 # Time to create a new var!
-                self.localVars[self.ctx][varName] = {
+                self.localVars[ctx][varName] = {
                     'count': 0,
                     'varType': self._varTypeToString(varType)
                 }
-                return z3util.mk_var("{0}{1}@{2}".format(self.localVars[self.ctx][varName]['count'],varName,self.ctx),varType)
+                return z3util.mk_var("{0}{1}@{2}".format(self.localVars[ctx][varName]['count'],varName,ctx),varType)
         
         # Try global
         """

@@ -5,23 +5,25 @@ import pyState
 
 logger = logging.getLogger("pyState:BinOp")
 
-def handle(state,element):
+def handle(state,element,ctx=None):
     """
     Input:
         state = State object
         element = ast.BinOp element to parse
+        (optional) ctx = context to resolve BinOp in if not current
     Action:
         Parse out the element with respect to the state
     Returns:
         Z3 constraint representing this BinOp
     """
+    ctx = state.ctx if ctx is None else ctx
     
     assert type(state) == pyState.State
     assert type(element) == ast.BinOp
 
     # Try resolving the parts
-    left = state.resolveObject(element.left)
-    right = state.resolveObject(element.right)
+    left = state.resolveObject(element.left,ctx=ctx)
+    right = state.resolveObject(element.right,ctx=ctx)
     op = element.op
     
     # Due to Z3 qirk, we need to cast vars to Real if one var is a float

@@ -108,9 +108,10 @@ Here's a list of things I have left to implement. This is really just a subset o
 * ifelse inline (x = 1 if 1 > 2 else 2)
 * pass statement
 * list comprehensions
-* function calls
- * test(1,2,3,x=4) (default args)
+* function calls (mostly completed)
  * x = test()
+ * kwargs
+ * starargs
 * Functions inside functions (function scope)
 * imports
 * "global" keyword
