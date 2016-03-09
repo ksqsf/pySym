@@ -101,3 +101,25 @@ In [5]: elseSide.printBacktrace()
 ```
 
 Much work left to do as I have only implimented a limited set of operations. However, this is pretty neat!
+
+# To-Do
+Here's a list of things I have left to implement. This is really just a subset of things, but these are high on my list.
+
+* ifelse inline (x = 1 if 1 > 2 else 2)
+* pass statement
+* list comprehensions
+* function calls
+ * test(1,2,3,x=4) (default args)
+ * x = test()
+* Functions inside functions (function scope)
+* imports
+* "global" keyword
+* symbolic strings
+* symbolic ints
+* symbolic arrays
+* function annotations
+* path groups
+* while loop
+* for loop
+* built-in calls
+ * print
