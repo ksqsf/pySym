@@ -80,8 +80,8 @@ def test_copy():
     
     # Add something to one and make sure the other is empty
     pyState.Assign.handle(s,assign)
-    assert s.localVars != {0: {}}
-    assert s2.localVars == {0: {}}
+    assert s.localVars != {0: {}, 1: {'ret': {'count': 0, 'varType': 'z3.IntSort()'}}}
+    assert s2.localVars == {0: {}, 1: {'ret': {'count': 0, 'varType': 'z3.IntSort()'}}}
 
 def test_any_int():
     s = State()

@@ -6,6 +6,10 @@ import pyState.BinOp
 
 logger = logging.getLogger("State")
 
+# Define some types
+# Retval means to substitute the return value here
+TYPE_RETVAL = 1
+
 def duplicateSort(obj):
     """
     Input:
@@ -94,15 +98,42 @@ class State():
     }
     """
     
-    def __init__(self,localVars=None,globalVars=None,solver=None,ctx=None,functions=None):
+    def __init__(self,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None):
    
         self.ctx = 0 if ctx is None else ctx
-        self.localVars = {self.ctx: {}} if localVars is None else localVars
+        self.localVars = {self.ctx: {}, 1: {}} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
         # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
+        self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
 
+    def Return(self,retElement):
+        """
+        Input:
+            retElement = ast.Return element
+        Action:
+            Set return variable appropriately
+        Returns:
+            Nothing for now
+        """
+        obj = retElement.value
+        
+        obj = self.resolveObject(obj)
+        
+        # Check for int vs real
+        if hasRealComponent(obj):
+            self.retVar = self.getZ3Var('ret',varType=z3.RealSort(),ctx=1)
+        
+        else:
+            self.retVar = self.getZ3Var('ret',varType=z3.IntSort(),ctx=1)
+        
+        # Add the constraint
+        self.addConstraint(self.retVar == obj)
+
+        # We need to re-cast now that we know what type we're dealing with
+        #retVar =
+        
 
     def Call(self,call):
         """
@@ -137,7 +168,7 @@ class State():
         #    logger.error(err)
         #    raise Exception(err)
         
-        if len(func.args.args) - len(func.args.defaults) < len(call.args):
+        if len(func.args.args) - len(func.args.defaults) > len(call.args):
             err = "call: number of arguments don't match expected, line {0} col {1}".format(call.lineno,call.col_offset)
             logger.error(err)
             raise Exception(err)
@@ -179,6 +210,10 @@ class State():
             dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
             self.addConstraint(dest_arg == caller_arg)
         
+        # Setup return var. Use Int for now, but recast when actually returning
+        # ctx of 1 is our return ctx
+        self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1)
+
         # Return the new instruction body
         return func.body
 
@@ -390,15 +425,18 @@ class State():
         for var in m:
             print("{0} == {1}".format(var.name(),m[var]))
 
-    def any_int(self,var):
+    def any_int(self,var,ctx=None):
         """
         Input:
             var == variable name. i.e.: "x"
+            (optional) ctx = context if not current one
         Action:
             Resolve possible value for this variable
         Return:
             Discovered variable or None if none found
         """
+        # Grab appropriate ctx
+        ctx = ctx if not None else self.ctx
         
         # Solve model first
         if not self.isSat():
@@ -410,11 +448,11 @@ class State():
         m = self.solver.model()
         
         # Check if we have it in our localVars
-        if self.getZ3Var(var) == None:
+        if self.getZ3Var(var,ctx=ctx) == None:
             logger.debug("any_int: var '{0}' not in known localVars".format(var))
             return None
 
-        var = self.getZ3Var(var)
+        var = self.getZ3Var(var,ctx=ctx)
         
         # Try getting the value
         value = m.eval(var)
@@ -461,16 +499,19 @@ class State():
         return self.any_real(var)
     """
 
-    def any_real(self,var):
+    def any_real(self,var,ctx=None):
         """
         Input:
             var == variable name. i.e.: "x"
+            (optional) ctx = context if not current one
         Action:
             Resolve possible value for this variable
         Return:
             Discovered variable or None if none found
             Note: this function will cast an Int to a Real implicitly if found
         """
+        # Grab appropriate ctx
+        ctx = ctx if not None else self.ctx
 
         # Solve model first
         if not self.isSat():
@@ -481,11 +522,11 @@ class State():
         # Get model
         m = self.solver.model()
 
-        if self.getZ3Var(var) == None:
+        if self.getZ3Var(var,ctx=ctx) == None:
             logger.debug("any_real: var '{0}' not found".format(var))
             return None
         
-        var = self.getZ3Var(var)
+        var = self.getZ3Var(var,ctx=ctx)
 
         # Try getting the value
         value = m.eval(var)
@@ -522,6 +563,7 @@ class State():
             globalVars=deepcopy(self.globalVars),
             solver=solverCopy,
             ctx=self.ctx,
-            functions=self.functions
+            functions=self.functions,
+            retVar=self.retVar
             )
         

@@ -5,7 +5,7 @@ from pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import deepcopy, copy
-import pyState.Assign, pyState.If, pyState.AugAssign, pyState.FunctionDef, pyState.Expr
+import pyState.Assign, pyState.If, pyState.AugAssign, pyState.FunctionDef, pyState.Expr, pyState.Return
 from random import random
 
 logger = logging.getLogger("Path")
@@ -32,6 +32,27 @@ class Path():
         # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1}
         self.callStack = [] if callStack is None else callStack
 
+    def popCallStack(self):
+        """
+        Input:
+            Nothing
+        Action:
+            Pops from the call stack to the run stack.
+        Returns:
+            True if pop succeeded, False if there was nothing left to pop
+        """
+        
+        # Check if we have somewhere to return to
+        if len(self.callStack) == 0:
+            return False
+
+        # Pop the callStack back on to the run queue
+        cs = self.callStack.pop()
+        self.path = cs["path"]
+        self.state.ctx = cs["ctx"]
+
+        return True
+
     def step(self):
         """
         Move the current path forward by one step
@@ -42,14 +63,8 @@ class Path():
         
         # Check if we're out of instructions
         if len(self.path) == 0:
-            # Check if we have somewhere to return to
-            if len(self.callStack) == 0:
+            if not self.popCallStack():
                 return []
-            
-            # Pop the callStack back on to the run queue
-            cs = self.callStack.pop()
-            self.path = cs["path"]
-            self.state.ctx = cs["ctx"]
 
         # Get the current instruction
         inst = self.path[0]
@@ -121,6 +136,17 @@ class Path():
                         'ctx': self.state.ctx
                     })
                 path.path = [path.path[0]] + r 
+
+        # TODO: Rework this...
+        elif type(inst) == ast.Return:
+            path = self.copy()
+            ret_paths = [path]
+            pyState.Return.handle(path.state,inst)
+            inst = path.path.pop(0)
+            path.backtrace.insert(0,inst)
+            if not path.popCallStack():
+                return []
+            return ret_paths
 
 
         else:

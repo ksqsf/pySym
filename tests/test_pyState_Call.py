@@ -34,6 +34,50 @@ test(1,c=x+1)
 y = 1
 """
 
+test4 = """
+def test(a,b=2,c=5.5):
+    z = 5
+    return a+b
+    x = 12
+
+
+x = 1
+test(1,c=x+1)
+test(1,2.2)
+y = 1
+"""
+
+
+def test_pySym_callwithKeyWordAndDefaultReturn():
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    # Step through program
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    
+    assert p.state.isSat()
+    assert p.state.any_int('x') == None
+
+    p = p.step()[0]
+    p = p.step()[0]
+    
+    assert p.state.isSat()
+    assert p.state.any_int('ret',ctx=1) == 1+2
+    
+    p = p.step()[0]
+    
+    assert p.state.isSat()
+    assert p.state.any_int('a') == 1
+    assert p.state.any_real('b') == 2.2
+    assert p.state.any_real('c') == 5.5
+    
+    p = p.step()[0]
+    p = p.step()[0]
+
+    assert p.state.isSat()
+    assert p.state.any_real('ret',ctx=1) == 3.2
+    
 
 def test_pySym_callwithKeyWordAndDefault():
     b = ast.parse(test3).body
