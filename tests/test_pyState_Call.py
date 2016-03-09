@@ -47,6 +47,28 @@ test(1,2.2)
 y = 1
 """
 
+test5 = """
+x = 4
+def test():
+    x = 6
+    return 5
+
+x = test()
+z = 1
+"""
+
+def test_pySym_returnToAssign():
+    # Testing that we can return a function to a variable
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    assert p.state.any_int('x') == 5
+
 
 def test_pySym_callwithKeyWordAndDefaultReturn():
     b = ast.parse(test4).body
@@ -61,14 +83,13 @@ def test_pySym_callwithKeyWordAndDefaultReturn():
     assert p.state.any_int('a') == 1
     assert p.state.any_int('b') == 2
     assert p.state.any_real('c') == 2
-    print(p.state.path)
+
     p = p.step()[0]
-    print(p.state.path)
     p = p.step()[0]
-    print(p.state.path)
+
     assert p.state.isSat()
     assert p.state.any_int('ret',ctx=1) == 1+2
-    print(p.state.path,p.state.callStack)
+    
     p = p.step()[0]
 
     assert p.state.isSat()

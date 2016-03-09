@@ -1,7 +1,8 @@
 import logging
 import z3, z3util
 import ast
-from . import BinOp, hasRealComponent
+from . import BinOp, hasRealComponent, Call, PYSYM_TYPE_RETVAL
+from copy import deepcopy
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -23,7 +24,24 @@ def _handleAssignNum(state,target,value):
         x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
 
     state.addConstraint(x == value)
+    
+    # Pop the instruction off
+    state.path.pop(0) if len(state.path) > 0 else None
 
+
+def _handleAssignCall(state,call,assign):
+    """
+    Handle assignment based on return val of function call
+    example: x = test()
+    """
+    
+    # TODO: This is hackish :-( Fix it
+    state.path[0].value = PYSYM_TYPE_RETVAL
+
+    # Idea here is to not pop off this instruction from the queue but modify it
+    # so when it's resolved we return to it
+    Call.handle(state,call)
+    
 
 def handle(state,element):
     """
@@ -46,13 +64,14 @@ def handle(state,element):
     target = targets[0]
 
     # Call appropriate handlers
-    if type(value) in [ast.Num, ast.Name, ast.BinOp]:
+    if type(value) in [ast.Num, ast.Name, ast.BinOp, int]:
         _handleAssignNum(state,target,state.resolveObject(value))
+    
+    elif type(value) is ast.Call:
+        _handleAssignCall(state,value,element)
 
     else:
         err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
         logger.error(err)
         raise Exception(err)
     
-    # Pop the instruction off
-    state.path.pop(0) if len(state.path) > 0 else None

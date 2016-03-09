@@ -10,7 +10,7 @@ logger = logging.getLogger("State")
 
 # Define some types
 # Retval means to substitute the return value here
-TYPE_RETVAL = 1
+PYSYM_TYPE_RETVAL = 17
 
 def duplicateSort(obj):
     """
@@ -378,6 +378,8 @@ class State():
         """
         Input:
             obj = Some ast object (i.e.: ast.Name, ast.Num, etc)
+                special object "PYSYM_TYPE_RETVAL" (int) will resolve the
+                last return value
             (optional) ctx = Context other than current to resolve in
         Action:
             Resolve object into something that can be used in a constraint
@@ -399,6 +401,9 @@ class State():
         
         elif t == ast.BinOp:
             return BinOp.handle(self,obj,ctx=ctx)
+
+        elif t == int and obj == PYSYM_TYPE_RETVAL:
+            return self.getZ3Var('ret',ctx=1)
 
         else:
             err = "resolveObject: unable to resolve object '{0}'".format(obj)
