@@ -15,43 +15,18 @@ class Path():
     Defines a path of execution.
     """
     
-    def __init__(self,path=None,backtrace=None,state=None,source=None,callStack=None):
+    def __init__(self,path=None,backtrace=None,state=None,source=None):
         """
-        (optional) path = list of sequential actions. Derived by ast.parse
+        (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
         (optional) state = State object for current path
         (optional) source = source code that we're looking at. This can make things prettier
-        (optional) callStack = list of lists containing previous instruction list. This gets
-                               pushed and popd when we call functions or go through if statements
         """
         
-        self.path = [] if path is None else path
+        path = [] if path is None else path
         self.backtrace = [] if backtrace is None else backtrace
-        self.state = State() if state is None else state
+        self.state = State(path=path) if state is None else state
         self.source = source
-        # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1}
-        self.callStack = [] if callStack is None else callStack
-
-    def popCallStack(self):
-        """
-        Input:
-            Nothing
-        Action:
-            Pops from the call stack to the run stack.
-        Returns:
-            True if pop succeeded, False if there was nothing left to pop
-        """
-        
-        # Check if we have somewhere to return to
-        if len(self.callStack) == 0:
-            return False
-
-        # Pop the callStack back on to the run queue
-        cs = self.callStack.pop()
-        self.path = cs["path"]
-        self.state.ctx = cs["ctx"]
-
-        return True
 
     def step(self):
         """
@@ -59,108 +34,22 @@ class Path():
         Note, this actually makes a copy/s and returns them. The initial path isn't modified.
         Returns: A list of paths or empty list if the path is done 
         """
-        # TODO: REALLY need to clean this method up..
         
-        # Check if we're out of instructions
-        if len(self.path) == 0:
-            if not self.popCallStack():
-                return []
-
-        # Get the current instruction
-        inst = self.path[0]
+        # Step-it
+        stateList = self.state.step()
         
-        # Return paths
-        ret_paths = []
+        pathList = []
 
-        if type(inst) == ast.Assign:
+        for state in stateList:
+            # New path
             path = self.copy()
-            ret_paths = [path]
-            pyState.Assign.handle(path.state,inst)
-        
-        elif type(inst) == ast.If:
-            # On If statements we want to take both options
-            
-            # path == we take the if statement
-            pathIf = self.copy()
-            
-            # path2 == we take the else statement
-            pathElse = self.copy()
-            ret_paths = [pathIf,pathElse]
-            
-            # Check if statement. We'll have at least one instruction here, so treat this as a call
-            # Saving off the current path so we can return to it and pick up at the next instruction
-            cs = deepcopy(pathIf.path[1:])
-            # Only push our stack if it's not empty
-            if len(cs) > 0:
-                pathIf.callStack.append({
-                    'path': cs,
-                    'ctx': self.state.ctx #self.newContext()
-                })
-            
-            # Our new path becomes the inside of the if statement
-            pathIf.path = [pathIf.path[0]] + inst.body
-            
-            # Update the else's path
-            # Check if there is an else path we need to take
-            if len(inst.orelse) > 0:
-                cs = deepcopy(pathElse.path[1:])
-                if len(cs) > 0:
-                    pathElse.callStack.append({
-                        'path': cs,
-                        'ctx': self.state.ctx # self.newContext()
-                    })
-                pathElse.path = [pathElse.path[0]] + inst.orelse
-            
-            pyState.If.handle(pathIf.state,pathElse.state,inst)
-        
-        elif type(inst) == ast.AugAssign:
-            path = self.copy()
-            ret_paths = [path]
-            pyState.AugAssign.handle(path.state,inst)
-        
-        elif type(inst) == ast.FunctionDef:
-            path = self.copy()
-            ret_paths = [path]
-            pyState.FunctionDef.handle(path.state,inst)
-        
-        elif type(inst) == ast.Expr:
-            path = self.copy()
-            ret_paths = [path]
-            r = pyState.Expr.handle(path.state,inst)
-            # If return is a list of length greater than 0, we just made a call
-            if len(r) > 0:
-                cs = deepcopy(path.path[1:])
-                if len(cs) > 0:
-                    path.callStack.append({
-                        'path': cs,
-                        'ctx': self.state.ctx
-                    })
-                path.path = [path.path[0]] + r 
 
-        # TODO: Rework this...
-        elif type(inst) == ast.Return:
-            path = self.copy()
-            ret_paths = [path]
-            pyState.Return.handle(path.state,inst)
-            inst = path.path.pop(0)
-            path.backtrace.insert(0,inst)
-            if not path.popCallStack():
-                return []
-            return ret_paths
+            # New state
+            path.state = state
 
+            pathList.append(path)
 
-        else:
-            err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
-            logger.error(err)
-            raise Exception(err)
-
-        # Move instruction to the done pile :-)
-        for path in ret_paths:
-            inst = path.path.pop(0)
-            path.backtrace.insert(0,inst)
-        
-        # Return the paths
-        return ret_paths
+        return pathList
     
     def printBacktrace(self):
         """
@@ -172,7 +61,7 @@ class Path():
         table = PrettyTable(header=False,border=False,field_names=["lineno","line","element"])
         table.align = 'l'
         
-        for inst in self.backtrace[::-1]:
+        for inst in self.state.backtrace[::-1]:
             table.add_row([
                 "Line {0}".format(inst.lineno),
                 source[inst.lineno-1] if source != None else " ",
@@ -189,10 +78,9 @@ class Path():
         Returns:
             Copy of the path
         """
+        # TODO: Don't think i need to copy state in this...
         return Path(
-                path=deepcopy(self.path),
                 backtrace=deepcopy(self.backtrace),
                 state=self.state.copy(),
                 source=deepcopy(self.source),
-                callStack=deepcopy(self.callStack)
                 )

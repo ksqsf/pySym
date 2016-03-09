@@ -1,7 +1,7 @@
 import logging
 import z3, z3util
 import ast
-from  . import BinOp, hasRealComponent
+from . import BinOp, hasRealComponent
 
 logger = logging.getLogger("pyState:Assign")
 

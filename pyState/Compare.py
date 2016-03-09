@@ -31,21 +31,22 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
     
     ops = ops[0]
     comp = comp[0]
-
+    
     # Determine what's on the right hand side of the compare
-    if type(comp) == ast.Name:
-        # Right hand side is another variable
-        right = stateTrue.getZ3Var(comp.id)
+    #if type(comp) == ast.Name:
+    #    # Right hand side is another variable
+    #    right = stateTrue.getZ3Var(comp.id)
     
-    elif type(comp) == ast.Num:
-        # Right hand side is a number
-        right = comp.n
+    #elif type(comp) == ast.Num:
+    #    # Right hand side is a number
+    #    right = comp.n
+    right = stateTrue.resolveObject(comp)
 
-    else:
-        err = "_handleLeftVar: Don't know how to handle right-hand type '{0}' at line {1} column {2}".format(type(comp),element.lineno,element.col_offset)
-        logger.error(err)
-        raise Exception(err)
-    
+    #else:
+    #    err = "_handleLeftVar: Don't know how to handle right-hand type '{0}' at line {1} column {2}".format(type(comp),element.lineno,element.col_offset)
+    #    logger.error(err)
+    #    raise Exception(err)
+
     # Assume success. Add constraints
     if type(ops) == ast.Gt:
         stateTrue.addConstraint(left > right )

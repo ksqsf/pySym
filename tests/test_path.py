@@ -74,13 +74,13 @@ def test_simpleIf():
     elseSide = p2[1]
     
     # ifSide's path should now be inside, meaning only the print statement
-    assert len(ifSide.path) == 1
+    assert len(ifSide.state.path) == 1
     # Else should be in the else statement
-    assert len(elseSide.path) == 2
+    assert len(elseSide.state.path) == 2
     
     # Neither have anything to do after the if statement
-    assert len(ifSide.callStack) == 0
-    assert len(elseSide.callStack) == 0
+    assert len(ifSide.state.callStack) == 0
+    assert len(elseSide.state.callStack) == 0
     
     # If side should not be possible
     assert not ifSide.state.isSat()

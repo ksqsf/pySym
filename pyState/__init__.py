@@ -2,7 +2,9 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
+#from pyState import BinOp, Assign, If, AugAssign, FunctionDef, Expr, Return
 import pyState.BinOp
+
 
 logger = logging.getLogger("State")
 
@@ -98,8 +100,13 @@ class State():
     }
     """
     
-    def __init__(self,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None):
-   
+    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None,callStack=None,backtrace=None):
+        """
+        (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
+        (optional) backtrace = list of asts that happened before the current one
+        """
+ 
+        self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.localVars = {self.ctx: {}, 1: {}} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
@@ -107,6 +114,141 @@ class State():
         # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
         self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
+        # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1}
+        self.callStack = [] if callStack is None else callStack
+        self.backtrace = [] if backtrace is None else backtrace
+        
+
+    def popCallStack(self):
+        """
+        Input:
+            Nothing
+        Action:
+            Pops from the call stack to the run stack.
+        Returns:
+            True if pop succeeded, False if there was nothing left to pop
+        """
+
+        # Check if we have somewhere to return to
+        if len(self.callStack) == 0:
+            return False
+
+        # Pop the callStack back on to the run queue
+        cs = self.callStack.pop()
+        self.path = cs["path"]
+        self.ctx = cs["ctx"]
+
+        return True
+
+    def step(self):
+        """
+        Move the current path forward by one step
+        Note, this actually makes a copy/s and returns them. The initial path isn't modified.
+        Returns: A list of paths or empty list if the path is done 
+        """
+        # TODO: REALLY need to clean this method up..
+
+        # Check if we're out of instructions
+        if len(self.path) == 0:
+            if not self.popCallStack():
+                return []
+
+        # Get the current instruction
+        inst = self.path[0]
+
+        # Return paths
+        ret_states = []
+
+        if type(inst) == ast.Assign:
+            state = self.copy()
+            ret_states = [state]
+            Assign.handle(state,inst)
+
+        elif type(inst) == ast.If:
+            # On If statements we want to take both options
+
+            # path == we take the if statement
+            stateIf = self.copy()
+
+            # path2 == we take the else statement
+            stateElse = self.copy()
+            ret_states = [stateIf,stateElse]
+
+            # Check if statement. We'll have at least one instruction here, so treat this as a call
+            # Saving off the current path so we can return to it and pick up at the next instruction
+            cs = deepcopy(stateIf.path[1:])
+            # Only push our stack if it's not empty
+            if len(cs) > 0:
+                stateIf.callStack.append({
+                    'path': cs,
+                    'ctx': self.ctx
+                })
+
+            # Our new path becomes the inside of the if statement
+            stateIf.path = [stateIf.path[0]] + inst.body
+
+            # Update the else's path
+            # Check if there is an else path we need to take
+            if len(inst.orelse) > 0:
+                cs = deepcopy(stateElse.path[1:])
+                if len(cs) > 0:
+                    stateElse.callStack.append({
+                        'path': cs,
+                        'ctx': self.ctx
+                    })
+                stateElse.path = [stateElse.path[0]] + inst.orelse
+
+            If.handle(stateIf,stateElse,inst)
+
+        elif type(inst) == ast.AugAssign:
+            state = self.copy()
+            ret_states = [state]
+            AugAssign.handle(state,inst)
+
+        elif type(inst) == ast.FunctionDef:
+            state = self.copy()
+            ret_states = [state]
+            FunctionDef.handle(state,inst)
+
+        elif type(inst) == ast.Expr:
+            state = self.copy()
+            ret_states = [state]
+            r = Expr.handle(state,inst)
+            # If return is a list of length greater than 0, we just made a call
+            if len(r) > 0:
+                cs = deepcopy(state.path[1:])
+                if len(cs) > 0:
+                    state.callStack.append({
+                        'path': cs,
+                        'ctx': self.ctx
+                    })
+                state.path = [state.path[0]] + r
+
+        # TODO: Rework this...
+        elif type(inst) == ast.Return:
+            state = self.copy()
+            ret_states = [state]
+            Return.handle(state,inst)
+            inst = state.path.pop(0)
+            #state.backtrace.insert(0,inst)
+            if not state.popCallStack():
+                return []
+            return ret_states
+
+
+        else:
+            err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
+            logger.error(err)
+            raise Exception(err)
+
+        # Move instruction to the done pile :-)
+        for state in ret_states:
+            inst = state.path.pop(0)
+            state.backtrace.insert(0,inst)
+
+        # Return the paths
+        return ret_states
+
 
     def Return(self,retElement):
         """
@@ -144,7 +286,6 @@ class State():
         Returns:
             New call process block
         """
-        
         assert type(call) == ast.Call
         
         funcName = call.func.id
@@ -213,7 +354,6 @@ class State():
         # Setup return var. Use Int for now, but recast when actually returning
         # ctx of 1 is our return ctx
         self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1)
-
         # Return the new instruction body
         return func.body
 
@@ -255,7 +395,7 @@ class State():
             return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         
         elif t == ast.BinOp:
-            return pyState.BinOp.handle(self,obj,ctx=ctx)
+            return BinOp.handle(self,obj,ctx=ctx)
 
         else:
             err = "resolveObject: unable to resolve object '{0}'".format(obj)
@@ -564,6 +704,9 @@ class State():
             solver=solverCopy,
             ctx=self.ctx,
             functions=self.functions,
-            retVar=self.retVar
+            retVar=self.retVar,
+            callStack=deepcopy(self.callStack),
+            path=deepcopy(self.path),
+            backtrace=deepcopy(self.backtrace)
             )
         
