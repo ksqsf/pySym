@@ -2,6 +2,11 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
+import logging
+import Colorer
+logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+
 import ast
 import z3
 from pyPath import Path
@@ -43,7 +48,7 @@ def test(a,b=2,c=5.5):
 
 x = 1
 test(1,c=x+1)
-test(1,2.2)
+x = test(1,2.2)
 y = 1
 """
 
@@ -69,6 +74,59 @@ x = test()
 z = 1
 """
 
+test7 = """
+def test2():
+    return 5
+
+def test():
+    return test2() + 2
+
+x = test()
+z = 1
+"""
+
+test8 = """
+def test2():
+    return 5
+
+def test():
+    return test2() + test2()
+
+x = test()
+z = 1
+"""
+
+def test_pySym_functionNestingThree():
+    b = ast.parse(test8).body
+    p = Path(b,source=test8)
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    assert p.state.isSat()
+    assert p.state.any_int('x') == 10
+
+
+def test_pySym_functionNestingTwo():
+    # More intense nesting
+    b = ast.parse(test7).body
+    p = Path(b,source=test7)
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    p = p.step()[0]
+    assert p.state.isSat()
+    assert p.state.any_int('x') == 7
+
+
 def test_pySym_functionNesting():
     # Test out calling functions from functions
     b = ast.parse(test6).body
@@ -80,6 +138,7 @@ def test_pySym_functionNesting():
     p = p.step()[0]
     p = p.step()[0]
     p = p.step()[0]
+    p.printBacktrace()
     p = p.step()[0]
     
     assert p.state.isSat()
@@ -117,7 +176,8 @@ def test_pySym_callwithKeyWordAndDefaultReturn():
     p = p.step()[0]
 
     assert p.state.isSat()
-    assert p.state.any_int('ret',ctx=1) == 1+2
+    #assert p.state.any_int('ret',ctx=1) == 1+2
+    p.state.any_int('x') == 1+2
     
     p = p.step()[0]
 
@@ -128,9 +188,15 @@ def test_pySym_callwithKeyWordAndDefaultReturn():
     
     p = p.step()[0]
     p = p.step()[0]
+    
+    #???
+    p = p.step()[0]
+    p = p.step()[0]
+    #???
 
     assert p.state.isSat()
-    assert p.state.any_real('ret',ctx=1) == 3.2
+    p.printBacktrace()
+    assert p.state.any_real('x') == 3.2
     
 
 def test_pySym_callwithKeyWordAndDefault():

@@ -5,13 +5,36 @@ from copy import copy, deepcopy
 #from pyState import BinOp, Assign, If, AugAssign, FunctionDef, Expr, Return
 import pyState.BinOp
 from . import Pass
-
+import random
 
 logger = logging.getLogger("State")
 
-# Define some types
-# Retval means to substitute the return value here
-PYSYM_TYPE_RETVAL = 17
+# Create small class for keeping track of return values
+class ReturnObject:
+    def __init__(self,retID):
+        self.retID = retID
+
+# I feel bad coding this but I can't find a better way atm.
+def replaceObjectWithObject(haystack,fromObj,toObj):
+    """
+    Find instance of fromObj in haystack and replace with toObj
+    Terrible hack here, but this is used to ensure we know which function return is ours
+    """
+    try:
+        fields = haystack._fields
+        if len(fields) == 0:
+            return
+    except:
+        return
+
+    for field in fields:
+        if getattr(haystack,field) == fromObj:
+            setattr(haystack,field,toObj)
+            return
+
+        replaceObjectWithObject(getattr(haystack,field),fromObj,toObj)
+
+
 
 def duplicateSort(obj):
     """
@@ -101,7 +124,7 @@ class State():
     }
     """
     
-    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None,callStack=None,backtrace=None):
+    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None,callStack=None,backtrace=None,retID=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
@@ -115,9 +138,11 @@ class State():
         # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
         self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
-        # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1}
+        # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1, 'ast_call': <ast call object>}
         self.callStack = [] if callStack is None else callStack
         self.backtrace = [] if backtrace is None else backtrace
+        # Keep track of what our return ID is
+        self.retID = retID
         
 
     def popCallStack(self):
@@ -125,7 +150,7 @@ class State():
         Input:
             Nothing
         Action:
-            Pops from the call stack to the run stack.
+            Pops from the call stack to the run stack. Adds call to completed state
         Returns:
             True if pop succeeded, False if there was nothing left to pop
         """
@@ -138,7 +163,8 @@ class State():
         cs = self.callStack.pop()
         self.path = cs["path"]
         self.ctx = cs["ctx"]
-
+        self.retID = cs["retID"]
+        
         return True
 
     def step(self):
@@ -147,6 +173,11 @@ class State():
         Note, this actually makes a copy/s and returns them. The initial path isn't modified.
         Returns: A list of paths or empty list if the path is done 
         """
+        # Adding sanity checks since we are not supposed to change during execution
+        h = hash(self)
+        
+        logger.debug("step:\n\tpath = {0}\n\tcallStack = {1}\n\tctx = {2}\n\tretID = {3}\n\tsolver = {4}\n".format(self.path,self.callStack,self.ctx,self.retID,self.solver))
+
         # TODO: REALLY need to clean this method up..
 
         # Check if we're out of instructions
@@ -154,12 +185,12 @@ class State():
             if not self.popCallStack():
                 return []
 
-        # Get the current instruction
-        inst = self.path[0]
-
         # Return initial return state
         state = self.copy()
         ret_states = [state]
+
+        # Get the current instruction
+        inst = state.path[0]
 
         if type(inst) == ast.Assign:
             Assign.handle(state,inst)
@@ -181,7 +212,8 @@ class State():
             if len(cs) > 0:
                 stateIf.callStack.append({
                     'path': cs,
-                    'ctx': self.ctx
+                    'ctx': self.ctx,
+                    'retID': self.retID,
                 })
 
             # Our new path becomes the inside of the if statement
@@ -195,7 +227,8 @@ class State():
                 if len(cs) > 0:
                     stateElse.callStack.append({
                         'path': cs,
-                        'ctx': self.ctx
+                        'ctx': self.ctx,
+                        'retID': self.retID
                     })
                 #stateElse.path = [stateElse.path[0]] + inst.orelse
                 stateElse.path = inst.orelse
@@ -214,14 +247,8 @@ class State():
         elif type(inst) == ast.Pass:
             Pass.handle(state,inst)
 
-        # TODO: Rework this...
         elif type(inst) == ast.Return:
-            Return.handle(state,inst)
-            # If we have nothing to return to, we're done
-            if not state.popCallStack():
-                return []
-            return ret_states
-
+            ret = Return.handle(state,inst)
 
         else:
             err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)
@@ -231,6 +258,9 @@ class State():
         # Move instruction to the done pile :-)
         for state in ret_states:
             state.backtrace.insert(0,inst)
+
+        # Assert we haven't changed
+        assert h == hash(self)
 
         # Return the paths
         return ret_states
@@ -249,33 +279,36 @@ class State():
         
         obj = self.resolveObject(obj)
         
+        # If this is a ReturnObject, forward it on
+        if type(obj) == ReturnObject:
+            return obj
+        
         # Check for int vs real
         if hasRealComponent(obj):
-            #self.retVar = self.getZ3Var('ret',varType=z3.RealSort(),ctx=1)
-            retVar = self.getZ3Var('ret',varType=z3.RealSort(),ctx=1,increment=True)
+            retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.RealSort(),ctx=1,increment=True)
         
         else:
-            #self.retVar = self.getZ3Var('ret',varType=z3.IntSort(),ctx=1)
-            retVar = self.getZ3Var('ret',varType=z3.IntSort(),ctx=1,increment=True)
+            retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.IntSort(),ctx=1,increment=True)
         
         # Add the constraint
-        #self.addConstraint(self.retVar == obj)
         self.addConstraint(retVar == obj)
         
         # Remove the remaining instructions in this function
         self.path = []
 
 
-    def Call(self,call):
+    def Call(self,call,retID=None):
         """
         Input:
             call = ast.Call object
+            (optional) retID = ID of the return object
         Action:
             Modify state in accordance w/ call
         Returns:
-            New call process block
+            ReturnObject the describes this functions return var
         """
         assert type(call) == ast.Call
+        logger.debug("Call: Setting up for Call to {0}".format(call.func.id))
         
         funcName = call.func.id
     
@@ -287,6 +320,7 @@ class State():
         
         # Grab the function
         func = self.functions[funcName]
+        logger.debug("Call: Resolved Function to {0}".format(func))
         
         # If the body is empty, don't actually call, just return []
         if len(func.body) == 0:
@@ -303,6 +337,8 @@ class State():
         oldCtx = self.ctx
         self.ctx = hash(call.func.ctx)
         
+        logger.debug("Call: Old CTX = {0} ... New CTX = {1}".format(oldCtx,self.ctx))
+        
         ######################
         # Populate Variables #
         ######################
@@ -315,6 +351,7 @@ class State():
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             dest_arg = self.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg))
             self.addConstraint(dest_arg == caller_arg)
+            logger.debug("Call: Setting argument {0} = {1}".format(dest_arg,caller_arg))
         
         # Grab any unset vars
         unsetArgs = func.args.args[len(call.args):]
@@ -331,6 +368,8 @@ class State():
             self.addConstraint(dest_arg == caller_arg)
             # Remove arg after it has been satisfied
             unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
+            logger.debug("Call: Setting keyword argument {0} = {1}".format(dest_arg,caller_arg))
+
 
         # Handle any defaults
         for arg in unsetArgs:
@@ -338,26 +377,36 @@ class State():
             caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
             dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
             self.addConstraint(dest_arg == caller_arg)
+            logger.debug("Call: Setting default argument {0} = {1}".format(dest_arg,caller_arg))
+
        
         ####################
         # Setup Return Var #
         ####################
  
-        # Setup return var. Use Int for now, but recast when actually returning
         # ctx of 1 is our return ctx
-        self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1)
+        # self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1)
+        # Generate random return ID
+        oldRetID = self.retID
+        self.retID = hash(random.random()) if retID is None else retID
         
         ##################
         # Save CallStack #
         ##################
-        cs = deepcopy(self.path)
+        cs = copy(self.path)
         if len(cs) > 0:
             self.callStack.append({
                 'path': cs,
-                'ctx': oldCtx
+                'ctx': oldCtx,
+                'retID': oldRetID
             })
         
         self.path = func.body
+        logger.debug("Call: Saved callstack: {0}".format(self.callStack))
+        logger.debug("Call: Set new path {0}".format(self.path))
+        
+        # Return our ReturnObject
+        return ReturnObject(self.retID)
         
 
     def registerFunction(self,func):
@@ -373,12 +422,13 @@ class State():
         
         self.functions[func.name] = func
 
-    def resolveObject(self,obj,ctx=None):
+    def resolveObject(self,obj,parent=None,ctx=None):
         """
         Input:
             obj = Some ast object (i.e.: ast.Name, ast.Num, etc)
                 special object "PYSYM_TYPE_RETVAL" (int) will resolve the
                 last return value
+            (optional) parent = parent node of obj. This is needed for resolving calls
             (optional) ctx = Context other than current to resolve in
         Action:
             Resolve object into something that can be used in a constraint
@@ -392,17 +442,34 @@ class State():
         t = type(obj)
         
         if t == ast.Name:
+            logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
             return self.getZ3Var(obj.id,ctx=ctx)
         
         elif t == ast.Num:
+            logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
             # Return real val or int val
             return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         
         elif t == ast.BinOp:
+            logger.debug("resolveObject: Resolving object type BinOp")
             return BinOp.handle(self,obj,ctx=ctx)
 
-        elif t == int and obj == PYSYM_TYPE_RETVAL:
-            return self.getZ3Var('ret',ctx=1)
+        elif t == ReturnObject:
+            logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
+            return self.getZ3Var('ret{0}'.format(obj.retID),ctx=1)
+
+        # Hack-ish solution to handle calls
+        elif t == ast.Call:
+            # Create our return object
+            retObj = ReturnObject(hash(random.random()))
+            
+            # Update state, change call to ReturnObject so we can resolve next time
+            replaceObjectWithObject(self.path[0],obj,retObj)
+            # Change our state, record the return object
+            Call.handle(self,obj,retID=retObj.retID)
+            
+            # Return the ReturnObject back to caller to inform them of the pending call
+            return retObj
 
         else:
             err = "resolveObject: unable to resolve object '{0}'".format(obj)
@@ -714,6 +781,7 @@ class State():
             retVar=self.retVar,
             callStack=deepcopy(self.callStack),
             path=deepcopy(self.path),
-            backtrace=deepcopy(self.backtrace)
+            backtrace=deepcopy(self.backtrace),
+            retID=copy(self.retID),
             )
         

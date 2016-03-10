@@ -22,16 +22,23 @@ def handle(state,element,ctx=None):
     assert type(element) == ast.BinOp
 
     # Try resolving the parts
-    left = state.resolveObject(element.left,ctx=ctx)
-    right = state.resolveObject(element.right,ctx=ctx)
+    left = state.resolveObject(element.left,parent=element,ctx=ctx)
+    
+    logger.debug("BinOp: BinOp Left = {0} Type {1}".format(left,type(left)))
+    # If we need to pause to resolve something, pause
+    if type(left) == pyState.ReturnObject:
+        return left
+
+    
+    right = state.resolveObject(element.right,parent=element,ctx=ctx)
+    
+    logger.debug("BinOp: BinOp Right = {0} Type {1}".format(right,type(right)))
+
+    if type(right) == pyState.ReturnObject:
+        return right
+
     op = element.op
     
-    # Due to Z3 qirk, we need to cast vars to Real if one var is a float
-    #if type(left) == float and type(right) == z3.ArithRef and right.is_int():
-    #    right = z3.ToReal(right)
-    #elif type(right) == float and type(left) == z3.ArithRef and left.is_int():
-    #    left = z3.ToReal(left)
-
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
         return left + right

@@ -19,7 +19,17 @@ def handle(state,element):
     assert type(state) == pyState.State
     assert type(element) == ast.Return
 
-    state.Return(element)
+    ret = state.Return(element)
+    
+    logger.debug("handle: ret value = {0}".format(ret))
+    
+    # We're pausing to resolve a call
+    if type(ret) is pyState.ReturnObject:
+        return
+        
+    # Good to go, pop back down
+    state.popCallStack()
+
     
     """
     else:
