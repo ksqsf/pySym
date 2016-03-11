@@ -38,7 +38,36 @@ if x == 1:
 z = 1
 """
 
-def test_pyPath_exploreWithIf():
+test3 = """
+def test():
+    return 5
+
+if test() == 5.0:
+    x = 1
+else:
+    x = 0
+
+q = 5
+"""
+
+def test_pyPathGroup_exploreFunctionCompare():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+
+    # Execute to the end
+    assert pg.explore(find=10)
+    
+    assert len(pg.active) == 0
+    assert len(pg.completed) == 0
+    assert len(pg.errored) == 0
+    assert len(pg.deadended) == 1
+    assert len(pg.found) == 1
+
+    assert pg.found[0].state.any_int('x') == 1
+    
+
+def test_pyPathGroup_exploreWithIf():
     b = ast.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)

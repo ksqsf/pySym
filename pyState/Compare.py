@@ -1,6 +1,7 @@
 import logging
 import z3
 import ast
+import pyState
 
 logger = logging.getLogger("pyState:Compare")
 
@@ -19,6 +20,10 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
     Return:
         Nothing. Modify state objects in place
     """
+
+    # Looks like we're making a call, go ahead and return
+    if type(left) == pyState.ReturnObject:
+        return left
     
     # Operators that we're comparing with
     ops = element.ops
@@ -33,6 +38,10 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
     comp = comp[0]
     
     right = stateTrue.resolveObject(comp)
+    
+    # Resolve Call first
+    if type(right) == pyState.ReturnObject:
+        return right
 
     # Assume success. Add constraints
     if type(ops) == ast.Gt:
@@ -73,7 +82,7 @@ def handle(stateTrue,stateFalse,element):
         stateTrue = state object for the True side of the compare
         stateFalse = state object for the False side of the compare
     Action:
-        Add constraints to bother True and False state objects
+        Add constraints to both True and False state objects
     Return:
         Nothing
     """
@@ -83,4 +92,4 @@ def handle(stateTrue,stateFalse,element):
     left = element.left
     
     # TODO: Probably need to add checks or consolidate here...
-    _handleLeftVarInt(stateTrue,stateFalse,element,stateTrue.resolveObject(left))
+    return _handleLeftVarInt(stateTrue,stateFalse,element,stateTrue.resolveObject(left))
