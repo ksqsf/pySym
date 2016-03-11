@@ -213,7 +213,6 @@ class State():
 
         # Return initial return state
         state = self.copy()
-        ret_states = []
 
         # Get the current instruction
         inst = state.path[0]
