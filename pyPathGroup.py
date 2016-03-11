@@ -49,7 +49,7 @@ class PathGroup:
         """
         assert type(find) == int
         
-        while True:
+        while len(self.active) > 0:
             # Step the things
             self.step()
             
