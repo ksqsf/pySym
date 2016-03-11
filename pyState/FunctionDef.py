@@ -23,3 +23,6 @@ def handle(state,element):
     
     # Pop instruction
     state.path.pop(0)
+    
+    # Return state
+    return [state]

@@ -2,9 +2,8 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-#from pyState import BinOp, Assign, If, AugAssign, FunctionDef, Expr, Return
 import pyState.BinOp
-from . import Pass
+import pyState.Pass
 import random
 
 logger = logging.getLogger("State")
@@ -195,7 +194,17 @@ class State():
         
         logger.debug("step:\n\tpath = {0}\n\tcallStack = {1}\n\tctx = {2}\n\tretID = {3}\n\tsolver = {4}\n".format(self.path,self.callStack,self.ctx,self.retID,self.solver))
 
-        # TODO: REALLY need to clean this method up..
+        # More cleanly resolve instructions
+        # TODO: Move this somewhere else... Moving it to the top of State introduced "include hell" :-(
+        instructions = {
+            ast.Assign: pyState.Assign,
+            ast.AugAssign: pyState.AugAssign,
+            ast.FunctionDef: pyState.FunctionDef,
+            ast.Expr: pyState.Expr,
+            ast.Pass: pyState.Pass,
+            ast.Return: pyState.Return,
+            ast.If: pyState.If
+            }
 
         # Check if we're out of instructions
         if len(self.path) == 0:
@@ -204,68 +213,14 @@ class State():
 
         # Return initial return state
         state = self.copy()
-        ret_states = [state]
+        ret_states = []
 
         # Get the current instruction
         inst = state.path[0]
 
-        if type(inst) == ast.Assign:
-            Assign.handle(state,inst)
-
-        elif type(inst) == ast.If:
-            # On If statements we want to take both options
-
-            # path == we take the if statement
-            stateIf = state
-
-            # path2 == we take the else statement
-            stateElse = self.copy()
-            ret_states = [stateIf,stateElse]
-
-            # Check if statement. We'll have at least one instruction here, so treat this as a call
-            # Saving off the current path so we can return to it and pick up at the next instruction
-            cs = deepcopy(stateIf.path[1:])
-            # Only push our stack if it's not empty
-            if len(cs) > 0:
-                stateIf.callStack.append({
-                    'path': cs,
-                    'ctx': self.ctx,
-                    'retID': self.retID,
-                })
-
-            # Our new path becomes the inside of the if statement
-            #stateIf.path = [stateIf.path[0]] + inst.body
-            stateIf.path = inst.body
-
-            # Update the else's path
-            # Check if there is an else path we need to take
-            if len(inst.orelse) > 0:
-                cs = deepcopy(stateElse.path[1:])
-                if len(cs) > 0:
-                    stateElse.callStack.append({
-                        'path': cs,
-                        'ctx': self.ctx,
-                        'retID': self.retID
-                    })
-                #stateElse.path = [stateElse.path[0]] + inst.orelse
-                stateElse.path = inst.orelse
-
-            If.handle(stateIf,stateElse,inst)
-
-        elif type(inst) == ast.AugAssign:
-            AugAssign.handle(state,inst)
-
-        elif type(inst) == ast.FunctionDef:
-            FunctionDef.handle(state,inst)
-
-        elif type(inst) == ast.Expr:
-            Expr.handle(state,inst)
-
-        elif type(inst) == ast.Pass:
-            Pass.handle(state,inst)
-
-        elif type(inst) == ast.Return:
-            ret = Return.handle(state,inst)
+        # Generically handle any instruction we know about
+        if type(inst) in instructions:
+            ret_states = instructions[type(inst)].handle(state,inst)
 
         else:
             err = "step: Unhandled element of type {0} at Line {1} Col {2}".format(type(inst),inst.lineno,inst.col_offset)

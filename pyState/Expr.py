@@ -27,7 +27,8 @@ def handle(state,element):
     state.path.pop(0)
     
     if type(value) == ast.Call:
-        return Call.handle(state,value)
+        Call.handle(state,value)
+        return [state]
 
     else:
         err = "Expr: Don't know how to handle expr type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)

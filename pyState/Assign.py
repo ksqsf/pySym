@@ -1,7 +1,8 @@
 import logging
 import z3, z3util
 import ast
-from . import BinOp, hasRealComponent, Call, ReturnObject
+from pyState import hasRealComponent, ReturnObject
+import pyState.BinOp, pyState.Call
 from copy import deepcopy
 
 logger = logging.getLogger("pyState:Assign")
@@ -30,6 +31,9 @@ def _handleAssignNum(state,target,value):
     # Pop the instruction off
     state.path.pop(0) if len(state.path) > 0 else None
 
+    # Return the state
+    return [state]
+
 
 def handle(state,element):
     """
@@ -52,11 +56,14 @@ def handle(state,element):
 
     # Call appropriate handlers
     if type(value) in [ast.Num, ast.Name, ast.BinOp, ReturnObject]:
-        _handleAssignNum(state,target,state.resolveObject(value))
+        return _handleAssignNum(state,target,state.resolveObject(value))
     
     elif type(value) is ast.Call:
         #_handleAssignCall(state,value,element)
-        return state.resolveObject(value)
+        #return state.resolveObject(value)
+        # Setup to resolve the call object
+        state.resolveObject(value)
+        return [state]
 
     else:
         err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)

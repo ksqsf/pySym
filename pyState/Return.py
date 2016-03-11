@@ -25,11 +25,12 @@ def handle(state,element):
     
     # We're pausing to resolve a call
     if type(ret) is pyState.ReturnObject:
-        return
+        return [state]
         
     # Good to go, pop back down
     state.popCallStack()
 
+    return [state]
     
     """
     else:

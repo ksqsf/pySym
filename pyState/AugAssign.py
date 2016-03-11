@@ -35,6 +35,7 @@ def handle(state,element):
     Attempt to handle the AugAssign element
     Example of this: x += 1
     """
+    # TODO: Revisit this implimentation. I think I can make this a lot better now.
     
     # Targets are what is being set
     target = element.target
@@ -100,3 +101,6 @@ def handle(state,element):
 
     # Pop the instruction off
     state.path.pop(0)
+    
+    # Return the state
+    return [state]

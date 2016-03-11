@@ -18,3 +18,4 @@ def handle(state,element):
     
     state.path.pop(0)
     
+    return [state]
