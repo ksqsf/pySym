@@ -364,13 +364,9 @@ class State():
         ##################
         # Save CallStack #
         ##################
-        cs = copy(self.path)
+        cs = deepcopy(self.path)
         if len(cs) > 0:
-            self.callStack.append({
-                'path': cs,
-                'ctx': oldCtx,
-                'retID': oldRetID
-            })
+            self.pushCallStack(cs,oldCtx,oldRetID)
         
         self.path = func.body
         logger.debug("Call: Saved callstack: {0}".format(self.callStack))
@@ -378,7 +374,18 @@ class State():
         
         # Return our ReturnObject
         return ReturnObject(self.retID)
-        
+
+    def pushCallStack(self,path,ctx,retID):
+        """
+        Save the call stack with given variables
+        """
+
+        self.callStack.append({
+            'path': path,
+            'ctx': ctx,
+            'retID': retID
+        })
+
 
     def registerFunction(self,func):
         """

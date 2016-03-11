@@ -26,11 +26,7 @@ def handle(state,element):
     cs = deepcopy(stateIf.path[1:])
     # Only push our stack if it's not empty
     if len(cs) > 0:
-        stateIf.callStack.append({
-            'path': cs,
-            'ctx': state.ctx,
-            'retID': state.retID,
-        })
+        stateIf.pushCallStack(cs,state.ctx,state.retID)
 
     # Our new path becomes the inside of the if statement
     stateIf.path = element.body
@@ -40,11 +36,8 @@ def handle(state,element):
     if len(element.orelse) > 0:
         cs = deepcopy(stateElse.path[1:])
         if len(cs) > 0:
-            stateElse.callStack.append({
-                'path': cs,
-                'ctx': state.ctx,
-                'retID': state.retID
-            })
+            stateElse.pushCallStack(cs,state.ctx,state.retID)
+        
         stateElse.path = element.orelse
 
 
