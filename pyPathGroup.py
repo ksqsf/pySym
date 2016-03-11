@@ -18,20 +18,22 @@ class PathGroup:
         """
         Pretty print status
         """
-        s = "<PathGroup with "
+        s = "<PathGroup with {0}>"
+
+        # Figure out the attributes
+        attr = []
         if len(self.active) > 0:
-            s += "{0} active".format(len(self.active))
+            attr.append("{0} active".format(len(self.active)))
         if len(self.deadended) > 0:
-            s += "{0} deadended".format(len(self.deadended))
+            attr.append("{0} deadended".format(len(self.deadended)))
         if len(self.completed) > 0:
-            s += "{0} completed".format(len(self.completed))
+            attr.append("{0} completed".format(len(self.completed)))
         if len(self.errored) > 0:
-            s += "{0} errored".format(len(self.errored))
+            attr.append("{0} errored".format(len(self.errored)))
         if len(self.found) > 0:
-            s += "{0} found".format(len(self.found))
-        s += ">"
+            attr.append("{0} found".format(len(self.found)))
         
-        return s
+        return s.format(', '.join(attr))
 
     def __repr__(self):
         return self.__str__()
@@ -53,7 +55,7 @@ class PathGroup:
             
             # Check for any path that has made it here
             for path in self.active:
-                if path.state.path[0].lineno == find:
+                if path.state.lineno() == find:
                     self.unstash(path,from_stash="active",to_stash="found")
                     return True
         
@@ -103,7 +105,7 @@ class PathGroup:
                 for returnedPath in paths_ret:
                     # Make sure the returned path is possible
                     if not returnedPath.state.isSat():
-                        self.unstash(path=returnedPath,from_stash="active",to_stash="deadended")
+                        self.unstash(path=returnedPath,to_stash="deadended")
                     else:
                         # We found our next step in the path
                         self.unstash(path=returnedPath,to_stash="active")

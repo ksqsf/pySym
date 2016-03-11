@@ -144,7 +144,24 @@ class State():
         # Keep track of what our return ID is
         self.retID = retID
         
-
+    def lineno(self):
+        """
+        Returns current line number. If returning from a call, returns the return line number
+        Returns None if the program is done
+        """
+        
+        # Return current lineno if exists
+        if len(self.path) > 0:
+            return self.path[0].lineno
+        
+        # Check up the call tree for instruction
+        for cs in self.callStack[::-1]:
+            if len(cs['path']) > 0:
+                return cs['path'][0].lineno
+        
+        # Looks like we're done with the program
+        return None
+    
     def popCallStack(self):
         """
         Input:
@@ -261,7 +278,7 @@ class State():
 
         # Assert we haven't changed
         assert h == hash(self)
-
+        
         # Return the paths
         return ret_states
 
