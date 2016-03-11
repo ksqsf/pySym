@@ -12,6 +12,7 @@ class PathGroup:
         self.deadended = []
         self.completed = []
         self.errored = []
+        self.found = []
 
     def __str__(self):
         """
@@ -26,12 +27,36 @@ class PathGroup:
             s += "{0} completed".format(len(self.completed))
         if len(self.errored) > 0:
             s += "{0} errored".format(len(self.errored))
+        if len(self.found) > 0:
+            s += "{0} found".format(len(self.found))
         s += ">"
         
         return s
 
     def __repr__(self):
         return self.__str__()
+
+    def explore(self,find=None):
+        """
+        Input:
+            find = input line number to explore to
+        Action:
+            Step through script until line is found
+        Returns:
+            True if found, False if not
+        """
+        assert type(find) == int
+        
+        while True:
+            # Step the things
+            self.step()
+            
+            # Check for any path that has made it here
+            for path in self.active:
+                if path.state.path[0].lineno == find:
+                    self.unstash(path,from_stash="active",to_stash="found")
+                    return True
+        
 
 
     def unstash(self,path=None,from_stash=None,to_stash=None):

@@ -21,6 +21,24 @@ x = test()
 z = 1
 """
 
+def test_pyPath_exploreFindLine():
+    b = ast.parse(test1).body
+    p = Path(b,source=test1)
+    pg = PathGroup(p)
+    
+    # Explore to line 9 (z = 1)
+    # Current setup means that z=1 will not actually be executed
+    assert pg.explore(find=9)
+    
+    assert len(pg.active) == 0
+    assert len(pg.completed) == 0
+    assert len(pg.errored) == 0
+    assert len(pg.deadended) == 0
+    assert len(pg.found) == 1
+
+    assert pg.found[0].state.any_int('x') == 10
+
+
 def test_pyPath_stepThroughProgram():
     b = ast.parse(test1).body
     p = Path(b,source=test1)
@@ -41,6 +59,7 @@ def test_pyPath_stepThroughProgram():
     assert len(pg.completed) == 1
     assert len(pg.errored) == 0
     assert len(pg.deadended) == 0
+    assert len(pg.found) == 0
     
     assert pg.completed[0].state.any_int('x') == 10
     assert pg.completed[0].state.any_int('z') == 1
