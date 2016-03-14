@@ -180,6 +180,7 @@ def test_pySym_callwithKeyWordAndDefaultReturn():
     p.state.any_int('x') == 1+2
     
     p = p.step()[0]
+    p = p.step()[0]
 
     assert p.state.isSat()
     assert p.state.any_int('a') == 1
@@ -242,6 +243,7 @@ def test_pySym_callThreeArgs():
     assert p.state.any_int('x') == 5
     
     p = p.step()[0]
+    p = p.step()[0]
     
     assert p.state.isSat()
     assert p.state.any_int('a') == None
@@ -271,6 +273,7 @@ def test_pySym_CallNoArgs():
     assert p.state.isSat()
     assert p.state.any_int('x') == 5
     
+    p = p.step()[0]
     p = p.step()[0]
     
     assert p.state.isSat()

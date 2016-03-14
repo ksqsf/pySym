@@ -170,8 +170,9 @@ class State():
         self.retID = retID
         self.loop = loop
         
-        # Initialize our known functions
-        self._init_simFunctions()
+        # Initialize our known functions if this is the first time through
+        if backtrace is None:
+            self._init_simFunctions()
         
     def lineno(self):
         """
@@ -311,11 +312,12 @@ class State():
         self.path = []
 
 
-    def Call(self,call,retID=None):
+    def Call(self,call,retID=None,func=None):
         """
         Input:
             call = ast.Call object
             (optional) retID = ID of the return object
+            (optional) func = resolved function for Call (i.e.: state.resolveCall(call)). This is here to remove duplicate calls to resolveCall from resolveObject
         Action:
             Modify state in accordance w/ call
         Returns:
@@ -325,7 +327,7 @@ class State():
         logger.debug("Call: Setting up for Call to {0}".format(call.func.id))
         
         # Resolve the call
-        func = self.resolveCall(call)
+        func = self.resolveCall(call) if func is None else func
         logger.debug("Call: Resolved Function to {0}".format(func))
         
         # If the body is empty, don't actually call, just return []
@@ -449,14 +451,14 @@ class State():
                 continue
 
             for f in files:
-                if f in ['__init__.py']:
+                if f in ['__init__.py'] or not f.endswith(('.py','.pyc','.pyo')):
                     continue
 
                 # TODO: This is messy...
                 modName = "." + os.path.join(subdir,f).replace(BASE,"").replace(f,"").strip("/").replace("/",".")
                 modName = "" if modName is "." else modName
                 modFName = os.path.splitext(f)[0]
-                imp = importlib.import_module('pyState.functions' + modName + "." + modFName)
+                imp = importlib.import_module(('pyState.functions' + modName + "." + modFName).replace("..","."))
                 self.registerFunction(imp,modName,True)
 
 
@@ -520,8 +522,12 @@ class State():
                 logger.error(err)
                 raise Exception(err)
 
+        # Give sim functions priority
+        if funcName in self.simFunctions:
+            return self.simFunctions[funcName]
+
         # If this function is a known local function, return it
-        if funcName in self.functions:
+        elif funcName in self.functions:
             return self.functions[funcName]
 
         else:
@@ -573,16 +579,38 @@ class State():
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:
-            # Create our return object
-            retObj = ReturnObject(hash(random.random()))
+            # Let's see if this is a real or sim call
+            func = self.resolveCall(obj)
             
-            # Update state, change call to ReturnObject so we can resolve next time
-            assert replaceObjectWithObject(self.path[0],obj,retObj)
-            # Change our state, record the return object
-            Call.handle(self,obj,retID=retObj.retID)
+            # If this is a simFunction
+            if type(func) is ModuleType:
+                # Simple pass it off to the handler, filling in args as appropriate
+                ret = func.handle(self,*obj.args)
+                # If we're returning something, replace the call w/ the return value
+                if "ast" in ret.__module__:
+                    assert replaceObjectWithObject(self.path[0],obj,ret)
+                
+                else:
+                    err = "resolveObject: unknown simFunction return object '{0}' from call '{1}'".format(ob,func)
+                    logger.error(err)
+                    raise Exception(err)
+                
+                # TODO: Maybe return something here?
+                return
+                    
+
+            # If we get here, we're a normal symbolic function
+            else:
+                # Create our return object
+                retObj = ReturnObject(hash(obj))
             
-            # Return the ReturnObject back to caller to inform them of the pending call
-            return retObj
+                # Update state, change call to ReturnObject so we can resolve next time
+                assert replaceObjectWithObject(self.path[0],obj,retObj)
+                # Change our state, record the return object
+                Call.handle(self,obj,retID=retObj.retID)
+            
+                # Return the ReturnObject back to caller to inform them of the pending call
+                return retObj
 
         else:
             err = "resolveObject: unable to resolve object '{0}'".format(obj)
