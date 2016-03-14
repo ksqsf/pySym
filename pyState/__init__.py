@@ -313,16 +313,8 @@ class State():
         assert type(call) == ast.Call
         logger.debug("Call: Setting up for Call to {0}".format(call.func.id))
         
-        funcName = call.func.id
-    
-        # Check that this function has been registered
-        if funcName not in self.functions:
-            err = "call: function '{0}' doesn't appear to be registered yet.".format(funcName)
-            logger.error(err)
-            raise Exception(err)
-        
-        # Grab the function
-        func = self.functions[funcName]
+        # Resolve the call
+        func = self.resolveCall(call)
         logger.debug("Call: Resolved Function to {0}".format(func))
         
         # If the body is empty, don't actually call, just return []
@@ -338,6 +330,7 @@ class State():
         
         # Grab a new context
         oldCtx = self.ctx
+        # TODO: Check for ctx collision here from previous ctx... Or just rework the whole ctx ID thing
         self.ctx = hash(call.func.ctx)
         
         logger.debug("Call: Old CTX = {0} ... New CTX = {1}".format(oldCtx,self.ctx))
@@ -440,6 +433,39 @@ class State():
         assert type(func) == ast.FunctionDef
         
         self.functions[func.name] = func
+
+    def resolveCall(self,call):
+        """
+        Input:
+            call = ast.Call object
+        Action:
+            Determine correct ast.func object
+        Returns:
+            ast.func block
+        """
+        
+        # If this is a local context call (i.e.: test())
+        if type(call.func) == ast.Name:
+            funcName = call.func.id
+        
+        # If this is an attr form (i.e.: telnetlib.Telnet())
+        elif type(call.func) == ast.Attribute:
+            funcName = call.func.value.id + call.func.attr
+            
+        else:
+                err = "resolveCall: unknown call-type object '{0}'".format(type(call))
+                logger.error(err)
+                raise Exception(err)
+
+        # If this function is a known local function, return it
+        if funcName in self.functions:
+            return self.functions[funcName]
+
+        else:
+            err = "resolveCall: unable to resolve call to '{0}'".format(funcName)
+            logger.error(err)
+            raise Exception(err)
+
 
     def resolveObject(self,obj,parent=None,ctx=None):
         """
