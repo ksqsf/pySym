@@ -54,6 +54,11 @@ class PathGroup:
         while len(self.active) > 0:
             # Step the things
             self.step()
+
+            # Blow away failed paths to save on memory
+            if self.discardFailures:
+                self.deadended = []
+                self.errored = []
             
             # Check for any path that has made it here
             for path in self.active:
@@ -61,11 +66,6 @@ class PathGroup:
                     self.unstash(path,from_stash="active",to_stash="found")
                     return True
             
-            # Blow away failed paths to save on memory
-            if self.discardFailures:
-                self.deadended = []
-                self.errored = []
-        
 
 
     def unstash(self,path=None,from_stash=None,to_stash=None):
