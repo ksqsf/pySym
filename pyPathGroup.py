@@ -2,9 +2,10 @@ from pyPath import Path
 
 class PathGroup:
 
-    def __init__(self,path=None):
+    def __init__(self,path=None,discardFailures=None):
         """
         (optional) path = starting path object for path group
+        (optional) discardFailure = Should we throw away bad paths to save on memory?
         """
 
         # Init the groups
@@ -13,6 +14,7 @@ class PathGroup:
         self.completed = []
         self.errored = []
         self.found = []
+        self.discardFailures = False if discardFailures is None else discardFailures
 
     def __str__(self):
         """
@@ -58,6 +60,11 @@ class PathGroup:
                 if path.state.lineno() == find:
                     self.unstash(path,from_stash="active",to_stash="found")
                     return True
+            
+            # Blow away failed paths to save on memory
+            if self.discardFailures:
+                self.deadended = []
+                self.errored = []
         
 
 
