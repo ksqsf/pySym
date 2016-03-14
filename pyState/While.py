@@ -14,9 +14,10 @@ def handle(state,element):
     
     # While is basically a repeated If statement, we want to take both sides
 
-    stateIf = state.copy()
+    stateIf = state
     stateElse = state.copy()
     ret_states = [stateIf,stateElse]
+    print(element.test.comparators)
 
     # If state should get a copy of the loop we're now in
     stateIf.loop = deepcopy(element)
@@ -30,7 +31,8 @@ def handle(state,element):
         
         # If we're waiting on resolution of a call, just return the initial state
         if type(ret) is pyState.ReturnObject:
-            return [state]
+            print(stateIf.callStack[-1]['path'][0].test.comparators)
+            return [stateIf]
     
         # If we're good to go, pop the instructions
         stateIf.path.pop(0)

@@ -13,24 +13,43 @@ class ReturnObject:
         self.retID = retID
 
 # I feel bad coding this but I can't find a better way atm.
-def replaceObjectWithObject(haystack,fromObj,toObj):
+def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
     """
     Find instance of fromObj in haystack and replace with toObj
     Terrible hack here, but this is used to ensure we know which function return is ours
+    Returns True on success and False on fail
     """
+    parent = haystack if parent is None else parent
+    
+    #print("Attempting to find: {0}".format(fromObj))
+    #print(haystack)
+    
+    # If we found the object
+    if haystack == fromObj:
+        parent[parent.index(fromObj)] = toObj
+        return True
+    
+    if type(haystack) == list:
+        for x in haystack:
+            if replaceObjectWithObject(x,fromObj,toObj,haystack):
+                return True
+    
     try:
         fields = haystack._fields
         if len(fields) == 0:
-            return
+            return False
     except:
-        return
+        return False
 
     for field in fields:
         if getattr(haystack,field) == fromObj:
             setattr(haystack,field,toObj)
-            return
+            return True
 
-        replaceObjectWithObject(getattr(haystack,field),fromObj,toObj)
+        if replaceObjectWithObject(getattr(haystack,field),fromObj,toObj,haystack):
+            return True
+    
+    return False
 
 
 
@@ -370,13 +389,20 @@ class State():
         # Generate random return ID
         oldRetID = self.retID
         self.retID = hash(random.random()) if retID is None else retID
+
+        #################
+        # Clearout Loop #
+        #################
+        # If we are calling something, save off our loop, but clear it out in current path
+        oldLoop = self.loop
+        self.loop = None
         
         ##################
         # Save CallStack #
         ##################
         cs = deepcopy(self.path)
         if len(cs) > 0:
-            self.pushCallStack(cs,oldCtx,oldRetID)
+            self.pushCallStack(path=cs,ctx=oldCtx,retID=oldRetID,loop=oldLoop)
         
         self.path = func.body
         logger.debug("Call: Saved callstack: {0}".format(self.callStack))
@@ -395,7 +421,7 @@ class State():
             'path': path if path is not None else self.path,
             'ctx': ctx if ctx is not None else self.ctx,
             'retID': retID if retID is not None else self.retID,
-            'loop': loop if loop is not None else self.loop,
+            'loop': loop,
         })
 
 
@@ -454,7 +480,7 @@ class State():
             retObj = ReturnObject(hash(random.random()))
             
             # Update state, change call to ReturnObject so we can resolve next time
-            replaceObjectWithObject(self.path[0],obj,retObj)
+            assert replaceObjectWithObject(self.path[0],obj,retObj)
             # Change our state, record the return object
             Call.handle(self,obj,retID=retObj.retID)
             
