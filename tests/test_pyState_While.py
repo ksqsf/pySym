@@ -48,6 +48,23 @@ while x < 5:
 z = z
 """
 
+test4 = """
+def test(x,y):
+    return x + y
+
+x = 0
+z = 0
+while x < 5:
+    y = 0
+    while y < 3:
+        z += test(x,y)
+        y += 1
+    x += 1
+
+z = z
+"""
+
+
 def test_pySym_nestedWhile():
     b = ast.parse(test3).body
     p = Path(b,source=test3)
@@ -55,6 +72,13 @@ def test_pySym_nestedWhile():
 
     assert pg.explore(find=14)
     assert pg.found[0].state.any_int('z') == 45
+
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    assert pg.explore(find=14)
+    assert pg.found[0].state.any_int('z') == 45
+
 
 
 def test_pySym_funcInWhileTest():

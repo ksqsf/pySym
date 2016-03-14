@@ -391,7 +391,7 @@ class State():
         # self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1)
         # Generate random return ID
         oldRetID = self.retID
-        self.retID = hash(random.random()) if retID is None else retID
+        self.retID = hash(call) if retID is None else retID
 
         #################
         # Clearout Loop #

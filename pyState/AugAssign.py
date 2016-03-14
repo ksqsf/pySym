@@ -1,34 +1,9 @@
 import logging
 import z3
 import ast
+from pyState import hasRealComponent, ReturnObject
 
 logger = logging.getLogger("pyState:AugAssign")
-
-def _isRealVal(val):
-    """
-    Input:
-        val = Value to check for real-ness
-    Action:
-        Determine val type (z3 object, int/float, etc).
-    Returns:
-        True fif val is of Real type, False otherwise
-    """
-    t = type(val)
-
-    if t == int:
-        return False
-
-    elif t == float:
-        return True
-
-    elif t == z3.ArithRef:
-        return val.is_real()
-    
-    else:
-        err = "Can't determine if object '{0}' is real type or not".format(val)
-        logger.error(err)
-        raise Exception(err)
-
 
 def handle(state,element):
     """
@@ -57,8 +32,12 @@ def handle(state,element):
         raise Exception(err)
 
     # Figure out value type
-    if type(value) == ast.Num:
-        value = value.n
+    if type(value) in [ast.Num,ast.Name,ast.Call,ReturnObject]:
+        value = state.resolveObject(value)
+        
+        # Check if we're making a call and need to wait for that to finish
+        if type(value) == ReturnObject:
+            return [state]
 
     elif type(value) == ast.Name:
         value = state.getZ3Var(value.id)
@@ -73,7 +52,7 @@ def handle(state,element):
     oldTargetVar = state.getZ3Var(target)
     
     # Z3 gets confused if we don't change our var to Real when comparing w/ Real
-    if _isRealVal(value):
+    if hasRealComponent(value):
         newTargetVar = state.getZ3Var(target,increment=True,varType=z3.RealSort())
     else:
         newTargetVar = state.getZ3Var(target,increment=True)
