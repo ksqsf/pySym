@@ -4,6 +4,13 @@ import logging
 from copy import copy, deepcopy
 import pyState.BinOp, pyState.Pass, pyState.While
 import random
+import os.path
+import importlib
+from types import ModuleType
+import ntpath
+
+# The current directory for running pySym
+SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger("State")
 
@@ -141,7 +148,7 @@ class State():
     }
     """
     
-    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None):
+    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
@@ -154,6 +161,7 @@ class State():
         self.solver = z3.Solver() if solver is None else solver
         # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
+        self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
         # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1, 'ast_call': <ast call object>}
         self.callStack = [] if callStack is None else callStack
@@ -161,6 +169,9 @@ class State():
         # Keep track of what our return ID is
         self.retID = retID
         self.loop = loop
+        
+        # Initialize our known functions
+        self._init_simFunctions()
         
     def lineno(self):
         """
@@ -420,19 +431,71 @@ class State():
             'loop': loop if loop is not None else self.loop,
         })
 
+    def _init_simFunctions(self):
+        """
+        Input:
+            Nothing
+        Action:
+            Initializes hooked functions (i.e.: pyState/functions/.)
+        Returns:
+            Nothing
+        """
+        # Base simFunction directory
+        BASE = os.path.join(SCRIPTDIR,"functions")
+        
+        # Walk through functions
+        for subdir, dirs, files in os.walk(BASE):
+            if "__pycache__" in subdir:
+                continue
 
-    def registerFunction(self,func):
+            for f in files:
+                if f in ['__init__.py']:
+                    continue
+
+                # TODO: This is messy...
+                modName = "." + os.path.join(subdir,f).replace(BASE,"").replace(f,"").strip("/").replace("/",".")
+                modName = "" if modName is "." else modName
+                modFName = os.path.splitext(f)[0]
+                imp = importlib.import_module('pyState.functions' + modName + "." + modFName)
+                self.registerFunction(imp,modName,True)
+
+
+    def registerFunction(self,func,base=None,simFunction=None):
         """
         Input:
             func = ast func definition
+            (optional) base = base path to import as (i.e.: "telnetlib" if importing "telnetlib.Telnet")
+            (optional) simFunction = Boolean if this should be treated as a simFunction and therefore not handled symbolically. Defaults to False.
         Action:
             Register's this function as being known to this state
         Returns:
             Nothing
         """
-        assert type(func) == ast.FunctionDef
+        assert type(func) in [ast.FunctionDef,ModuleType]
+        assert type(base) in [type(None),str]
+        assert type(simFunction) in [type(None),bool]
         
-        self.functions[func.name] = func
+        simFunction = False if simFunction is None else simFunction
+        
+        # Resolve the optional base
+        base = "" if base is None else base
+        # Add the end "." if needed
+        base = base + "." if base is not "" and not base.endswith(".") else base
+        
+        # If this is a normal function
+        if not simFunction:
+            assert type(func) is ast.FunctionDef
+            funcName = base + func.name
+            logger.debug("registerFunction: Registering function '{0}'".format(funcName))
+            self.functions[funcName] = func
+        
+        # This must be a simFunction
+        else:
+            assert type(func) is ModuleType
+            funcName = func.__package__.replace("pyState.functions","") + "." + os.path.splitext(ntpath.basename(func.__file__))[0]
+            funcName = funcName.lstrip(".")
+            logger.debug("registerFunction: Registering simFunction '{0}'".format(funcName))
+            self.simFunctions[funcName] = func
 
     def resolveCall(self,call):
         """
@@ -494,6 +557,11 @@ class State():
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
             # Return real val or int val
             return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
+        
+        #elif t == ast.Str:
+        #    logger.debug("resolveObject: Resolving object type Str: {0}".format(obj.s))
+        #    # Return real val or int val
+        #    return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         
         elif t == ast.BinOp:
             logger.debug("resolveObject: Resolving object type BinOp")
@@ -823,6 +891,7 @@ class State():
             solver=solverCopy,
             ctx=self.ctx,
             functions=self.functions,
+            simFunctions=self.simFunctions,
             retVar=self.retVar,
             callStack=deepcopy(self.callStack),
             path=deepcopy(self.path),
