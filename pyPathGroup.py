@@ -43,13 +43,13 @@ class PathGroup:
     def explore(self,find=None):
         """
         Input:
-            find = input line number to explore to
+            (optional) find = input line number to explore to
         Action:
             Step through script until line is found
         Returns:
             True if found, False if not
         """
-        assert type(find) == int
+        assert type(find) in [int,type(None)]
         
         while len(self.active) > 0:
             # Step the things
@@ -60,12 +60,12 @@ class PathGroup:
                 self.deadended = []
                 self.errored = []
             
-            # Check for any path that has made it here
-            for path in self.active:
-                if path.state.lineno() == find:
-                    self.unstash(path,from_stash="active",to_stash="found")
-                    return True
-            
+            if find:
+                # Check for any path that has made it here
+                for path in self.active:
+                    if path.state.lineno() == find:
+                        self.unstash(path,from_stash="active",to_stash="found")
+                        return True
 
 
     def unstash(self,path=None,from_stash=None,to_stash=None):
