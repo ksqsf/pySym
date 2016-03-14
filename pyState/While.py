@@ -17,12 +17,6 @@ def handle(state,element):
     stateIf = state
     stateElse = state.copy()
     ret_states = [stateIf,stateElse]
-    print(element.test.comparators)
-
-    # If state should get a copy of the loop we're now in
-    stateIf.loop = deepcopy(element)
-    # else side should be done with the loop
-    stateElse.loop = None
 
     # Check what type of test this is    
     if type(element.test) == ast.Compare:
@@ -43,6 +37,7 @@ def handle(state,element):
         logger.error(err)
         raise Exception(err)
 
+
     # Check if statement. We'll have at least one instruction here, so treat this as a call
     # Saving off the current path so we can return to it and pick up at the next instruction
     cs = deepcopy(stateIf.path)
@@ -52,6 +47,11 @@ def handle(state,element):
 
     # Our new path becomes the inside of the if statement
     stateIf.path = element.body
+
+    # If state should get a copy of the loop we're now in
+    stateIf.loop = deepcopy(element)
+    # else side should be done with the loop
+    stateElse.loop = None
 
     # Update the else's path
     # Check if there is an else path we need to take

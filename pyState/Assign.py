@@ -18,6 +18,10 @@ def _handleAssignNum(state,target,value):
     varName = target.id
     
     logger.debug("_handleAssignNum: Handling value {0} of type {1}".format(value,type(value)))
+    
+    # If we're waiting on a resolve, return state without pop-ing instruction
+    if type(value) == ReturnObject:
+        return [state]
 
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
     if hasRealComponent(value):

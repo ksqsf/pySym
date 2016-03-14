@@ -180,6 +180,9 @@ class State():
         for cs in self.callStack[::-1]:
             if len(cs['path']) > 0:
                 return cs['path'][0].lineno
+            # If we're returning to start the loop anew
+            if cs['loop']:
+                return cs['loop'].lineno
         
         # Looks like we're done with the program
         return None
@@ -231,17 +234,17 @@ class State():
             ast.While: pyState.While
             }
 
-        # Check if we're out of instructions
-        if len(self.path) == 0:
-            # If we're in a loop, time to re-evaluate it
-            if self.loop:
-                self.path = [deepcopy(self.loop)]
-            # If we're not in a loop, try to pop up one on the stack
-            elif not self.popCallStack():
-                return []
-
         # Return initial return state
         state = self.copy()
+        
+        # Check if we're out of instructions
+        if len(state.path) == 0:
+            # If we're in a loop, time to re-evaluate it
+            if state.loop:
+                state.path = [deepcopy(state.loop)]
+            # If we're not in a loop, try to pop up one on the stack
+            elif not state.popCallStack():
+                return []
 
         # Get the current instruction
         inst = state.path[0]
@@ -421,7 +424,7 @@ class State():
             'path': path if path is not None else self.path,
             'ctx': ctx if ctx is not None else self.ctx,
             'retID': retID if retID is not None else self.retID,
-            'loop': loop,
+            'loop': loop if loop is not None else self.loop,
         })
 
 
