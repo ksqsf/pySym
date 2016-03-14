@@ -64,6 +64,36 @@ while x < 5:
 z = z
 """
 
+test5 = """
+def test(x,y):
+    out = 2
+    while x < y:
+        out *= x
+        x += 1
+    
+    return out
+
+x = 0
+z = 0
+while x < 5:
+    y = 0
+    while y < 3:
+        z += test(x,y)
+        y += 1
+    x += 1
+
+z = z
+"""
+
+
+def test_pySym_complicated():
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+    
+    assert pg.explore(find=19)
+    assert pg.found[0].state.any_int('z') == 26
+
 
 def test_pySym_nestedWhile():
     b = ast.parse(test3).body
