@@ -116,7 +116,6 @@ Here's a list of things I have left to implement. This is really just a subset o
 * symbolic ints
 * symbolic arrays
 * function annotations
-* while loop
 * for loop
 * built-in calls
  * print

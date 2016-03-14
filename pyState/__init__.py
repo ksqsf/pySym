@@ -2,8 +2,7 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-import pyState.BinOp
-import pyState.Pass
+import pyState.BinOp, pyState.Pass, pyState.While
 import random
 
 logger = logging.getLogger("State")
@@ -123,7 +122,7 @@ class State():
     }
     """
     
-    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None,callStack=None,backtrace=None,retID=None):
+    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
@@ -142,6 +141,7 @@ class State():
         self.backtrace = [] if backtrace is None else backtrace
         # Keep track of what our return ID is
         self.retID = retID
+        self.loop = loop
         
     def lineno(self):
         """
@@ -152,6 +152,10 @@ class State():
         # Return current lineno if exists
         if len(self.path) > 0:
             return self.path[0].lineno
+
+        # Check if we're going back to the start of the loop
+        if self.loop:
+            return self.loop.body[0].lineno
         
         # Check up the call tree for instruction
         for cs in self.callStack[::-1]:
@@ -180,6 +184,7 @@ class State():
         self.path = cs["path"]
         self.ctx = cs["ctx"]
         self.retID = cs["retID"]
+        self.loop = cs["loop"]
         
         return True
 
@@ -192,7 +197,7 @@ class State():
         # Adding sanity checks since we are not supposed to change during execution
         h = hash(self)
         
-        logger.debug("step:\n\tpath = {0}\n\tcallStack = {1}\n\tctx = {2}\n\tretID = {3}\n\tsolver = {4}\n".format(self.path,self.callStack,self.ctx,self.retID,self.solver))
+        logger.debug("step:\n\tpath = {0}\n\tcallStack = {1}\n\tctx = {2}\n\tretID = {3}\n\tsolver = {4}\n\tloop = {5}\n".format(self.path,self.callStack,self.ctx,self.retID,self.solver,self.loop))
 
         # More cleanly resolve instructions
         # TODO: Move this somewhere else... Moving it to the top of State introduced "include hell" :-(
@@ -203,12 +208,17 @@ class State():
             ast.Expr: pyState.Expr,
             ast.Pass: pyState.Pass,
             ast.Return: pyState.Return,
-            ast.If: pyState.If
+            ast.If: pyState.If,
+            ast.While: pyState.While
             }
 
         # Check if we're out of instructions
         if len(self.path) == 0:
-            if not self.popCallStack():
+            # If we're in a loop, time to re-evaluate it
+            if self.loop:
+                self.path = [deepcopy(self.loop)]
+            # If we're not in a loop, try to pop up one on the stack
+            elif not self.popCallStack():
                 return []
 
         # Return initial return state
@@ -375,15 +385,17 @@ class State():
         # Return our ReturnObject
         return ReturnObject(self.retID)
 
-    def pushCallStack(self,path,ctx,retID):
+    def pushCallStack(self,path=None,ctx=None,retID=None,loop=None):
         """
         Save the call stack with given variables
+        Defaults to current variables if none given
         """
 
         self.callStack.append({
-            'path': path,
-            'ctx': ctx,
-            'retID': retID
+            'path': path if path is not None else self.path,
+            'ctx': ctx if ctx is not None else self.ctx,
+            'retID': retID if retID is not None else self.retID,
+            'loop': loop if loop is not None else self.loop,
         })
 
 
@@ -761,5 +773,6 @@ class State():
             path=deepcopy(self.path),
             backtrace=deepcopy(self.backtrace),
             retID=copy(self.retID),
+            loop=copy(self.loop)
             )
         
