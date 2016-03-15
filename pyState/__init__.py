@@ -14,6 +14,18 @@ SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger("State")
 
+def z3_bv_to_int(x):
+    # Convers BitVec to Int in the solver
+    # example: s.add(q == to_int(z)) where q == IntSort and z == BitVecSort
+    return z3.ArithRef(z3.Z3_mk_bv2int(x.ctx_ref(), x.as_ast(), 0), x.ctx)
+
+def z3_int_to_bv(x):
+    # Converts Int to BV
+    # Note, that we need a default length here for the BitVec... Assuming 128 for now
+    # TODO: Figure out better way of handling the BitVec length
+    return z3.BitVecRef(z3.Z3_mk_int2bv(x.ctx_ref(),128,x.as_ast()))
+
+
 # Create small class for keeping track of return values
 class ReturnObject:
     def __init__(self,retID):

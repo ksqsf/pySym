@@ -6,6 +6,7 @@ import ast
 import z3
 from pyPath import Path
 import pytest
+from pyPathGroup import PathGroup
 
 test1 = """
 x = 1.5 
@@ -23,6 +24,22 @@ test3 = """
 x = 2
 x = x + 3.5
 """
+
+test4 = """
+a = 10
+b = 1
+c = 6
+d = a ^ b ^ c
+"""
+
+def test_pySym_BinOp_Xor():
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    pg.explore()
+    
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('d') == 13
 
 
 def test_pySym_BinOp():

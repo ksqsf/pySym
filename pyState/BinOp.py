@@ -55,6 +55,10 @@ def handle(state,element,ctx=None):
     elif type(op) == ast.Mod:
         return left % right
 
+    elif type(op) == ast.BitXor:
+        # Need to play some Z3 games here. Convert to BitVec then right back to Int
+        return pyState.z3_bv_to_int(pyState.z3_int_to_bv(left) ^ pyState.z3_int_to_bv(right))
+
     else:
         err = "BinOP: Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)
         logger.error(err)
