@@ -24,8 +24,10 @@ def handle(state,element):
     value = element.value
 
     if type(value) == ast.Call:
-        state.resolveObject(value)
-        return [state]
+        ret = state.resolveObject(value)
+        # We're making an actual call, don't pop instruction yet.
+        if type(ret) is ReturnObject:
+            return [state]
 
     # Don't really care about the return object for now... Maybe later?
     elif type(value) == ReturnObject:

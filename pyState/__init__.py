@@ -587,11 +587,15 @@ class State():
                 # Simple pass it off to the handler, filling in args as appropriate
                 ret = func.handle(self,*obj.args)
                 # If we're returning something, replace the call w/ the return value
-                if "ast" in ret.__module__:
+                if ret and "ast" in ret.__module__:
                     assert replaceObjectWithObject(self.path[0],obj,ret)
+               
+                # Ignore return 
+                elif ret is None:
+                    pass
                 
                 else:
-                    err = "resolveObject: unknown simFunction return object '{0}' from call '{1}'".format(ob,func)
+                    err = "resolveObject: unknown simFunction return object '{0}' from call '{1}'".format(ret,func)
                     logger.error(err)
                     raise Exception(err)
                 
