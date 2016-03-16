@@ -107,6 +107,7 @@ Here's a list of things I have left to implement. This is really just a subset o
 
 * Add automatic BitVector scaling
  * http://stackoverflow.com/questions/22568867/z3-bitvector-overflow-checking-from-python
+ * http://stackoverflow.com/questions/14579377/z3py-how-to-extend-and-trunc-variables
 * ifelse inline (x = 1 if 1 > 2 else 2)
 * list comprehensions
 * function calls (mostly completed)
