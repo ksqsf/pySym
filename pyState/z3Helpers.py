@@ -41,13 +41,23 @@ def z3_matchLeftAndRight(left,right,op):
     rType = type(right)
 
     needBitVec = True if type(op) in [ast.BitXor, ast.BitAnd, ast.BitOr, ast.LShift, ast.RShift] else False
+    # TODO: If the two sizes are different, we'll have problems down the road.
+    bitVecSize = max([c.size() for c in [b for b in [left,right] if type(b) in [z3.BitVecRef, z3.BitVecNumRef]]],default=128)
 
     # For now only handling casting of int to BV. Not other way around.
-    if (lType is z3.BitVecRef and rType is z3.ArithRef) or (rType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
-        right = pyState.z3_int_to_bv(right)
+    if (lType is z3.BitVecRef and rType in [z3.ArithRef,z3.IntNumRef]) or (rType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
+        # If we need to convert to BitVec and it is a constant, not variable, do so more directly
+        if rType is z3.IntNumRef and right.is_int():
+            right = z3.BitVecVal(right.as_long(),bitVecSize)
+        # Otherwise cast it. Not optimal, but oh well.
+        else:
+            right = pyState.z3_int_to_bv(right)
 
-    if (rType is z3.BitVecRef and lType is z3.ArithRef) or (lType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
-        left = pyState.z3_int_to_bv(left)
+    if (rType is z3.BitVecRef and lType is [z3.ArithRef,z3.IntNumRef]) or (lType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
+        if lType is z3.IntNumRef and left.is_int():
+            left = z3.BitVecVal(left.as_long(),bitVecSize)
+        else:
+            left = pyState.z3_int_to_bv(left)
 
     return (left,right)
 

@@ -43,6 +43,11 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
     if type(right) == pyState.ReturnObject:
         return right
 
+    # Adjust the types if needed
+    left,right = pyState.z3Helpers.z3_matchLeftAndRight(left,right,ops)
+
+    logger.debug("_handleLeftVar: Comparing {0} (type: {2}) and {1} (type: {3})".format(left,right,type(left),type(right)))
+
     # Assume success. Add constraints
     if type(ops) == ast.Gt:
         stateTrue.addConstraint(left > right )
