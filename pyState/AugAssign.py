@@ -50,17 +50,17 @@ def handle(state,element):
     # Basic sanity checks complete. For augment assigns we will always need to update the vars.
     # Grab the old var and create a new now
     oldTargetVar = state.getZ3Var(target)
+
+    # Match up the right hand side
+    oldTargetVar, value = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value,op)
     
     # Z3 gets confused if we don't change our var to Real when comparing w/ Real
     if hasRealComponent(value):
         newTargetVar = state.getZ3Var(target,increment=True,varType=z3.RealSort())
     elif type(value) is z3.BitVecRef:
-        newTargetVar = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
+        newTargetVar = state.getZ3Var(target,increment=True,varType=z3.BitVecSort(value.size()))
     else:
         newTargetVar = state.getZ3Var(target,increment=True)
-    
-    # Match up the right hand side
-    oldTargetVar, value = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value,op)
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
@@ -79,6 +79,7 @@ def handle(state,element):
         state.addConstraint(newTargetVar == oldTargetVar % value)
 
     elif type(op) == ast.BitXor:
+        logger.debug("{0} = {1} ^ {2}".format(newTargetVar.size(),oldTargetVar.size(),value.size()))
         state.addConstraint(newTargetVar == oldTargetVar ^ value)
 
     elif type(op) == ast.BitOr:
