@@ -33,7 +33,7 @@ def handle(state,element):
         raise Exception(err)
 
     # Figure out value type
-    if type(value) in [ast.Num,ast.Name,ast.Call,ReturnObject]:
+    if type(value) in [ast.Num,ast.Name,ast.Call,ReturnObject,ast.BinOp]:
         value = state.resolveObject(value)
         
         # Check if we're making a call and need to wait for that to finish

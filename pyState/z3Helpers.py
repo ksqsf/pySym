@@ -102,7 +102,7 @@ def z3_matchLeftAndRight(left,right,op):
     #####################################
     # Check length. Extend if needed.
     if type(left) in [z3.BitVecRef, z3.BitVecNumRef] and type(right) in [z3.BitVecRef, z3.BitVecNumRef]:
-        logger.debug("z3_matchLeftAndRight: Matching BitVecLength @ {0}".format(bitVecSize))
+        logger.debug("z3_matchLeftAndRight: Matching BitVecLength @ {0} (left={1},right={2})".format(bitVecSize,left.size(),right.size()))
         if left.size() < right.size():
             # Sign extend left's value to match
             left = z3.SignExt(right.size()-left.size(),left)
@@ -123,9 +123,7 @@ def z3_matchLeftAndRight(left,right,op):
         else:
             right = z3_int_to_bv(right,size=bitVecSize)
 
-    print(lType,rType)
     if (rType in [z3.BitVecNumRef, z3.BitVecRef] and lType in [z3.ArithRef,z3.IntNumRef]) or (lType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
-        print("Adjusting left")
         if lType is z3.IntNumRef and left.is_int():
             left = z3.BitVecVal(left.as_long(),bitVecSize)
         else:
