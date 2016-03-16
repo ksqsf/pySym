@@ -63,6 +63,24 @@ x = 2
 x **= test(2,4)
 """
 
+test8 = """
+x = 50%6
+y = x%4
+"""
+
+def test_pySym_AugAssign_Mod():
+    b = ast.parse(test8).body
+    p = Path(b,source=test8)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert len(pg.deadended) == 0
+    
+    assert pg.completed[0].state.any_int('x') == 50%6
+    assert pg.completed[0].state.any_int('y') == 50%6%4
+
+
 def test_pySym_AugAssign_Pow():
     b = ast.parse(test7).body
     p = Path(b,source=test7)
