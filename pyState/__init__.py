@@ -146,7 +146,7 @@ class State():
     }
     """
     
-    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None):
+    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
@@ -167,7 +167,10 @@ class State():
         # Keep track of what our return ID is
         self.retID = retID
         self.loop = loop
+
+        # Keeps track of what retIDs and Ctxs have been used
         self.maxRetID = 0 if maxRetID is None else maxRetID
+        self.maxCtx = 1 if maxCtx is None else maxCtx
         
         # Initialize our known functions if this is the first time through
         if backtrace is None:
@@ -342,8 +345,8 @@ class State():
         
         # Grab a new context
         oldCtx = self.ctx
-        # TODO: Check for ctx collision here from previous ctx... Or just rework the whole ctx ID thing
-        self.ctx = hash(call.func.ctx)
+        self.maxCtx += 1
+        self.ctx = self.maxCtx
         
         logger.debug("Call: Old CTX = {0} ... New CTX = {1}".format(oldCtx,self.ctx))
         
@@ -941,6 +944,7 @@ class State():
             backtrace=deepcopy(self.backtrace),
             retID=copy(self.retID),
             loop=copy(self.loop),
-            maxRetID=self.maxRetID
+            maxRetID=self.maxRetID,
+            maxCtx=self.maxCtx
             )
         
