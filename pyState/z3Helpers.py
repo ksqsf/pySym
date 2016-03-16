@@ -123,7 +123,9 @@ def z3_matchLeftAndRight(left,right,op):
         else:
             right = z3_int_to_bv(right,size=bitVecSize)
 
-    if (rType in [z3.BitVecNumRef, z3.BitVecRef] and lType is [z3.ArithRef,z3.IntNumRef]) or (lType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
+    print(lType,rType)
+    if (rType in [z3.BitVecNumRef, z3.BitVecRef] and lType in [z3.ArithRef,z3.IntNumRef]) or (lType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
+        print("Adjusting left")
         if lType is z3.IntNumRef and left.is_int():
             left = z3.BitVecVal(left.as_long(),bitVecSize)
         else:
