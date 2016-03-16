@@ -107,6 +107,10 @@ def handle(state,element):
     elif type(op) == ast.RShift:
         state.addConstraint(newTargetVar == oldTargetVar >> value)
 
+    # TODO: This will fail with BitVec objects...
+    elif type(op) == ast.Pow:
+        state.addConstraint(newTargetVar == oldTargetVar ** value)
+
     else:
         err = "Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)
         logger.error(err)

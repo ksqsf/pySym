@@ -55,6 +55,26 @@ h = pyState.BVV(1337,64)
 h -= 1338
 """
 
+test7 = """
+def test(x,y):
+    return x**y
+
+x = 2
+x **= test(2,4)
+"""
+
+def test_pySym_AugAssign_Pow():
+    b = ast.parse(test7).body
+    p = Path(b,source=test7)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert len(pg.deadended) == 0
+    
+    assert pg.completed[0].state.any_int('x') == 2 ** (2**4)
+
+
 def test_pySym_AugAssign_SafeBitVec():
     # Ensuring that we notice over and underflows
 

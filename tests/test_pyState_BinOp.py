@@ -56,6 +56,24 @@ h = pyState.BVV(1337,64)
 h = h - 1338
 """
 
+test9 = """
+def test(x,y):
+    return x**y
+
+x = test(2,4)**8
+"""
+
+def test_pySym_BinOp_Exp():
+    b = ast.parse(test9).body
+    p = Path(b,source=test9)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert len(pg.deadended) == 0
+
+    assert pg.completed[0].state.any_int('x') == (2**4)**8
+
 def test_pySym_BinOp_SafeBitVec():
     # Ensuring that we notice over and underflows
 

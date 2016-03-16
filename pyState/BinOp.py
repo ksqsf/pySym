@@ -82,6 +82,10 @@ def handle(state,element,ctx=None):
     elif type(op) == ast.RShift:
         return left >> right
 
+    # TODO: This one will fail if we use BitVecs.. Maybe think about check/convert?
+    elif type(op) == ast.Pow:
+        return left ** right
+
     else:
         err = "BinOP: Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)
         logger.error(err)
