@@ -2,6 +2,7 @@ import logging
 import z3, z3util
 import ast
 from pyState import hasRealComponent, ReturnObject
+import pyState.z3Helpers
 import pyState.BinOp, pyState.Call
 from copy import deepcopy
 
@@ -24,11 +25,11 @@ def _handleAssignNum(state,target,value):
         return [state]
 
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
-    if hasRealComponent(value):
+    elif hasRealComponent(value):
         x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
 
     # See if our output should be a BitVec
-    elif type(value) is z3.BitVecRef:
+    elif type(value) in [z3.BitVecRef, z3.BitVecNumRef]:
         x = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
 
     else: 
@@ -66,10 +67,12 @@ def handle(state,element):
         return _handleAssignNum(state,target,state.resolveObject(value))
     
     elif type(value) is ast.Call:
-        #_handleAssignCall(state,value,element)
-        #return state.resolveObject(value)
-        # Setup to resolve the call object
-        state.resolveObject(value)
+        ret = state.resolveObject(value)
+        # If we don't get a return object back, this is likely a simFunction call
+        if type(ret) is not ReturnObject:
+            return _handleAssignNum(state,target,ret)
+        
+        # Need to wait to resolve the object until the call has finished
         return [state]
 
     else:

@@ -105,6 +105,8 @@ Much work left to do as I have only implimented a limited set of operations. How
 # To-Do
 Here's a list of things I have left to implement. This is really just a subset of things, but these are high on my list.
 
+* Add automatic BitVector scaling
+ * http://stackoverflow.com/questions/22568867/z3-bitvector-overflow-checking-from-python
 * ifelse inline (x = 1 if 1 > 2 else 2)
 * list comprehensions
 * function calls (mostly completed)

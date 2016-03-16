@@ -7,6 +7,14 @@ import ast
 import pyState
 
 
+def isZ3Object(obj):
+    """
+    Determine if the object given is a z3 type object
+    """
+    if type(obj) in [z3.ArithRef, z3.IntNumRef, z3.RatNumRef, z3.BitVecRef, z3.BitVecNumRef, z3.ArrayRef, z3.SeqRef]:
+        return True
+    return False
+
 def mk_var(name,vsort):
     if vsort.kind() == z3.Z3_INT_SORT:
         v = z3.Int(name)

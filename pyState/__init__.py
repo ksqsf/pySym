@@ -526,7 +526,7 @@ class State():
         
         # If this is an attr form (i.e.: telnetlib.Telnet())
         elif type(call.func) == ast.Attribute:
-            funcName = call.func.value.id + call.func.attr
+            funcName = call.func.value.id + "." + call.func.attr
             
         else:
                 err = "resolveCall: unknown call-type object '{0}'".format(type(call))
@@ -596,9 +596,10 @@ class State():
             # If this is a simFunction
             if type(func) is ModuleType:
                 # Simple pass it off to the handler, filling in args as appropriate
-                ret = func.handle(self,*obj.args)
+                return func.handle(self,*obj.args)
+                """
                 # If we're returning something, replace the call w/ the return value
-                if ret and "ast" in ret.__module__:
+                if ret:
                     assert replaceObjectWithObject(self.path[0],obj,ret)
                
                 # Ignore return 
@@ -612,7 +613,7 @@ class State():
                 
                 # TODO: Maybe return something here?
                 return
-                    
+                """ 
 
             # If we get here, we're a normal symbolic function
             else:
