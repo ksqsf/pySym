@@ -5,12 +5,12 @@ import pyState
 
 logger = logging.getLogger("pyState:Call")
 
-def handle(state,element,retID=None):
+def handle(state,element,retObj=None):
     """
     Input:
         state = State object
         element = ast.Call element to parse
-        (optional) retID = Return call ID
+        (optional) retOjb = ReturnObject to have it's ID filled in
     Action:
         Performs call
     Returns:
@@ -20,7 +20,7 @@ def handle(state,element,retID=None):
     assert type(state) == pyState.State
     assert type(element) == ast.Call
 
-    return state.Call(element,retID=retID)
+    return state.Call(element,retObj=retObj)
 
     """
     else:

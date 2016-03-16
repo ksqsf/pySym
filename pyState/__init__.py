@@ -146,7 +146,7 @@ class State():
     }
     """
     
-    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None):
+    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
@@ -167,6 +167,7 @@ class State():
         # Keep track of what our return ID is
         self.retID = retID
         self.loop = loop
+        self.maxRetID = 0 if maxRetID is None else maxRetID
         
         # Initialize our known functions if this is the first time through
         if backtrace is None:
@@ -311,11 +312,10 @@ class State():
         self.path = []
 
 
-    def Call(self,call,retID=None,func=None):
+    def Call(self,call,func=None,retObj=None):
         """
         Input:
             call = ast.Call object
-            (optional) retID = ID of the return object
             (optional) func = resolved function for Call (i.e.: state.resolveCall(call)). This is here to remove duplicate calls to resolveCall from resolveObject
         Action:
             Modify state in accordance w/ call
@@ -396,7 +396,12 @@ class State():
         # self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1)
         # Generate random return ID
         oldRetID = self.retID
-        self.retID = hash(call) if retID is None else retID
+        self.retID = self.maxRetID + 1 # hash(call) # if retID is None else retID
+        self.maxRetID += 1
+        retObj = retObj if retObj is not None else ReturnObject(self.retID)
+        # This isn't a duplicate call.. It's because I have to handle replacing the call function first using resolveObject..
+        # TODO: Fire out better way than this.
+        retObj.retID = self.retID
 
         #################
         # Clearout Loop #
@@ -417,7 +422,7 @@ class State():
         logger.debug("Call: Set new path {0}".format(self.path))
         
         # Return our ReturnObject
-        return ReturnObject(self.retID)
+        return retObj
 
     def pushCallStack(self,path=None,ctx=None,retID=None,loop=None):
         """
@@ -605,14 +610,17 @@ class State():
 
             # If we get here, we're a normal symbolic function
             else:
-                # Create our return object
-                retObj = ReturnObject(hash(obj))
-            
+                # Create our return object (temporary ID to be filled in by the Call handle)
+                retObj = ReturnObject(1)
+
                 # Update state, change call to ReturnObject so we can resolve next time
                 assert replaceObjectWithObject(self.path[0],obj,retObj)
+                
                 # Change our state, record the return object
-                Call.handle(self,obj,retID=retObj.retID)
+                Call.handle(self,obj,retObj=retObj)
+                #retObj = Call.handle(self,obj)
             
+                #print(retObj.retID)
                 # Return the ReturnObject back to caller to inform them of the pending call
                 return retObj
 
@@ -932,6 +940,7 @@ class State():
             path=deepcopy(self.path),
             backtrace=deepcopy(self.backtrace),
             retID=copy(self.retID),
-            loop=copy(self.loop)
+            loop=copy(self.loop),
+            maxRetID=self.maxRetID
             )
         
