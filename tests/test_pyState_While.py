@@ -85,6 +85,30 @@ while x < 5:
 z = z
 """
 
+test6 = """
+x = 0
+y = 0
+o = 0
+while x < 10:
+    while y < 5:
+        o += 1
+        y += 1
+    x += 1
+
+print(o)
+"""
+
+def test_pySym_stupidWhile():
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('x') == 10
+    assert pg.completed[0].state.any_int('y') == 5
+    assert pg.completed[0].state.any_int('o') == 5
+
 
 def test_pySym_complicated():
     b = ast.parse(test5).body

@@ -50,16 +50,17 @@ def handle(state,element):
 
     # If state should get a copy of the loop we're now in
     stateIf.loop = deepcopy(element)
-    # else side should be done with the loop
-    stateElse.loop = None
 
     # Update the else's path
     # Check if there is an else path we need to take
-    if len(element.orelse) > 0:
-        cs = deepcopy(stateElse.path)
-        if len(cs) > 0:
-            stateElse.pushCallStack(path=cs)
+    #if len(element.orelse) > 0:
+    cs = deepcopy(stateElse.path)
+    if len(cs) > 0:
+        stateElse.pushCallStack(path=cs)
+
+    # else side should be done with the loop
+    stateElse.loop = None
         
-        stateElse.path = element.orelse
+    stateElse.path = element.orelse
 
     return ret_states 
