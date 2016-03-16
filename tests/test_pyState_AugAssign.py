@@ -6,6 +6,7 @@ import ast
 import z3
 from pyPath import Path
 import pytest
+from pyPathGroup import PathGroup
 
 test1 = """
 x = 7
@@ -24,6 +25,30 @@ if x == y:
 else:
     x += y
 """
+
+test3 = """
+a = 0x10325476
+b = 0x98BADCFE
+c = 0xEFCDAB89
+d = 0x67452301
+g = 0x12345678
+e = a ^ g
+e ^= b
+e |= c
+e >>= 5
+e &= 0x12345678
+e <<= 20
+"""
+
+def test_pySym_AugAssign_BitStuff():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('e') == 38776701190144
+
 
 def test_pySym_AugAssign_MixedTypes():
     #######

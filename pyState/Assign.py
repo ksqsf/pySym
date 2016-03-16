@@ -27,11 +27,14 @@ def _handleAssignNum(state,target,value):
     if hasRealComponent(value):
         x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
 
+    # See if our output should be a BitVec
+    elif type(value) is z3.BitVecRef:
+        x = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
+
     else: 
         x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
 
     state.addConstraint(x == value)
-    
     # Pop the instruction off
     state.path.pop(0) if len(state.path) > 0 else None
 

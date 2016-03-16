@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-from pyState import hasRealComponent, ReturnObject
+from pyState import hasRealComponent, ReturnObject, z3Helpers
 
 logger = logging.getLogger("pyState:AugAssign")
 
@@ -54,9 +54,14 @@ def handle(state,element):
     # Z3 gets confused if we don't change our var to Real when comparing w/ Real
     if hasRealComponent(value):
         newTargetVar = state.getZ3Var(target,increment=True,varType=z3.RealSort())
+    elif type(value) is z3.BitVecRef:
+        newTargetVar = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
     else:
         newTargetVar = state.getZ3Var(target,increment=True)
     
+    # Match up the right hand side
+    oldTargetVar, value = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value,op)
+
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
         state.addConstraint(newTargetVar == oldTargetVar + value)
@@ -72,6 +77,21 @@ def handle(state,element):
     
     elif type(op) == ast.Mod:
         state.addConstraint(newTargetVar == oldTargetVar % value)
+
+    elif type(op) == ast.BitXor:
+        state.addConstraint(newTargetVar == oldTargetVar ^ value)
+
+    elif type(op) == ast.BitOr:
+        state.addConstraint(newTargetVar == oldTargetVar | value)
+
+    elif type(op) == ast.BitAnd:
+        state.addConstraint(newTargetVar == oldTargetVar & value)
+    
+    elif type(op) == ast.LShift:
+        state.addConstraint(newTargetVar == oldTargetVar << value)
+
+    elif type(op) == ast.RShift:
+        state.addConstraint(newTargetVar == oldTargetVar >> value)
 
     else:
         err = "Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)

@@ -32,6 +32,25 @@ c = 6
 d = a ^ b ^ c
 """
 
+test5 = """
+a = 0x10325476
+b = 0x98BADCFE
+c = 0xEFCDAB89
+d = 0x67452301
+g = 0x12345678
+e = (d ^ ((b & (c ^ a)) & g >> 2)) << 15
+"""
+
+def test_pySym_BinOp_BitStuff():
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+    pg.explore()
+    
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('e') == 57065549561856
+
+
 def test_pySym_BinOp_Xor():
     b = ast.parse(test4).body
     p = Path(b,source=test4)

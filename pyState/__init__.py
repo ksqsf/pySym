@@ -8,6 +8,7 @@ import os.path
 import importlib
 from types import ModuleType
 import ntpath
+import pyState.z3Helpers
 
 # The current directory for running pySym
 SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
@@ -39,9 +40,6 @@ def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
     Returns True on success and False on fail
     """
     parent = haystack if parent is None else parent
-    
-    #print("Attempting to find: {0}".format(fromObj))
-    #print(haystack)
     
     # If we found the object
     if haystack == fromObj:
@@ -139,7 +137,7 @@ def hasRealComponent(expr):
     Returns:
         True if it has real componenet, False otherwise
     """
-    return max([x.is_real() for x in get_all(expr)])
+    return max([False if type(x) not in [z3.ArithRef, z3.RatNumRef] else x.is_real() for x in get_all(expr)])
 
 
 class State():
@@ -643,7 +641,7 @@ class State():
         Returns:
             String representation of varType
         """
-        assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
+        assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef,z3.BitVecSortRef]
         
         if type(varType) == z3.ArithSortRef:
             if varType.is_real():
@@ -658,6 +656,9 @@ class State():
                 return "z3.BoolSort()"
             else:
                 raise Exception("Got unknown BoolSortRef type {0}".format(varType))
+
+        elif type(varType) == z3.BitVecSortRef:
+            return "z3.BitVecSort({0})".format(varType.size())
 
 
     def getZ3Var(self,varName,local=True,increment=False,varType=None,previous=False,ctx=None):
@@ -705,18 +706,18 @@ class State():
                 if type(varType) != type(None):
                     self.localVars[ctx][varName]['varType'] = self._varTypeToString(varType)
                 
-                return z3util.mk_var("{0}{1}@{2}".format(count,varName,ctx),eval(self.localVars[ctx][varName]['varType']))
+                return z3Helpers.mk_var("{0}{1}@{2}".format(count,varName,ctx),eval(self.localVars[ctx][varName]['varType']))
         
             # If we want to increment but we didn't find it, create it
             elif increment:
-                assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef]
+                assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef,z3.BitVecSortRef]
                 
                 # Time to create a new var!
                 self.localVars[ctx][varName] = {
                     'count': 0,
                     'varType': self._varTypeToString(varType)
                 }
-                return z3util.mk_var("{0}{1}@{2}".format(self.localVars[ctx][varName]['count'],varName,ctx),varType)
+                return z3Helpers.mk_var("{0}{1}@{2}".format(self.localVars[ctx][varName]['count'],varName,ctx),varType)
         
         # Try global
         """
@@ -732,7 +733,7 @@ class State():
             if varType != None:
                 self.localVars[varName]['varType'] = self._varTypeToString(varType)
             
-            return z3util.mk_var("{0}{1}".format(count,varName),eval(self.globalVars[varName]['varType']))
+            return z3Helpers.mk_var("{0}{1}".format(count,varName),eval(self.globalVars[varName]['varType']))
         """
         
         # We failed :-(
@@ -836,7 +837,7 @@ class State():
             return None
 
         # Check the type of the value
-        if type(value) != z3.IntNumRef:
+        if type(value) not in [z3.IntNumRef,z3.BitVecNumRef]:
             err = "any_int: var '{0}' not of type int, of type '{1}'".format(var,type(value))
             logger.error(err)
             raise Exception(err)
