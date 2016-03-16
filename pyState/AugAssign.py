@@ -2,6 +2,7 @@ import logging
 import z3
 import ast
 from pyState import hasRealComponent, ReturnObject, z3Helpers
+import pyState.z3Helpers
 
 logger = logging.getLogger("pyState:AugAssign")
 
@@ -64,15 +65,27 @@ def handle(state,element):
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
+        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+            # Check for over and underflows
+            state.solver.add(pyState.z3Helpers.bvadd_safe(oldTargetVar,value))
         state.addConstraint(newTargetVar == oldTargetVar + value)
     
     elif type(op) == ast.Sub:
+        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+            # Check for over and underflows
+            state.solver.add(pyState.z3Helpers.bvsub_safe(oldTargetVar,value))
         state.addConstraint(newTargetVar == oldTargetVar - value)
 
     elif type(op) == ast.Mult:
+        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+            # Check for over and underflows
+            state.solver.add(pyState.z3Helpers.bvmul_safe(oldTargetVar,value))
         state.addConstraint(newTargetVar == oldTargetVar * value)
     
     elif type(op) == ast.Div:
+        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+            # Check for over and underflows
+            state.solver.add(pyState.z3Helpers.bvdiv_safe(oldTargetVar,value))
         state.addConstraint(newTargetVar == oldTargetVar / value)
     
     elif type(op) == ast.Mod:

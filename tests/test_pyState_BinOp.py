@@ -41,6 +41,60 @@ g = 0x12345678
 e = (d ^ ((b & (c ^ a)) & g >> 2)) << 15
 """
 
+test6 = """
+h = pyState.BVV(1337,64)
+h = h + 0xffffffffffffffff
+"""
+
+test7 = """
+h = pyState.BVV(1337,64)
+h = h * 0xffffffffffffff
+"""
+
+test8 = """
+h = pyState.BVV(1337,64)
+h = h - 1338
+"""
+
+def test_pySym_BinOp_SafeBitVec():
+    # Ensuring that we notice over and underflows
+
+    #######
+    # Add #
+    #######
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    pg = PathGroup(p)
+    pg.explore()
+    
+    assert len(pg.completed) == 0
+    assert len(pg.deadended) == 1
+
+    #######
+    # Mul #
+    #######
+    b = ast.parse(test7).body
+    p = Path(b,source=test7)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 0
+    assert len(pg.deadended) == 1
+
+    #######
+    # Sub #
+    #######
+    b = ast.parse(test8).body
+    p = Path(b,source=test8)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 0
+    assert len(pg.deadended) == 1
+
+
+
+
 def test_pySym_BinOp_BitStuff():
     b = ast.parse(test5).body
     p = Path(b,source=test5)

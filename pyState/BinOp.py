@@ -44,15 +44,24 @@ def handle(state,element,ctx=None):
     
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
+        if type(left) in [z3.BitVecRef, z3.BitVecNumRef]:
+            # Check for over and underflows
+            state.solver.add(pyState.z3Helpers.bvadd_safe(left,right))
         return left + right
 
     elif type(op) == ast.Sub:
+        if type(left) in [z3.BitVecRef, z3.BitVecNumRef]:
+            state.solver.add(pyState.z3Helpers.bvsub_safe(left,right))
         return left - right
 
     elif type(op) == ast.Mult:
+        if type(left) in [z3.BitVecRef, z3.BitVecNumRef]:
+            state.solver.add(pyState.z3Helpers.bvmul_safe(left,right))
         return left * right
 
     elif type(op) == ast.Div:
+        if type(left) in [z3.BitVecRef, z3.BitVecNumRef]:
+            state.solver.add(pyState.z3Helpers.bvdiv_safe(left,right))
         return left / right
 
     elif type(op) == ast.Mod:

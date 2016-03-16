@@ -40,6 +40,58 @@ e &= 0x12345678
 e <<= 20
 """
 
+test4 = """
+h = pyState.BVV(1337,64)
+h += 0xffffffffffffffff
+"""
+
+test5 = """
+h = pyState.BVV(1337,64)
+h *= 0xffffffffffffff
+"""
+
+test6 = """
+h = pyState.BVV(1337,64)
+h -= 1338
+"""
+
+def test_pySym_AugAssign_SafeBitVec():
+    # Ensuring that we notice over and underflows
+
+    #######
+    # Add #
+    #######
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    pg.explore()
+    
+    assert len(pg.completed) == 0
+    assert len(pg.deadended) == 1
+
+    #######
+    # Mul #
+    #######
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 0
+    assert len(pg.deadended) == 1
+
+    #######
+    # Sub #
+    #######
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    pg = PathGroup(p)
+    pg.explore()
+    
+    assert len(pg.completed) == 0
+    assert len(pg.deadended) == 1
+
+
 def test_pySym_AugAssign_BitStuff():
     b = ast.parse(test3).body
     p = Path(b,source=test3)

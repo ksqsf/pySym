@@ -11,12 +11,42 @@ logger = logging.getLogger("pyState:z3Helpers")
 
 Z3_DEFAULT_BITVEC_SIZE = 64
 
+#############################
+# Watch for BitVec Overflow #
+#############################
+
+def bvadd_safe(x, y, signed=False):
+    assert x.ctx_ref()==y.ctx_ref()
+    a, b = z3._coerce_exprs(x, y)
+    return (z3.BoolRef(z3.Z3_mk_bvadd_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed)),
+            z3.BoolRef(z3.Z3_mk_bvadd_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast())))
+
+def bvmul_safe(x, y, signed=False):
+    assert x.ctx_ref()==y.ctx_ref()
+    a, b = z3._coerce_exprs(x, y)
+    return (z3.BoolRef(z3.Z3_mk_bvmul_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed)),
+            z3.BoolRef(z3.Z3_mk_bvmul_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast())))
+
+def bvsub_safe(x, y, signed=False):
+    assert x.ctx_ref()==y.ctx_ref()
+    a, b = z3._coerce_exprs(x, y)
+    return (z3.BoolRef(z3.Z3_mk_bvsub_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast())),
+            z3.BoolRef(z3.Z3_mk_bvsub_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed)))
+
+def bvdiv_safe(x, y, signed=False):
+    assert x.ctx_ref()==y.ctx_ref()
+    a, b = z3._coerce_exprs(x, y)
+    return z3.BoolRef(z3.Z3_mk_bvsdiv_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast()))
+
+
 def z3_bv_to_int(x):
     # Convers BitVec to Int in the solver
     # example: s.add(q == to_int(z)) where q == IntSort and z == BitVecSort
     return z3.ArithRef(z3.Z3_mk_bv2int(x.ctx_ref(), x.as_ast(), 0), x.ctx)
 
 def z3_int_to_bv(x,size=Z3_DEFAULT_BITVEC_SIZE):
+    assert type(x) in [z3.IntNumRef,z3.ArithRef]
+    assert x.is_int()
     # Converts Int to BV
     return z3.BitVecRef(z3.Z3_mk_int2bv(x.ctx_ref(),size,x.as_ast()))
 
