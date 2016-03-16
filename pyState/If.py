@@ -48,6 +48,8 @@ def handle(state,element):
 
     # Our new path becomes the inside of the if statement
     stateIf.path = element.body
+    # Once inside the If, we're no longer in a "loop" for this call
+    stateIf.loop = None
 
     # Update the else's path
     # Check if there is an else path we need to take
@@ -57,5 +59,6 @@ def handle(state,element):
             stateElse.pushCallStack(cs,state.ctx,state.retID)
         
         stateElse.path = element.orelse
+        stateElse.loop = None
 
     return ret_states 

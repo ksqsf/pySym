@@ -25,7 +25,7 @@ def handle(state,element):
         
         # If we're waiting on resolution of a call, just return the initial state
         if type(ret) is pyState.ReturnObject:
-            print(stateIf.callStack[-1]['path'][0].test.comparators)
+            #print(stateIf.callStack[-1]['path'][0].test.comparators)
             return [stateIf]
     
         # If we're good to go, pop the instructions
