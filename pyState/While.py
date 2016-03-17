@@ -21,16 +21,20 @@ def handle(state,element):
     # Check what type of test this is    
     if type(element.test) == ast.Compare:
         # Try to handle the compare
-        ret = pyState.Compare.handle(stateIf,stateElse,element.test)
+        ifConstraint, elseConstraint = pyState.Compare.handle(state,element.test)
         
         # If we're waiting on resolution of a call, just return the initial state
-        if type(ret) is pyState.ReturnObject:
+        if type(ifConstraint) is pyState.ReturnObject:
             #print(stateIf.callStack[-1]['path'][0].test.comparators)
             return [stateIf]
     
         # If we're good to go, pop the instructions
         stateIf.path.pop(0)
         stateElse.path.pop(0)
+
+        # Add the constraints
+        stateIf.addConstraint(ifConstraint)
+        stateElse.addConstraint(elseConstraint)
 
     else:
         err = "handle: I don't know how to handle type {0}".format(type(element.test))

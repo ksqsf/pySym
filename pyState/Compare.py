@@ -5,11 +5,10 @@ import pyState
 
 logger = logging.getLogger("pyState:Compare")
 
-def _handleLeftVarInt(stateTrue,stateFalse,element,left):
+def _handleLeftVarInt(state,element,left):
     """
     Input:
-        stateTrue = State object for the True evaluation of the compare
-        stateFalse = State object for the False evaluation of the compare
+        state = State object for the evaluation of the compare
         element = ast element object for the if statement (type ast.If)
         left = Left variable name or int (i.e.: 'x' or 5)
     Action:
@@ -18,12 +17,12 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
               therefor it must be either an int or a z3 object type
         ex: if x > 5
     Return:
-        Nothing. Modify state objects in place
+        Created constraint expressions as a (ifSide,elseSide) tuple, or (ReturnObject, None) if we're waiting on a call
     """
 
     # Looks like we're making a call, go ahead and return
     if type(left) == pyState.ReturnObject:
-        return left
+        return left, None
     
     # Operators that we're comparing with
     ops = element.ops
@@ -37,11 +36,11 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
     ops = ops[0]
     comp = comp[0]
     
-    right = stateTrue.resolveObject(comp)
+    right = state.resolveObject(comp)
     
     # Resolve Call first
     if type(right) == pyState.ReturnObject:
-        return right
+        return right, None
 
     # Adjust the types if needed
     left,right = pyState.z3Helpers.z3_matchLeftAndRight(left,right,ops)
@@ -50,28 +49,22 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
 
     # Assume success. Add constraints
     if type(ops) == ast.Gt:
-        stateTrue.addConstraint(left > right )
-        stateFalse.addConstraint(left <= right )
+        return left > right, left <= right 
     
     elif type(ops) == ast.GtE:
-        stateTrue.addConstraint(left >= right )
-        stateFalse.addConstraint(left < right )
+        return left >= right, left < right
 
     elif type(ops) == ast.Lt:
-        stateTrue.addConstraint(left < right )
-        stateFalse.addConstraint(left >= right )
+        return left < right, left >= right
 
     elif type(ops) == ast.LtE:
-        stateTrue.addConstraint(left <= right )
-        stateFalse.addConstraint(left > right )
+        return left <= right, left > right
 
     elif type(ops) == ast.Eq:
-        stateTrue.addConstraint(left == right )
-        stateFalse.addConstraint(left != right )
+        return left == right, left != right
 
     elif type(ops) == ast.NotEq:
-        stateTrue.addConstraint(left != right )
-        stateFalse.addConstraint(left == right )
+        return left != right, left == right
 
     else:
         err = "_handleLeftVar: Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
@@ -80,16 +73,15 @@ def _handleLeftVarInt(stateTrue,stateFalse,element,left):
        
     
 
-def handle(stateTrue,stateFalse,element):
+def handle(state,element):
     """
     Handle the Compare element (such as <,>,==,etc)
     Input:
-        stateTrue = state object for the True side of the compare
-        stateFalse = state object for the False side of the compare
+        state = state object
     Action:
-        Add constraints to both True and False state objects
+        Create constraint expression for both True and False state objects
     Return:
-        Nothing
+        The corresponding z3 constraints as a tuple (true constraints ,false constraints), or (ReturnObject, None) if waiting for a Call
     """
     assert type(element) == ast.Compare
     
@@ -97,4 +89,4 @@ def handle(stateTrue,stateFalse,element):
     left = element.left
     
     # TODO: Probably need to add checks or consolidate here...
-    return _handleLeftVarInt(stateTrue,stateFalse,element,stateTrue.resolveObject(left))
+    return _handleLeftVarInt(state,element,state.resolveObject(left))
