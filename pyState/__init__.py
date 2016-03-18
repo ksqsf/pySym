@@ -147,7 +147,7 @@ class State():
     }
     """
     
-    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None):
+    def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
@@ -156,13 +156,12 @@ class State():
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager()
-        self.localVars = {self.ctx: {}, 1: {}} if localVars is None else localVars
-        self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
         # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
-        self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
+        #self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
+        self.retVar = self.objectManager.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
         # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1, 'ast_call': <ast call object>}
         self.callStack = [] if callStack is None else callStack
         self.backtrace = [] if backtrace is None else backtrace
@@ -306,10 +305,12 @@ class State():
         
         # Check for int vs real
         if hasRealComponent(obj):
-            retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.RealSort(),ctx=1,increment=True)
+            #retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.RealSort(),ctx=1,increment=True)
+            retVar = self.objectManager.getZ3Var('ret{0}'.format(self.retID),varType=z3.RealSort(),ctx=1,increment=True)
         
         else:
-            retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.IntSort(),ctx=1,increment=True)
+            #retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.IntSort(),ctx=1,increment=True)
+            retVar = self.objectManager.getZ3Var('ret{0}'.format(self.retID),varType=z3.IntSort(),ctx=1,increment=True)
         
         # Add the constraint
         self.addConstraint(retVar == obj)
@@ -358,12 +359,14 @@ class State():
         ######################
 
         # Create local vars dict
-        self.localVars[self.ctx] = {}
+        #self.localVars[self.ctx] = {}
+        self.objectManager.newCtx(self.ctx)
         
         # If there are arguments, fill them in
         for i in range(len(call.args)):
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
-            dest_arg = self.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg))
+            #dest_arg = self.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg))
+            dest_arg = self.objectManager.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg),ctx=self.ctx)
             self.addConstraint(dest_arg == caller_arg)
             logger.debug("Call: Setting argument {0} = {1}".format(dest_arg,caller_arg))
         
@@ -378,7 +381,8 @@ class State():
                 logger.error(err)
                 raise Exception(err)
             caller_arg = self.resolveObject(call.keywords[i].value,ctx=oldCtx)
-            dest_arg = self.getZ3Var(call.keywords[i].arg,increment=True,varType=duplicateSort(caller_arg)) 
+            #dest_arg = self.getZ3Var(call.keywords[i].arg,increment=True,varType=duplicateSort(caller_arg)) 
+            dest_arg = self.objectManager.getZ3Var(call.keywords[i].arg,increment=True,varType=duplicateSort(caller_arg),ctx=self.ctx) 
             self.addConstraint(dest_arg == caller_arg)
             # Remove arg after it has been satisfied
             unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
@@ -389,7 +393,8 @@ class State():
         for arg in unsetArgs:
             argIndex = func.args.args.index(arg) - (len(func.args.args) - len(func.args.defaults))
             caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
-            dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
+            #dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
+            dest_arg = self.objectManager.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg),ctx=self.ctx)
             self.addConstraint(dest_arg == caller_arg)
             logger.debug("Call: Setting default argument {0} = {1}".format(dest_arg,caller_arg))
 
@@ -567,7 +572,7 @@ class State():
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
-            return self.getZ3Var(obj.id,ctx=ctx)
+            return self.objectManager.getZ3Var(obj.id,ctx=ctx) #objectManager.resolveVariable(obj,ctx=ctx) # self.getZ3Var(obj.id,ctx=ctx)
         
         elif t == ast.Num:
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
@@ -585,7 +590,8 @@ class State():
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
-            return self.getZ3Var('ret{0}'.format(obj.retID),ctx=1)
+            #return self.getZ3Var('ret{0}'.format(obj.retID),ctx=1)
+            return self.objectManager.getZ3Var('ret{0}'.format(obj.retID),ctx=1)
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:
@@ -634,114 +640,6 @@ class State():
             err = "resolveObject: unable to resolve object '{0}'".format(obj)
             logger.error(err)
             raise Exception(err)
-
-
-    def _varTypeToString(self,varType):
-        """
-        Input:
-            varType = z3 var sort (i.e.: z3.IntSort())
-        Action:
-            Resolves input type back to it's string (i.e.: "z3.IntSort()")
-        Returns:
-            String representation of varType
-        """
-        assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef,z3.BitVecSortRef]
-        
-        if type(varType) == z3.ArithSortRef:
-            if varType.is_real():
-                return "z3.RealSort()"
-            elif varType.is_int():
-                return "z3.IntSort()"
-            else:
-                raise Exception("Got unknown ArithSortRef type {0}".format(varType))
-
-        elif type(varType) == z3.BoolSortRef:
-            if varType.is_bool():
-                return "z3.BoolSort()"
-            else:
-                raise Exception("Got unknown BoolSortRef type {0}".format(varType))
-
-        elif type(varType) == z3.BitVecSortRef:
-            return "z3.BitVecSort({0})".format(varType.size())
-
-
-    def getZ3Var(self,varName,local=True,increment=False,varType=None,previous=False,ctx=None):
-        """
-        Input:
-            varName = Variable name to retrieve Z3 object of
-            (optional) local = Boolean if we're dealing with local scope
-            (optional) increment = Increment the counter. This is if we want to do
-                                   something new with this variable. If variable
-                                   does not exist, it will be created in the scope
-                                   defined by the "local" param
-            (optional) varType = Type of var to create. Used when increment=True
-                                 and var cannot be found. (i.e: z3.IntSort())
-            (optional) previous = Bool of do you want one that is one older
-                                  i.e.: current is x_1, return x_0
-            (optional) ctx = context to resolve in if not the current one
-        Action:
-            Look-up variable
-        Returns:
-            z3 object variable with given name or None if it cannot be found
-        """
-        # It's important to look this up since we might not know going in
-        # what the variable type is. This keeps track of that state.
-        
-        # Variable naming convention. Intentionally breaking legal python variable naming conventions
-        # <Count><VarName>@<context>
-        # example: 07MyVar@1
-        
-        #TODO: Optimize this
-        
-        ctx = self.ctx if ctx is None else ctx
-
-        # If we're looking up local variable
-        if local:
-            if varName in self.localVars[ctx]:
-                # Increment the counter if asked
-                if increment:
-                    self.localVars[ctx][varName]['count'] += 1
-                count = self.localVars[ctx][varName]['count']
-                # Get previous
-                if previous:
-                    count -= 1
-            
-                # Set varType if asked for
-                if type(varType) != type(None):
-                    self.localVars[ctx][varName]['varType'] = self._varTypeToString(varType)
-                
-                return z3Helpers.mk_var("{0}{1}@{2}".format(count,varName,ctx),eval(self.localVars[ctx][varName]['varType']))
-        
-            # If we want to increment but we didn't find it, create it
-            elif increment:
-                assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef,z3.BitVecSortRef]
-                
-                # Time to create a new var!
-                self.localVars[ctx][varName] = {
-                    'count': 0,
-                    'varType': self._varTypeToString(varType)
-                }
-                return z3Helpers.mk_var("{0}{1}@{2}".format(self.localVars[ctx][varName]['count'],varName,ctx),varType)
-        
-        # Try global
-        """
-        if varName in self.globalVars:
-            # Increment the counter if asked
-            if increment:
-                self.localVars[varName]['count'] += 1
-            count = self.globalVars[varName]['count']
-            if previous:
-                count -= 1
-            
-            # Set varType if asked for
-            if varType != None:
-                self.localVars[varName]['varType'] = self._varTypeToString(varType)
-            
-            return z3Helpers.mk_var("{0}{1}".format(count,varName),eval(self.globalVars[varName]['varType']))
-        """
-        
-        # We failed :-(
-        return None
 
 
     def addConstraint(self,constraint):
@@ -812,8 +710,8 @@ class State():
             Discovered variable or None if none found
         """
         # Grab appropriate ctx
-        ctx = ctx if not None else self.ctx
-        
+        ctx = ctx if ctx is not None else self.ctx
+
         # Solve model first
         if not self.isSat():
             logger.debug("any_int: No valid model found")
@@ -824,11 +722,13 @@ class State():
         m = self.solver.model()
         
         # Check if we have it in our localVars
-        if self.getZ3Var(var,ctx=ctx) == None:
+        #if self.getZ3Var(var,ctx=ctx) == None:
+        if self.objectManager.getZ3Var(var,ctx=ctx) == None:
             logger.debug("any_int: var '{0}' not in known localVars".format(var))
             return None
 
-        var = self.getZ3Var(var,ctx=ctx)
+        #var = self.getZ3Var(var,ctx=ctx)
+        var = self.objectManager.getZ3Var(var,ctx=ctx)
         
         # Try getting the value
         value = m.eval(var)
@@ -887,7 +787,7 @@ class State():
             Note: this function will cast an Int to a Real implicitly if found
         """
         # Grab appropriate ctx
-        ctx = ctx if not None else self.ctx
+        ctx = ctx if ctx is not None else self.ctx
 
         # Solve model first
         if not self.isSat():
@@ -898,11 +798,11 @@ class State():
         # Get model
         m = self.solver.model()
 
-        if self.getZ3Var(var,ctx=ctx) == None:
+        if self.objectManager.getZ3Var(var,ctx=ctx) == None:
             logger.debug("any_real: var '{0}' not found".format(var))
             return None
         
-        var = self.getZ3Var(var,ctx=ctx)
+        var = self.objectManager.getZ3Var(var,ctx=ctx)
 
         # Try getting the value
         value = m.eval(var)
@@ -935,8 +835,6 @@ class State():
         solverCopy.add(self.solver.assertions())
         
         return State(
-            localVars=deepcopy(self.localVars),
-            globalVars=deepcopy(self.globalVars),
             solver=solverCopy,
             ctx=self.ctx,
             functions=self.functions,

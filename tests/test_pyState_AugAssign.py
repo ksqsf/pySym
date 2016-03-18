@@ -154,7 +154,7 @@ def test_pySym_AugAssign_MixedTypes():
 
     assert elseSide.state.isSat()
     assert elseSide.state.any_real('x') == 9.0
-    assert elseSide.state.getZ3Var('x').is_real()
+    assert elseSide.state.objectManager.getZ3Var('x',ctx=elseSide.state.ctx).is_real()
 
 
 

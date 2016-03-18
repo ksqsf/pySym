@@ -26,14 +26,17 @@ def _handleAssignNum(state,target,value):
 
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
     elif hasRealComponent(value):
-        x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
+        #x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
+        x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.RealSort(),ctx=state.ctx)
 
     # See if our output should be a BitVec
     elif type(value) in [z3.BitVecRef, z3.BitVecNumRef]:
-        x = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
+        #x = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
+        x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()),ctx=state.ctx)
 
     else: 
-        x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
+        #x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
+        x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.IntSort(),ctx=state.ctx)
 
     state.addConstraint(x == value)
     # Pop the instruction off
