@@ -9,6 +9,7 @@ import importlib
 from types import ModuleType
 import ntpath
 import pyState.z3Helpers
+from pyObjectManager import ObjectManager
 
 # The current directory for running pySym
 SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
@@ -146,7 +147,7 @@ class State():
     }
     """
     
-    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None):
+    def __init__(self,path=None,localVars=None,globalVars=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
@@ -154,6 +155,7 @@ class State():
  
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
+        self.objectManager = objectManager if objectManager is not None else ObjectManager()
         self.localVars = {self.ctx: {}, 1: {}} if localVars is None else localVars
         self.globalVars = {} if globalVars is None else globalVars
         self.solver = z3.Solver() if solver is None else solver
@@ -175,6 +177,7 @@ class State():
         # Initialize our known functions if this is the first time through
         if backtrace is None:
             self._init_simFunctions()
+
         
     def lineno(self):
         """
@@ -945,6 +948,7 @@ class State():
             retID=copy(self.retID),
             loop=copy(self.loop),
             maxRetID=self.maxRetID,
-            maxCtx=self.maxCtx
+            maxCtx=self.maxCtx,
+            objectManager=self.objectManager.copy()
             )
         
