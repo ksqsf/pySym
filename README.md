@@ -105,6 +105,7 @@ Much work left to do as I have only implimented a limited set of operations. How
 # To-Do
 Here's a list of things I have left to implement. This is really just a subset of things, but these are high on my list.
 
+* Update how I save variables (implementing ObjectManager and such)
 * Add automatic BitVector scaling
  * http://stackoverflow.com/questions/22568867/z3-bitvector-overflow-checking-from-python
  * http://stackoverflow.com/questions/14579377/z3py-how-to-extend-and-trunc-variables
@@ -116,10 +117,8 @@ Here's a list of things I have left to implement. This is really just a subset o
 * imports
 * "global" keyword
 * symbolic strings
-* symbolic ints
 * symbolic arrays
 * function annotations
 * for loop
 * built-in calls
  * print
-* Update how I assign return IDs
