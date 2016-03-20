@@ -175,7 +175,7 @@ class State():
         self.simFunctions = {} if simFunctions is None else simFunctions
         #self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
         #self.retVar = self.objectManager.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
-        self.retVar = self.objectManager.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
+        self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
         # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1, 'ast_call': <ast call object>}
         self.callStack = [] if callStack is None else callStack
         self.backtrace = [] if backtrace is None else backtrace
@@ -190,6 +190,15 @@ class State():
         # Initialize our known functions if this is the first time through
         if backtrace is None:
             self._init_simFunctions()
+
+
+    def getVar(self,varName,ctx=None,varType=None,kwargs=None):
+        """
+        Convinence function that adds current ctx to getVar request
+        """
+        ctx = self.ctx if ctx is None else ctx
+
+        return self.objectManager.getVar(varName,ctx,varType,kwargs)
 
         
     def lineno(self):
@@ -322,10 +331,10 @@ class State():
         
         # Check for int vs real
         if hasRealComponent(obj):
-            retVar = self.objectManager.getVar('ret{0}'.format(self.retID),varType=Real,ctx=1).getZ3Object(increment=True)
+            retVar = self.getVar('ret{0}'.format(self.retID),varType=Real,ctx=1).getZ3Object(increment=True)
         
         else:
-            retVar = self.objectManager.getVar('ret{0}'.format(self.retID),varType=Int,ctx=1).getZ3Object(increment=True)
+            retVar = self.getVar('ret{0}'.format(self.retID),varType=Int,ctx=1).getZ3Object(increment=True)
         
         # Add the constraint
         self.addConstraint(retVar == obj)
@@ -383,7 +392,7 @@ class State():
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
-            dest_arg = self.objectManager.getVar(func.args.args[i].arg,ctx=self.ctx,varType=varType,kwargs=kwargs)
+            dest_arg = self.getVar(func.args.args[i].arg,varType=varType,kwargs=kwargs)
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
             logger.debug("Call: Setting argument {0} = {1}".format(dest_arg,caller_arg))
         
@@ -400,7 +409,7 @@ class State():
             caller_arg = self.resolveObject(call.keywords[i].value,ctx=oldCtx)
             caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
-            dest_arg = self.objectManager.getVar(call.keywords[i].arg,varType=varType,kwargs=kwargs,ctx=self.ctx)
+            dest_arg = self.getVar(call.keywords[i].arg,varType=varType,kwargs=kwargs)
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
             # Remove arg after it has been satisfied
             unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
@@ -413,7 +422,7 @@ class State():
             caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
             caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
-            dest_arg = self.objectManager.getVar(arg.arg,varType=varType,kwargs=kwargs,ctx=self.ctx)
+            dest_arg = self.getVar(arg.arg,varType=varType,kwargs=kwargs)
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
             logger.debug("Call: Setting default argument {0} = {1}".format(dest_arg,caller_arg))
 
@@ -591,7 +600,7 @@ class State():
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
-            return self.objectManager.getVar(obj.id,ctx=ctx)
+            return self.getVar(obj.id,ctx=ctx)
         
         elif t == ast.Num:
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
@@ -609,7 +618,7 @@ class State():
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
-            return self.objectManager.getVar('ret{0}'.format(obj.retID),ctx=1).getZ3Object()
+            return self.getVar('ret{0}'.format(obj.retID),ctx=1).getZ3Object()
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:
@@ -738,12 +747,12 @@ class State():
         m = self.solver.model()
         
         # Check if we have it in our localVars
-        if self.objectManager.getVar(var,ctx=ctx) == None:
+        if self.getVar(var) == None:
             logger.debug("any_int: var '{0}' not in known variables".format(var))
             return None
 
         #var = self.getZ3Var(var,ctx=ctx)
-        var = self.objectManager.getVar(var,ctx=ctx).getZ3Object()
+        var = self.getVar(var).getZ3Object()
         
         # Try getting the value
         value = m.eval(var)
@@ -814,12 +823,12 @@ class State():
         m = self.solver.model()
 
         try:
-            self.objectManager.getVar(var,ctx=ctx)
+            self.getVar(var)
         except:
             logger.debug("any_real: var '{0}' not found".format(var))
             return None
         
-        var = self.objectManager.getVar(var,ctx=ctx).getZ3Object()
+        var = self.getVar(var).getZ3Object()
 
         # Try getting the value
         value = m.eval(var)

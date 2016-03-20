@@ -50,7 +50,7 @@ def handle(state,element):
     elif type(value) == ast.Name:
         #value = state.getZ3Var(value.id)
         #value = state.objectManager.getZ3Var(value.id,ctx=state.ctx)
-        value = state.objectManager.getVar(value.id,ctx=state.ctx).getZ3Object()
+        value = state.getVar(value.id).getZ3Object()
 
     else:
         err = "Don't know how to handle value type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
@@ -59,25 +59,18 @@ def handle(state,element):
     
     # Basic sanity checks complete. For augment assigns we will always need to update the vars.
     # Grab the old var and create a new now
-    #oldTargetVar = state.getZ3Var(target)
-    #oldTargetVar = state.objectManager.getZ3Var(target,ctx=state.ctx)
-    oldTargetVar = state.objectManager.getVar(target,ctx=state.ctx).getZ3Object()
+    oldTargetVar = state.getVar(target).getZ3Object()
 
     # Match up the right hand side
     oldTargetVar, value = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value,op)
     
     # Z3 gets confused if we don't change our var to Real when comparing w/ Real
     if hasRealComponent(value):
-        #newTargetVar = state.getZ3Var(target,increment=True,varType=z3.RealSort())
-        #newTargetVar = state.objectManager.getZ3Var(target,increment=True,varType=z3.RealSort(),ctx=state.ctx)
-        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx,varType=Real).getZ3Object(increment=True)
+        newTargetVar = state.getVar(target,varType=Real).getZ3Object(increment=True)
     elif type(value) is z3.BitVecRef:
-        #newTargetVar = state.getZ3Var(target,increment=True,varType=z3.BitVecSort(value.size()))
-        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
+        newTargetVar = state.getVar(target,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
     else:
-        #newTargetVar = state.getZ3Var(target,increment=True)
-        #newTargetVar = state.objectManager.getZ3Var(target,increment=True,ctx=state.ctx)
-        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx).getZ3Object(increment=True)
+        newTargetVar = state.getVar(target).getZ3Object(increment=True)
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:

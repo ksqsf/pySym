@@ -32,14 +32,14 @@ def _handleAssignNum(state,target,value):
 
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
     if hasRealComponent(value):
-        x = state.objectManager.getVar(varName,ctx=state.ctx,varType=Real).getZ3Object(increment=True)
+        x = state.getVar(varName,varType=Real).getZ3Object(increment=True)
 
     # See if our output should be a BitVec
     elif type(value) in [z3.BitVecRef, z3.BitVecNumRef]:
-        x = state.objectManager.getVar(varName,ctx=state.ctx,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
+        x = state.getVar(varName,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
 
     else: 
-        x = state.objectManager.getVar(varName,ctx=state.ctx,varType=Int).getZ3Object(increment=True)
+        x = state.getVar(varName,varType=Int).getZ3Object(increment=True)
 
     state.addConstraint(x == value)
     # Pop the instruction off
