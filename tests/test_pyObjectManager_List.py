@@ -16,6 +16,10 @@ test1 = """
 l = [1,2.2,3]
 """
 
+test2 = """
+l = [1,2.2,[3,4,5]]
+"""
+
 def test_pyObjectManager_List_BasicAssign():
     b = ast.parse(test1).body
     p = Path(b,source=test1)
@@ -25,4 +29,12 @@ def test_pyObjectManager_List_BasicAssign():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1,2.2,3]
 
+def test_pyObjectManager_List_NestedList():
+    b = ast.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,2.2,[3,4,5]]
 

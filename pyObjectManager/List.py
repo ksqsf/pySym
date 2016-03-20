@@ -30,7 +30,7 @@ class List:
     def append(self,var):
         """
         Input:
-            var = object to append
+            var = pyObjectManager oject to append (i.e.: Int/Real/etc)
         Action:
             Resolves object, creates variable if needed
         Returns:
@@ -44,6 +44,9 @@ class List:
 
             elif type(var.n) is float:
                 self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+
+        elif type(var) is List:
+            self.variables.append(var)
 
         else:
             err = "append: Don't know how to append/resolve object '{0}'".format(var)

@@ -586,7 +586,7 @@ class State():
             logger.error(err)
             raise Exception(err)
 
-    def _resolveList(self,listObject,ctx=None):
+    def _resolveList(self,listObject,ctx=None,i=0):
         """
         Input:
             listObject = ast.List object
@@ -609,22 +609,27 @@ class State():
 
                 # If we're making a call, return for now so we can do that
                 if type(ret) is ReturnObject:
-                    return [self]
+                    return ret
 
         ####################################
         # Append each element individually #
         ####################################
         # Create temporary variable if need be
-        var = self.getVar('tempList',varType=List,ctx=1)
+        var = self.getVar('tempList{0}'.format(i),varType=List,ctx=1)
         # Make sure we get a fresh list variable
         var.increment()
     
         # TODO: This will probably fail on ReturnObjects
         for elm in listObject.elts:
-            var.append(elm)
+            logger.debug("_resolveList: Adding {0} to tempList".format(elm))
             if type(elm) is ast.Num:
+                var.append(elm)
                 self.addConstraint(var[-1].getZ3Object() == elm.n)
-    
+
+            elif type(elm) is ast.List:
+                # Recursively resolve this
+                var.append(self._resolveList(elm,ctx=ctx,i=i+1))
+ 
             else:
                 err = "Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
                 logger.error(err)
@@ -803,15 +808,19 @@ class State():
             # No valid ints
             return None
 
-        # Make sure the variable exists
-        try:
-            self.getVar(var,ctx=ctx)
-        except:
-            logger.debug("any_list: var '{0}' not found".format(var))
-            return None
-
-        listObject = self.getVar(var,ctx=ctx)
-
+        if type(var) is not List:
+            # Make sure the variable exists
+            try:
+                self.getVar(var,ctx=ctx)
+            except:
+                logger.debug("any_list: var '{0}' not found".format(var.varName))
+                return None
+    
+            listObject = self.getVar(var,ctx=ctx)
+   
+        else:
+            listObject = var
+ 
         if type(listObject) is not List:
             logger.warning("any_list: var '{0}' not of type List".format(var))
             return None
@@ -820,9 +829,11 @@ class State():
 
         for elm in listObject:
             if type(elm) is Int:
-                out.append(self.any_int(elm))
+                out.append(self.any_int(elm,ctx=ctx))
             elif type(elm) is Real:
-                out.append(self.any_real(elm))
+                out.append(self.any_real(elm,ctx=ctx))
+            elif type(elm) is List:
+                out.append(self.any_list(elm,ctx=ctx))
             else:
                 err = "any_list: unable to resolve object '{0}'".format(elm)
                 logger.error(err)
