@@ -13,6 +13,7 @@ from pyObjectManager import ObjectManager
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
+from pyObjectManager.List import List
 
 
 # The current directory for running pySym
@@ -724,10 +725,59 @@ class State():
         for var in m:
             print("{0} == {1}".format(var.name(),m[var]))
 
-    def any_int(self,var,ctx=None):
+
+    def any_list(self,var,ctx=None):
         """
         Input:
             var == variable name. i.e.: "x"
+            (optional) ctx = context if not current one
+        Action:
+            Resolve possible value for this variable (list)
+        Return:
+            Discovered variable or None if none found
+        """
+        # Grab appropriate ctx
+        ctx = ctx if ctx is not None else self.ctx
+
+        # Solve model first
+        if not self.isSat():
+            logger.debug("any_list: No valid model found")
+            # No valid ints
+            return None
+
+        # Make sure the variable exists
+        try:
+            self.getVar(var,ctx=ctx)
+        except:
+            logger.debug("any_list: var '{0}' not found".format(var))
+            return None
+
+        listObject = self.getVar(var,ctx=ctx)
+
+        if type(listObject) is not List:
+            logger.warning("any_list: var '{0}' not of type List".format(var))
+            return None
+        
+        out = []
+
+        for elm in listObject:
+            if type(elm) is Int:
+                out.append(self.any_int(elm))
+            elif type(elm) is Real:
+                out.append(self.any_real(elm))
+            else:
+                err = "any_list: unable to resolve object '{0}'".format(elm)
+                logger.error(err)
+                raise Exception(err)
+        
+        return out
+
+
+
+    def any_int(self,var,ctx=None):
+        """
+        Input:
+            var == variable name. i.e.: "x" --or-- ObjectManager object (i.e.: Int)
             (optional) ctx = context if not current one
         Action:
             Resolve possible value for this variable
@@ -747,12 +797,11 @@ class State():
         m = self.solver.model()
         
         # Check if we have it in our localVars
-        if self.getVar(var) == None:
+        if type(var) is str and self.getVar(var,ctx=ctx) == None:
             logger.debug("any_int: var '{0}' not in known variables".format(var))
             return None
 
-        #var = self.getZ3Var(var,ctx=ctx)
-        var = self.getVar(var).getZ3Object()
+        var = self.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
         
         # Try getting the value
         value = m.eval(var)
@@ -802,7 +851,7 @@ class State():
     def any_real(self,var,ctx=None):
         """
         Input:
-            var == variable name. i.e.: "x"
+            var == variable name. i.e.: "x" --or-- ObjectManager Object (i.e.: Int)
             (optional) ctx = context if not current one
         Action:
             Resolve possible value for this variable
@@ -822,13 +871,14 @@ class State():
         # Get model
         m = self.solver.model()
 
-        try:
-            self.getVar(var)
-        except:
-            logger.debug("any_real: var '{0}' not found".format(var))
-            return None
+        if type(var) is str:
+            try:
+                self.getVar(var,ctx=ctx)
+            except:
+                logger.debug("any_real: var '{0}' not found".format(var))
+                return None
         
-        var = self.getVar(var).getZ3Object()
+        var = self.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
 
         # Try getting the value
         value = m.eval(var)

@@ -38,10 +38,10 @@ class List:
 
         if type(var) is ast.Num:
             if type(var.n) is int:
-                self.variables.append(Int('{0}@{1}'.format(self.varName,len(self.variables)),ctx=self.ctx,value=var.n))
+                self.variables.append(Int('{0}@{1}'.format(self.varName,len(self.variables)),ctx=self.ctx))
 
             elif type(var.n) is float:
-                self.variables.append(Real('{0}@{1}'.format(self.varName,len(self.variables)),ctx=self.ctx,value=var.n))
+                self.variables.append(Real('{0}@{1}'.format(self.varName,len(self.variables)),ctx=self.ctx))
 
         else:
             err = "append: Don't know how to append/resolve object '{0}'".format(var)

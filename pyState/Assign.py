@@ -76,6 +76,14 @@ def _handleAssignList(state,target,listObject):
     # TODO: This will probably fail on ReturnObjects
     for elm in listObject.elts:
         var.append(elm)
+        if type(elm) is ast.Num:
+            state.addConstraint(var[-1].getZ3Object() == elm.n)
+
+        else:
+            err = "Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
+            logger.error(err)
+            raise Exception(err)
+
 
     state.path.pop(0) if len(state.path) > 0 else None
     return [state]
