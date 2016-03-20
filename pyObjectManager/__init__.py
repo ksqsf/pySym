@@ -6,6 +6,7 @@ from copy import deepcopy
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
+from pyObjectManager.List import List
 
 
 logger = logging.getLogger("ObjectManager")
@@ -54,7 +55,7 @@ class ObjectManager:
         # Attempt to return variable
         assert type(varName) is str
         assert type(ctx) is int
-        assert varType in [None, Int, Real, BitVec]
+        assert varType in [None, Int, Real, BitVec, List]
         
         create = False
         

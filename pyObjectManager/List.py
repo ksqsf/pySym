@@ -20,6 +20,7 @@ class List:
         self.varName = varName
         self.ctx = ctx
         self.variables = []
+
         
     def append(self,var):
         """
@@ -36,21 +37,15 @@ class List:
             if type(var.n) is int:
                 self.variables.append(Int('{0}@{1}'.format(self.varName,len(self.variables)),ctx=self.ctx,value=var.n))
 
+            elif type(var.n) is float:
+                self.variables.append(Real('{0}@{1}'.format(self.varName,len(self.variables)),ctx=self.ctx,value=var.n))
+
         else:
             err = "append: Don't know how to append/resolve object '{0}'".format(var)
             logger.error(err)
             raise Exception(err)
 
-    """
-    def getZ3Object(self,increment=False):
-        Returns the z3 object for this variable
 
-        if increment:
-            self.count += 1
-        
-        return z3.Int("{0}{1}@{2}".format(self.count,self.varName,self.ctx))
-    """
-    
     def _isSame(self):
         """
         Checks if variables for this object are the same as those entered.

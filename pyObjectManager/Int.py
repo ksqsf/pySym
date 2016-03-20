@@ -1,4 +1,7 @@
 import z3
+import logging
+
+logger = logging.getLogger("ObjectManager:Int")
 
 class Int:
     """
