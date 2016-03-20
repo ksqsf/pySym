@@ -33,9 +33,11 @@ class Int:
         # This must be a constant type
         return z3.IntVal(self.value)
     
-    def _isSame(self):
+    def _isSame(self,value=None):
         """
         Checks if variables for this object are the same as those entered.
         Assumes checks of type will be done prior to calling.
         """
-        return True
+        if self.value is value:
+            return True
+        return False
