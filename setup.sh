@@ -15,6 +15,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 PYSYM_VENV="${HOME}/.virtualenvs/pySym"
 Z3_DIR="${HOME}/opt/pySymZ3"
+Z3_BASENAME=`basename $Z3_DIR`
 
 # Setup the venv
 mkdir -p $PYSYM_VENV 2>/dev/null
@@ -39,8 +40,8 @@ pushd .
 cd ~/opt
 
 # Install Z3... This will be slow as f*
-git clone https://github.com/Z3Prover/z3.git
-cd z3
+git clone https://github.com/Z3Prover/z3.git $Z3_BASENAME
+cd $Z3_BASENAME
 
 # Make the makefile
 python scripts/mk_make.py --python

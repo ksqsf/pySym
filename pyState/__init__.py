@@ -579,6 +579,50 @@ class State():
             logger.error(err)
             raise Exception(err)
 
+    def _resolveList(self,obj,ctx=None):
+        """
+        Input:
+            obj = ast.List object
+            (optional) ctx = Context of List to resolve. Default is current context
+        Action:
+            Resolve ast.List object into pyObjectManager.List.List object
+        Returns:
+            pyObjectManager.List.List object
+        """
+        assert type(target) is ast.Name
+        assert type(listObject) is ast.List
+
+        #############################
+        # Resolve Calls in the list #
+        #############################
+
+        # Perform any calls if need be
+        for elm in listObject.elts:
+            if type(elm) is ast.Call:
+                ret = state.resolveObject(elm)
+
+                # If we're making a call, return for now so we can do that
+                if type(ret) is ReturnObject:
+                    return [state]
+
+        ####################################
+        # Append each element individually #
+        ####################################
+        var = state.getVar(target.id,varType=List)
+        # Make sure we get a fresh list variable
+        var.increment()
+    
+        # TODO: This will probably fail on ReturnObjects
+        for elm in listObject.elts:
+            var.append(elm)
+            if type(elm) is ast.Num:
+                state.addConstraint(var[-1].getZ3Object() == elm.n)
+    
+            else:
+                err = "Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
+                logger.error(err)
+                raise Exception(err)
+
 
     def resolveObject(self,obj,parent=None,ctx=None):
         """
