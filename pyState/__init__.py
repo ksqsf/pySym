@@ -66,12 +66,21 @@ def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
 def duplicateSort(obj):
     """
     Input:
-        obj = z3 object to duplicate kind (i.e.: z3.IntSort())
+        obj = z3 object to duplicate kind (i.e.: z3.IntSort()) --or--
+              pyObjectManager type object (i.e.: Int)
     Action:
         Figure out details of the object and make duplicate sort
     Return:
-        Duplicate Sort object
+        (class, kwargs)
+        Duplicate pyObjectManager class object for this type (i.e.: Int)
     """
+
+    if type(obj) in [Int, Real]:
+        return type(obj), None
+
+    if type(obj) is BitVec:
+        return type(obj), {'size': obj.size()}
+
     
     if type(obj) in [z3.IntNumRef,z3.RatNumRef,z3.ArithRef]:
         kind = obj.sort_kind()
@@ -81,19 +90,19 @@ def duplicateSort(obj):
         kind = obj.kind()
     
     kindTable = {
-        z3.Z3_INT_SORT: z3.IntSort(),
-        z3.Z3_REAL_SORT: z3.RealSort(),
-        z3.Z3_BOOL_SORT: z3.BoolSort()
+        z3.Z3_INT_SORT: Int,
+        z3.Z3_REAL_SORT: Real,
+        #z3.Z3_BOOL_SORT: z3.BoolSort()
     }
     
     if kind in kindTable:
-        return kindTable[kind]
+        return kindTable[kind], None
 
-    elif kind == z3.Z3_ARRAY_SORT:
-        return z3.ArraySort(obj.domain().kind(),obj.range.kind())
+    #elif kind == z3.Z3_ARRAY_SORT:
+    #    return z3.ArraySort(obj.domain().kind(),obj.range.kind())
 
-    elif kind == z3.Z3_BV_SORT:
-        return z3.BitVecSort(obj.size())
+    elif kind is z3.Z3_BV_SORT:
+        return BitVec, {'size': obj.size()}
     
     else:
         err = "duplicateSort: unable to determine object sort '{0}'".format(obj)
@@ -315,7 +324,7 @@ class State():
         
         else:
             #retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.IntSort(),ctx=1,increment=True)
-            retVar = self.objectManager.getZ3Var('ret{0}'.format(self.retID),varType=z3.IntSort(),ctx=1,increment=True)
+            retVar = self.objectManager.getVar('ret{0}'.format(self.retID),varType=Int,ctx=1).getZ3Object(increment=True)
         
         # Add the constraint
         self.addConstraint(retVar == obj)
@@ -369,10 +378,13 @@ class State():
         
         # If there are arguments, fill them in
         for i in range(len(call.args)):
+            #caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
+            caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             #dest_arg = self.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg))
-            dest_arg = self.objectManager.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg),ctx=self.ctx)
-            self.addConstraint(dest_arg == caller_arg)
+            varType, kwargs = duplicateSort(caller_arg)
+            dest_arg = self.objectManager.getVar(func.args.args[i].arg,ctx=self.ctx,varType=varType,kwargs=kwargs)
+            self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
             logger.debug("Call: Setting argument {0} = {1}".format(dest_arg,caller_arg))
         
         # Grab any unset vars
@@ -386,9 +398,11 @@ class State():
                 logger.error(err)
                 raise Exception(err)
             caller_arg = self.resolveObject(call.keywords[i].value,ctx=oldCtx)
+            caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             #dest_arg = self.getZ3Var(call.keywords[i].arg,increment=True,varType=duplicateSort(caller_arg)) 
-            dest_arg = self.objectManager.getZ3Var(call.keywords[i].arg,increment=True,varType=duplicateSort(caller_arg),ctx=self.ctx) 
-            self.addConstraint(dest_arg == caller_arg)
+            varType, kwargs = duplicateSort(caller_arg)
+            dest_arg = self.objectManager.getVar(call.keywords[i].arg,varType=varType,kwargs=kwargs,ctx=self.ctx)
+            self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
             # Remove arg after it has been satisfied
             unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
             logger.debug("Call: Setting keyword argument {0} = {1}".format(dest_arg,caller_arg))
@@ -398,9 +412,11 @@ class State():
         for arg in unsetArgs:
             argIndex = func.args.args.index(arg) - (len(func.args.args) - len(func.args.defaults))
             caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
+            caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             #dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
-            dest_arg = self.objectManager.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg),ctx=self.ctx)
-            self.addConstraint(dest_arg == caller_arg)
+            varType, kwargs = duplicateSort(caller_arg)
+            dest_arg = self.objectManager.getVar(arg.arg,varType=varType,kwargs=kwargs,ctx=self.ctx)
+            self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
             logger.debug("Call: Setting default argument {0} = {1}".format(dest_arg,caller_arg))
 
        
@@ -569,7 +585,7 @@ class State():
         Return:
             Resolved object
                 ast.Num == int (i.e.: 6)
-                ast.Name == z3 Object
+                ast.Name == pyObjectManager object (Int, Real, BitVec, etc)
                 ast.BinOp == z3 expression of BinOp (i.e.: x + y)
         """
         ctx = self.ctx if ctx is None else ctx
@@ -578,7 +594,7 @@ class State():
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
             #return self.objectManager.getZ3Var(obj.id,ctx=ctx) #objectManager.resolveVariable(obj,ctx=ctx) # self.getZ3Var(obj.id,ctx=ctx)
-            return self.objectManager.getVar(obj.id,ctx=ctx).getZ3Object()
+            return self.objectManager.getVar(obj.id,ctx=ctx)
         
         elif t == ast.Num:
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
@@ -597,7 +613,7 @@ class State():
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
             #return self.getZ3Var('ret{0}'.format(obj.retID),ctx=1)
-            return self.objectManager.getZ3Var('ret{0}'.format(obj.retID),ctx=1)
+            return self.objectManager.getVar('ret{0}'.format(obj.retID),ctx=1).getZ3Object()
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:

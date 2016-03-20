@@ -35,7 +35,7 @@ class ObjectManager:
         """
         assert ctx is not None
 
-        self.localVars[ctx] = {}
+        self.variables[ctx] = {}
 
 
     def resolveVariable(self,obj,ctx):
@@ -111,7 +111,7 @@ class ObjectManager:
             if varType is not None:
 
                 # If the variable type is different or it's settings are different, we need to create a new object
-                if type(self.variables[ctx][varName]) is not varType or not self.variables[ctx][varName]._isSame():
+                if type(self.variables[ctx][varName]) is not varType or not self.variables[ctx][varName]._isSame(**kwargs if kwargs is not None else {}):
                     create = True
             
             # If we can just return the current one, let's do it

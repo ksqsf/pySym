@@ -44,6 +44,9 @@ def handle(state,element):
         if type(value) == ReturnObject:
             return [state]
 
+        if type(value) in [Int, Real, BitVec]:
+            value = value.getZ3Object()
+
     elif type(value) == ast.Name:
         #value = state.getZ3Var(value.id)
         #value = state.objectManager.getZ3Var(value.id,ctx=state.ctx)
@@ -67,14 +70,14 @@ def handle(state,element):
     if hasRealComponent(value):
         #newTargetVar = state.getZ3Var(target,increment=True,varType=z3.RealSort())
         #newTargetVar = state.objectManager.getZ3Var(target,increment=True,varType=z3.RealSort(),ctx=state.ctx)
-        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx,increment=True,varType=Real).getZ3Object()
+        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx,varType=Real).getZ3Object(increment=True)
     elif type(value) is z3.BitVecRef:
         #newTargetVar = state.getZ3Var(target,increment=True,varType=z3.BitVecSort(value.size()))
-        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx,increment=True,varType=BitVec,kwargs={'size':value.size()}).getZ3Object()
+        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
     else:
         #newTargetVar = state.getZ3Var(target,increment=True)
         #newTargetVar = state.objectManager.getZ3Var(target,increment=True,ctx=state.ctx)
-        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx,increment=True).getZ3Object()
+        newTargetVar = state.objectManager.getVar(target,ctx=state.ctx).getZ3Object(increment=True)
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:

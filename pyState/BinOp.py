@@ -2,6 +2,10 @@ import logging
 import z3
 import ast
 import pyState
+from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
+
 
 logger = logging.getLogger("pyState:BinOp")
 
@@ -23,14 +27,19 @@ def handle(state,element,ctx=None):
 
     # Try resolving the parts
     left = state.resolveObject(element.left,parent=element,ctx=ctx)
+
+    if type(left) in [Int, Real, BitVec]:
+        left = left.getZ3Object()
     
     logger.debug("BinOp: BinOp Left = {0} Type {1}".format(left,type(left)))
     # If we need to pause to resolve something, pause
     if type(left) == pyState.ReturnObject:
         return left
 
-    
     right = state.resolveObject(element.right,parent=element,ctx=ctx)
+
+    if type(right) in [Int, Real, BitVec]:
+        right = right.getZ3Object()
     
     logger.debug("BinOp: BinOp Right = {0} Type {1}".format(right,type(right)))
 

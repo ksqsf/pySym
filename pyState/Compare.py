@@ -2,6 +2,10 @@ import logging
 import z3
 import ast
 import pyState
+from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
+
 
 logger = logging.getLogger("pyState:Compare")
 
@@ -23,6 +27,10 @@ def _handleLeftVarInt(state,element,left):
     # Looks like we're making a call, go ahead and return
     if type(left) == pyState.ReturnObject:
         return left, None
+
+    # Resolve the z3 object
+    if type(left) in [Int, Real, BitVec]:
+        left = left.getZ3Object()
     
     # Operators that we're comparing with
     ops = element.ops
@@ -41,6 +49,9 @@ def _handleLeftVarInt(state,element,left):
     # Resolve Call first
     if type(right) == pyState.ReturnObject:
         return right, None
+
+    if type(right) in [Int, Real, BitVec]:
+        right = right.getZ3Object()
 
     # Adjust the types if needed
     left,right = pyState.z3Helpers.z3_matchLeftAndRight(left,right,ops)

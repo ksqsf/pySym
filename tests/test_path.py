@@ -5,6 +5,7 @@ sys.path.insert(0, myPath + '/../')
 import ast
 import z3
 from pyPath import Path
+import pytest
 
 test1 = "x = 1\ny = 2"
 
@@ -51,8 +52,10 @@ def test_basicPathStep():
     p2.printBacktrace()
     assert p2.state.any_int('x') == 1
     assert p2.state.any_int('y') == 2
-    assert p1.state.any_int('x') == None
-    assert p1.state.any_int('y') == None
+    with pytest.raises(Exception):
+        p1.state.any_int('x')
+    with pytest.raises(Exception):
+        p1.state.any_int('y')
 
 def test_pathCopy():
     b = ast.parse(test1).body
@@ -61,7 +64,8 @@ def test_pathCopy():
     assert p2 != p
     p = p.step()[0]
     assert p.state.any_int('x') == 1
-    assert p2.state.any_int('x') == None
+    with pytest.raises(Exception):
+        p2.state.any_int('x')
 
 def test_simpleIf():
     b = ast.parse(simpleIf).body
