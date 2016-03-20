@@ -38,52 +38,6 @@ class ObjectManager:
         self.variables[ctx] = {}
 
 
-    def resolveVariable(self,obj,ctx):
-        """
-        Input:
-            obj = ast object to resolve
-            ctx = Context for this variable
-        Action: 
-           Resolve it to an object z3 can work with
-        Return:
-            Resolved z3 object
-        """
-        # List of object we current understand
-        assert type(obj) in [ast.Name]
-        
-        # Basically copying this function over for now. Will modify later.
-        return self.getZ3Var(obj.id,ctx=ctx)
-
-
-    def _varTypeToString(self,varType):
-        """
-        Input:
-            varType = z3 var sort (i.e.: z3.IntSort())
-        Action:
-            Resolves input type back to it's string (i.e.: "z3.IntSort()")
-        Returns:
-            String representation of varType
-        """
-        assert type(varType) in [z3.ArithSortRef,z3.BoolSortRef,z3.BitVecSortRef]
-
-        if type(varType) == z3.ArithSortRef:
-            if varType.is_real():
-                return "z3.RealSort()"
-            elif varType.is_int():
-                return "z3.IntSort()"
-            else:
-                raise Exception("Got unknown ArithSortRef type {0}".format(varType))
-
-        elif type(varType) == z3.BoolSortRef:
-            if varType.is_bool():
-                return "z3.BoolSort()"
-            else:
-                raise Exception("Got unknown BoolSortRef type {0}".format(varType))
-
-        elif type(varType) == z3.BitVecSortRef:
-            return "z3.BitVecSort({0})".format(varType.size())
-
-
     def getVar(self,varName,ctx,varType=None,kwargs=None):
         """
         Input:
