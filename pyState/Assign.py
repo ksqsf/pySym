@@ -53,38 +53,9 @@ def _handleAssignList(state,target,listObject):
     assert type(target) is ast.Name
     assert type(listObject) is ast.List
 
-    #############################
-    # Resolve Calls in the list #
-    #############################
-
-    # Perform any calls if need be
-    for elm in listObject.elts:
-        if type(elm) is ast.Call:
-            ret = state.resolveObject(elm)
-
-            # If we're making a call, return for now so we can do that
-            if type(ret) is ReturnObject:
-                return [state]
+    l = state.resolveObject(listObject)
+    state.setVar(varName=target.id,var=l)
     
-    ####################################
-    # Append each element individually #
-    ####################################
-    var = state.getVar(target.id,varType=List)
-    # Make sure we get a fresh list variable
-    var.increment()
-    
-    # TODO: This will probably fail on ReturnObjects
-    for elm in listObject.elts:
-        var.append(elm)
-        if type(elm) is ast.Num:
-            state.addConstraint(var[-1].getZ3Object() == elm.n)
-
-        else:
-            err = "Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
-            logger.error(err)
-            raise Exception(err)
-
-
     state.path.pop(0) if len(state.path) > 0 else None
     return [state]
 

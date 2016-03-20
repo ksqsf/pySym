@@ -24,6 +24,8 @@ class List:
 
     def increment(self):
         self.count += 1
+        # reset variable list if we're incrementing our count
+        self.variables = []
         
     def append(self,var):
         """
@@ -34,14 +36,14 @@ class List:
         Returns:
             Nothing
         """
-        # Variable names in list are "<varName>[<index>]". This is in addition to base naming conventions 
+        # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
 
         if type(var) is ast.Num:
             if type(var.n) is int:
-                self.variables.append(Int('{0}[{1}]'.format(self.varName,len(self.variables)),ctx=self.ctx))
+                self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
             elif type(var.n) is float:
-                self.variables.append(Real('{0}[{1}]'.format(self.varName,len(self.variables)),ctx=self.ctx))
+                self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
         else:
             err = "append: Don't know how to append/resolve object '{0}'".format(var)

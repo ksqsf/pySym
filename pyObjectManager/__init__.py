@@ -38,6 +38,23 @@ class ObjectManager:
 
         self.variables[ctx] = {}
 
+    def setVar(self,varName,ctx,var):
+        """
+        Input:
+            varName = variable name (i.e.: 'x')
+            ctx = Context to set for
+            var = variable object of type pyObjectManager.X
+        Action:
+            Sets variable to the input (var) object
+        Returns:
+            Nothing
+        """
+        assert type(varName) is str
+        assert type(ctx) is int
+        assert type(var) in [Int, Real, BitVec, List]
+
+        self.variables[ctx][varName] = var
+        
 
     def getVar(self,varName,ctx,varType=None,kwargs=None):
         """
