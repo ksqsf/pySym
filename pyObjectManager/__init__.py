@@ -4,6 +4,9 @@ import logging
 from copy import deepcopy
 #from pyState import z3Helpers
 from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
+
 
 logger = logging.getLogger("ObjectManager")
 
@@ -23,8 +26,8 @@ class ObjectManager:
     }
     """
 
-    def __init__(self,localVars=None):
-        self.variables = {CTX_GLOBAL: {}, CTX_RETURNS: {}} if localVars is None else localVars
+    def __init__(self,variables=None):
+        self.variables = {CTX_GLOBAL: {}, CTX_RETURNS: {}} if variables is None else variables
 
     def newCtx(self,ctx):
         """
@@ -97,7 +100,7 @@ class ObjectManager:
         # Attempt to return variable
         assert type(varName) is str
         assert type(ctx) is int
-        assert varType in [None, Int]
+        assert varType in [None, Int, Real, BitVec]
         
         create = False
         
@@ -126,9 +129,8 @@ class ObjectManager:
         
         return self.variables[ctx][varName]
 
-
+    """
     def getZ3Var(self,varName,local=True,increment=False,varType=None,previous=False,ctx=None):
-        """
         Input:
             varName = Variable name to retrieve Z3 object of
             (optional) local = Boolean if we're dealing with local scope
@@ -145,7 +147,6 @@ class ObjectManager:
             Look-up variable
         Returns:
             z3 object variable with given name or None if it cannot be found
-        """
         # It's important to look this up since we might not know going in
         # what the variable type is. This keeps track of that state.
 
@@ -187,7 +188,6 @@ class ObjectManager:
                 return z3Helpers.mk_var("{0}{1}@{2}".format(self.localVars[ctx][varName]['count'],varName,ctx),varType)
 
         # Try global
-        """
         if varName in self.globalVars:
             # Increment the counter if asked
             if increment:
@@ -201,10 +201,11 @@ class ObjectManager:
                 self.localVars[varName]['varType'] = self._varTypeToString(varType)
             
             return z3Helpers.mk_var("{0}{1}".format(count,varName),eval(self.globalVars[varName]['varType']))
-        """
 
         # We failed :-(
         return None
+
+    """
 
 
     def copy(self):
@@ -213,6 +214,6 @@ class ObjectManager:
         """
 
         return ObjectManager(
-            localVars = deepcopy(self.localVars)
+            variables = deepcopy(self.variables)
         )
 

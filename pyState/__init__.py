@@ -10,6 +10,10 @@ from types import ModuleType
 import ntpath
 import pyState.z3Helpers
 from pyObjectManager import ObjectManager
+from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
+
 
 # The current directory for running pySym
 SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
@@ -161,7 +165,8 @@ class State():
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         #self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
-        self.retVar = self.objectManager.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
+        #self.retVar = self.objectManager.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
+        self.retVar = self.objectManager.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
         # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1, 'ast_call': <ast call object>}
         self.callStack = [] if callStack is None else callStack
         self.backtrace = [] if backtrace is None else backtrace
@@ -572,7 +577,8 @@ class State():
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
-            return self.objectManager.getZ3Var(obj.id,ctx=ctx) #objectManager.resolveVariable(obj,ctx=ctx) # self.getZ3Var(obj.id,ctx=ctx)
+            #return self.objectManager.getZ3Var(obj.id,ctx=ctx) #objectManager.resolveVariable(obj,ctx=ctx) # self.getZ3Var(obj.id,ctx=ctx)
+            return self.objectManager.getVar(obj.id,ctx=ctx).getZ3Object()
         
         elif t == ast.Num:
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
@@ -723,12 +729,13 @@ class State():
         
         # Check if we have it in our localVars
         #if self.getZ3Var(var,ctx=ctx) == None:
-        if self.objectManager.getZ3Var(var,ctx=ctx) == None:
-            logger.debug("any_int: var '{0}' not in known localVars".format(var))
+        #if self.objectManager.getZ3Var(var,ctx=ctx) == None:
+        if self.objectManager.getVar(var,ctx=ctx) == None:
+            logger.debug("any_int: var '{0}' not in known variables".format(var))
             return None
 
         #var = self.getZ3Var(var,ctx=ctx)
-        var = self.objectManager.getZ3Var(var,ctx=ctx)
+        var = self.objectManager.getVar(var,ctx=ctx).getZ3Object()
         
         # Try getting the value
         value = m.eval(var)
@@ -798,11 +805,13 @@ class State():
         # Get model
         m = self.solver.model()
 
-        if self.objectManager.getZ3Var(var,ctx=ctx) == None:
+        try:
+            self.objectManager.getVar(var,ctx=ctx)
+        except:
             logger.debug("any_real: var '{0}' not found".format(var))
             return None
         
-        var = self.objectManager.getZ3Var(var,ctx=ctx)
+        var = self.objectManager.getVar(var,ctx=ctx).getZ3Object()
 
         # Try getting the value
         value = m.eval(var)

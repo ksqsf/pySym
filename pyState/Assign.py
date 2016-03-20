@@ -5,6 +5,9 @@ from pyState import hasRealComponent, ReturnObject
 import pyState.z3Helpers
 import pyState.BinOp, pyState.Call
 from copy import deepcopy
+from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -27,16 +30,19 @@ def _handleAssignNum(state,target,value):
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
     elif hasRealComponent(value):
         #x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
-        x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.RealSort(),ctx=state.ctx)
+        #x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.RealSort(),ctx=state.ctx)
+        x = state.objectManager.getVar(varName,ctx=state.ctx,varType=Real).getZ3Object(increment=True)
 
     # See if our output should be a BitVec
     elif type(value) in [z3.BitVecRef, z3.BitVecNumRef]:
         #x = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
-        x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()),ctx=state.ctx)
+        #x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()),ctx=state.ctx)
+        x = state.objectManager.getVar(varName,ctx=state.ctx,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
 
     else: 
         #x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
-        x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.IntSort(),ctx=state.ctx)
+        #x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.IntSort(),ctx=state.ctx)
+        x = state.objectManager.getVar(varName,ctx=state.ctx,varType=Int).getZ3Object(increment=True)
 
     state.addConstraint(x == value)
     # Pop the instruction off
