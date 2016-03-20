@@ -27,21 +27,18 @@ def _handleAssignNum(state,target,value):
     if type(value) == ReturnObject:
         return [state]
 
+    if type(value) in [Int, Real, BitVec]:
+        value = value.getZ3Object()
+
     # Check if we have any Real vars to create the correct corresponding value (z3 doesn't mix types well)
-    elif hasRealComponent(value):
-        #x = state.getZ3Var(varName,increment=True,varType=z3.RealSort())
-        #x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.RealSort(),ctx=state.ctx)
+    if hasRealComponent(value):
         x = state.objectManager.getVar(varName,ctx=state.ctx,varType=Real).getZ3Object(increment=True)
 
     # See if our output should be a BitVec
     elif type(value) in [z3.BitVecRef, z3.BitVecNumRef]:
-        #x = state.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()))
-        #x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.BitVecSort(value.size()),ctx=state.ctx)
         x = state.objectManager.getVar(varName,ctx=state.ctx,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
 
     else: 
-        #x = state.getZ3Var(varName,increment=True,varType=z3.IntSort())
-        #x = state.objectManager.getZ3Var(varName,increment=True,varType=z3.IntSort(),ctx=state.ctx)
         x = state.objectManager.getVar(varName,ctx=state.ctx,varType=Int).getZ3Object(increment=True)
 
     state.addConstraint(x == value)

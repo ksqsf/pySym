@@ -317,13 +317,14 @@ class State():
         if type(obj) == ReturnObject:
             return obj
         
+        if type(obj) in [Int, Real, BitVec]:
+            obj = obj.getZ3Object()
+        
         # Check for int vs real
         if hasRealComponent(obj):
-            #retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.RealSort(),ctx=1,increment=True)
-            retVar = self.objectManager.getZ3Var('ret{0}'.format(self.retID),varType=z3.RealSort(),ctx=1,increment=True)
+            retVar = self.objectManager.getVar('ret{0}'.format(self.retID),varType=Real,ctx=1).getZ3Object(increment=True)
         
         else:
-            #retVar = self.getZ3Var('ret{0}'.format(self.retID),varType=z3.IntSort(),ctx=1,increment=True)
             retVar = self.objectManager.getVar('ret{0}'.format(self.retID),varType=Int,ctx=1).getZ3Object(increment=True)
         
         # Add the constraint
@@ -381,7 +382,6 @@ class State():
             #caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
-            #dest_arg = self.getZ3Var(func.args.args[i].arg,increment=True,varType=duplicateSort(caller_arg))
             varType, kwargs = duplicateSort(caller_arg)
             dest_arg = self.objectManager.getVar(func.args.args[i].arg,ctx=self.ctx,varType=varType,kwargs=kwargs)
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
@@ -399,7 +399,6 @@ class State():
                 raise Exception(err)
             caller_arg = self.resolveObject(call.keywords[i].value,ctx=oldCtx)
             caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
-            #dest_arg = self.getZ3Var(call.keywords[i].arg,increment=True,varType=duplicateSort(caller_arg)) 
             varType, kwargs = duplicateSort(caller_arg)
             dest_arg = self.objectManager.getVar(call.keywords[i].arg,varType=varType,kwargs=kwargs,ctx=self.ctx)
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
@@ -413,7 +412,6 @@ class State():
             argIndex = func.args.args.index(arg) - (len(func.args.args) - len(func.args.defaults))
             caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
             caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
-            #dest_arg = self.getZ3Var(arg.arg,increment=True,varType=duplicateSort(caller_arg))
             varType, kwargs = duplicateSort(caller_arg)
             dest_arg = self.objectManager.getVar(arg.arg,varType=varType,kwargs=kwargs,ctx=self.ctx)
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg)
@@ -593,7 +591,6 @@ class State():
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
-            #return self.objectManager.getZ3Var(obj.id,ctx=ctx) #objectManager.resolveVariable(obj,ctx=ctx) # self.getZ3Var(obj.id,ctx=ctx)
             return self.objectManager.getVar(obj.id,ctx=ctx)
         
         elif t == ast.Num:
@@ -612,7 +609,6 @@ class State():
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
-            #return self.getZ3Var('ret{0}'.format(obj.retID),ctx=1)
             return self.objectManager.getVar('ret{0}'.format(obj.retID),ctx=1).getZ3Object()
 
         # Hack-ish solution to handle calls
@@ -652,9 +648,7 @@ class State():
                 
                 # Change our state, record the return object
                 Call.handle(self,obj,retObj=retObj)
-                #retObj = Call.handle(self,obj)
             
-                #print(retObj.retID)
                 # Return the ReturnObject back to caller to inform them of the pending call
                 return retObj
 
@@ -744,8 +738,6 @@ class State():
         m = self.solver.model()
         
         # Check if we have it in our localVars
-        #if self.getZ3Var(var,ctx=ctx) == None:
-        #if self.objectManager.getZ3Var(var,ctx=ctx) == None:
         if self.objectManager.getVar(var,ctx=ctx) == None:
             logger.debug("any_int: var '{0}' not in known variables".format(var))
             return None

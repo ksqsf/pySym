@@ -167,7 +167,8 @@ def test_pySym_callwithKeyWordAndDefaultReturn():
     p = p.step()[0]
     
     assert p.state.isSat()
-    assert p.state.any_int('x') == None
+    with pytest.raises(Exception):
+        p.state.any_int('x')
     assert p.state.any_int('a') == 1
     assert p.state.any_int('b') == 2
     assert p.state.any_real('c') == 2
@@ -216,7 +217,8 @@ def test_pySym_callwithKeyWordAndDefault():
     assert p.state.any_int('a') == 1
     assert p.state.any_int('b') == 2
     assert p.state.any_real('c') == 2.5
-    assert p.state.any_int('x') == None
+    with pytest.raises(Exception):
+        p.state.any_int('x')
 
 
 
@@ -236,7 +238,8 @@ def test_pySym_callThreeArgs():
     assert p.state.any_int('a') == 1
     assert p.state.any_real('b') == 2.2
     assert p.state.any_real('c') == 3.5
-    assert p.state.any_int('x') == None
+    with pytest.raises(Exception):
+        p.state.any_int('x')
     
     p = p.step()[0]
     assert p.state.isSat()
@@ -246,7 +249,8 @@ def test_pySym_callThreeArgs():
     p = p.step()[0]
     
     assert p.state.isSat()
-    assert p.state.any_int('a') == None
+    with pytest.raises(Exception):
+        p.state.any_int('a')
     assert p.state.any_real('b') == None
     assert p.state.any_real('c') == None
     assert p.state.any_int('x') == 1
@@ -266,7 +270,8 @@ def test_pySym_CallNoArgs():
     p = p.step()[0]
     
     assert p.state.isSat()
-    assert p.state.any_int('x') == None # New context means there should be no more x
+    with pytest.raises(Exception):
+        p.state.any_int('x') # New context means there should be no more x
     
     p = p.step()[0]
     
