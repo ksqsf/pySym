@@ -21,6 +21,9 @@ class List:
         self.ctx = ctx
         self.variables = []
 
+
+    def increment(self):
+        self.count += 1
         
     def append(self,var):
         """

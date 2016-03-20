@@ -8,6 +8,7 @@ from copy import deepcopy
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
+from pyObjectManager.List import List
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -48,6 +49,37 @@ def _handleAssignNum(state,target,value):
     # Return the state
     return [state]
 
+def _handleAssignList(state,target,listObject):
+    assert type(target) is ast.Name
+    assert type(listObject) is ast.List
+
+    #############################
+    # Resolve Calls in the list #
+    #############################
+
+    # Perform any calls if need be
+    for elm in listObject.elts:
+        if type(elm) is ast.Call:
+            ret = state.resolveObject(elm)
+
+            # If we're making a call, return for now so we can do that
+            if type(ret) is ReturnObject:
+                return [state]
+    
+    ####################################
+    # Append each element individually #
+    ####################################
+    var = state.getVar(target.id,varType=List)
+    # Make sure we get a fresh list variable
+    var.increment()
+    
+    # TODO: This will probably fail on ReturnObjects
+    for elm in listObject.elts:
+        var.append(elm)
+
+    state.path.pop(0) if len(state.path) > 0 else None
+    return [state]
+
 
 def handle(state,element):
     """
@@ -72,6 +104,9 @@ def handle(state,element):
     if type(value) in [ast.Num, ast.Name, ast.BinOp, ReturnObject]:
         return _handleAssignNum(state,target,state.resolveObject(value))
     
+    elif type(value) is ast.List:
+        return _handleAssignList(state,target,value)
+
     elif type(value) is ast.Call:
         ret = state.resolveObject(value)
         # If we don't get a return object back, this is likely a simFunction call
