@@ -17,7 +17,7 @@ l = [1,2.2,3]
 """
 
 test2 = """
-l = [1,2.2,[3,4,5]]
+l = [1,2.2,[3,[4,5],6]]
 """
 
 def test_pyObjectManager_List_BasicAssign():
@@ -36,5 +36,5 @@ def test_pyObjectManager_List_NestedList():
     
     pg.explore()
     assert len(pg.completed) == 1
-    assert pg.completed[0].state.any_list('l') == [1,2.2,[3,4,5]]
+    assert pg.completed[0].state.any_list('l') == [1,2.2,[3,[4,5],6]]
 

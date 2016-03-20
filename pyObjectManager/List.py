@@ -27,10 +27,11 @@ class List:
         # reset variable list if we're incrementing our count
         self.variables = []
         
-    def append(self,var):
+    def append(self,var,kwargs=None):
         """
         Input:
             var = pyObjectManager oject to append (i.e.: Int/Real/etc)
+            (optional) kwargs = optional keyword args needed to instantiate type
         Action:
             Resolves object, creates variable if needed
         Returns:
@@ -38,12 +39,11 @@ class List:
         """
         # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
 
-        if type(var) is ast.Num:
-            if type(var.n) is int:
-                self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+        if var is Int:
+            self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
-            elif type(var.n) is float:
-                self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+        elif var is Real:
+            self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
         elif type(var) is List:
             self.variables.append(var)
