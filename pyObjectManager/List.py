@@ -1,4 +1,5 @@
 import z3
+import ast
 import logging
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
@@ -33,7 +34,7 @@ class List:
 
         if type(var) is ast.Num:
             if type(var.n) is int:
-                self.variables.append(Int('{0}@{1}'.format(self.varName
+                self.variables.append(Int('{0}@{1}'.format(self.varName,len(self.variables)),ctx=self.ctx,value=var.n))
 
         else:
             err = "append: Don't know how to append/resolve object '{0}'".format(var)
