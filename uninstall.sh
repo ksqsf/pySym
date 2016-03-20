@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Simple uninstall
 
 PYSYM_VENV="${HOME}/.virtualenvs/pySym"
