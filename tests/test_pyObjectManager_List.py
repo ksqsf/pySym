@@ -20,6 +20,54 @@ test2 = """
 l = [1,2.2,[3,[4,5],6]]
 """
 
+test3 = """
+x = 3
+l = [1,2,x,4]
+"""
+
+test4 = """
+x = 3
+l = [1,2,[x,4]]
+"""
+
+test5 = """
+x = 3
+l = [1,2,[x,4]]
+x = 5
+"""
+
+
+
+def test_pyObjectManager_List_varInList():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,2,3,4]
+
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,2,[3,4]]
+
+
+    # NOTE: This is correct behavior. Python resolves the object when creating the list
+    # Updating the var later has no affect on the list
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,2,[3,4]]
+
+
+
 def test_pyObjectManager_List_BasicAssign():
     b = ast.parse(test1).body
     p = Path(b,source=test1)

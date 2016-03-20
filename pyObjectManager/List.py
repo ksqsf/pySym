@@ -40,12 +40,15 @@ class List:
         # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
 
         if var is Int:
+            logger.debug("append: adding Int")
             self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
         elif var is Real:
+            logger.debug("append: adding Real")
             self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
         elif type(var) is List:
+            logger.debug("append: adding List")
             self.variables.append(var)
 
         else:

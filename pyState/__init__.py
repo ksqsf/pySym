@@ -625,18 +625,20 @@ class State():
             if type(elm) is ast.Num:
                 elm_resolved = self.resolveObject(elm)
                 t = Int if elm_resolved.is_int() else Real
-                var.append(Real)
+                var.append(t)
                 self.addConstraint(var[-1].getZ3Object() == elm_resolved)
 
             elif type(elm) is ast.List:
                 # Recursively resolve this
                 var.append(self._resolveList(elm,ctx=ctx,i=i+1))
 
-            #elif type(elm) is ast.Name:
-            #    # Resolve the name
-            #    elm_resolved = self.resolveObject(elm)
-            #    t,args = duplicateSort(elm_resolved)
-            #    var.append(
+            elif type(elm) is ast.Name:
+                # Resolve the name
+                elm_resolved = self.resolveObject(elm)
+                t,args = duplicateSort(elm_resolved)
+                var.append(var=t,kwargs=args)
+                if t in [Int, Real, BitVec]:
+                    self.addConstraint(var[-1].getZ3Object() == elm_resolved.getZ3Object())
  
             else:
                 err = "Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
