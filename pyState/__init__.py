@@ -80,7 +80,7 @@ def duplicateSort(obj):
         return type(obj), None
 
     if type(obj) is BitVec:
-        return type(obj), {'size': obj.size()}
+        return type(obj), {'size': obj.size}
 
     
     if type(obj) in [z3.IntNumRef,z3.RatNumRef,z3.ArithRef]:
@@ -635,6 +635,7 @@ class State():
             elif type(elm) is ast.Name:
                 # Resolve the name
                 elm_resolved = self.resolveObject(elm)
+                print(type(elm_resolved))
                 t,args = duplicateSort(elm_resolved)
                 var.append(var=t,kwargs=args)
                 if t in [Int, Real, BitVec]:
@@ -838,7 +839,7 @@ class State():
         out = []
 
         for elm in listObject:
-            if type(elm) is Int:
+            if type(elm) in [Int,BitVec]:
                 out.append(self.any_int(elm,ctx=ctx))
             elif type(elm) is Real:
                 out.append(self.any_real(elm,ctx=ctx))

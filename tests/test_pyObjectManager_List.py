@@ -36,6 +36,54 @@ l = [1,2,[x,4]]
 x = 5
 """
 
+test6 = """
+y = 1
+x = y+3
+l = [1,2,x,4]
+"""
+
+test7 = """
+l = [1,2,3,4]
+l = [4,3,2,1]
+"""
+
+test8 = """
+x = pyState.BVV(1337,32)
+l = [1,2,x,4]
+"""
+
+test9 = """
+x = pyState.BVV(1337,32)
+l = [1,[2,x],4]
+"""
+
+def test_pyObjectManager_List_BitVec():
+    b = ast.parse(test8).body
+    p = Path(b,source=test8)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,2,1337,4]
+
+    b = ast.parse(test9).body
+    p = Path(b,source=test9)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,[2,1337],4]
+
+
+
+def test_pyObjectManager_List_ReAssign():
+    b = ast.parse(test7).body
+    p = Path(b,source=test7)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [4,3,2,1]
 
 
 def test_pyObjectManager_List_varInList():
@@ -65,6 +113,14 @@ def test_pyObjectManager_List_varInList():
     pg.explore()
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1,2,[3,4]]
+
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,2,4,4]
 
 
 
