@@ -911,9 +911,9 @@ class State():
             n = number of viable solutions to find (i.e.: 5)
             (optional) ctx = context if not current one
         Action:
-            Resolve possible value for this variable
+            Resolve n possible values for this variable
         Return:
-            Discovered variable or None if none found
+            Discovered n values or [] if none found
         """
         # Grab appropriate ctx
         ctx = ctx if ctx is not None else self.ctx
@@ -939,8 +939,42 @@ class State():
             out.append(myInt)
             s.addConstraint(varZ3Object != myInt)
 
-        for i in range(len(out)):
-            s.popConstraint()
+        return out
+
+    def any_n_real(self,var,n,ctx=None):
+        """
+        Input:
+            var = variable name. i.e.: "x" --or-- ObjectManager object (i.e.: Int)
+            n = number of viable solutions to find (i.e.: 5)
+            (optional) ctx = context if not current one
+        Action:
+            Resolve n possible values for this variable
+        Return:
+            Discovered possible values or [] if none found
+        """
+        # Grab appropriate ctx
+        ctx = ctx if ctx is not None else self.ctx
+
+        assert type(n) is int
+
+        # Doing this on a copy of the state since we're modifying it
+        s = self.copy()
+
+        varZ3Object = s.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
+        out = []
+
+        for i in range(n):
+            try:
+                myInt = s.any_real(var,ctx=ctx)
+            except:
+                #Looks like we're done
+                break
+
+            if myInt == None:
+                break
+
+            out.append(myInt)
+            s.addConstraint(varZ3Object != myInt)
 
         return out
 

@@ -19,6 +19,35 @@ test3 = "x = 3.1415"
 test4 = """
 x = pyState.Int(x)
 """
+test5 = """
+x = pyState.Real(x)
+"""
+
+def test_any_n_real():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_real('x') == 3.1415
+    # Duplicate test to ensure we're not destroying state
+    assert pg.completed[0].state.any_n_real('x',10) == [3.1415]
+    assert pg.completed[0].state.any_n_real('x',10) == [3.1415]
+
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_real('x') != None
+    # Duplicate test to ensure we're not destroying state
+    assert len(pg.completed[0].state.any_n_real('x',10)) == 10
+    assert len(pg.completed[0].state.any_n_real('x',10)) == 10
+
 
 def test_any_n_int():
     b = ast.parse(test1).body
