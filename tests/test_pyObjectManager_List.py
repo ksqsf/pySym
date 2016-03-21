@@ -57,6 +57,23 @@ x = pyState.BVV(1337,32)
 l = [1,[2,x],4]
 """
 
+test10 = """
+def test():
+    return 12
+
+l = [1,test(),[test() + test()]]
+"""
+
+def test_pyObjectManager_List_FunctionCalls():
+    b = ast.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1, 12, [24]]
+
+
 def test_pyObjectManager_List_BitVec():
     b = ast.parse(test8).body
     p = Path(b,source=test8)

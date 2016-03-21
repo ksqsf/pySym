@@ -54,6 +54,11 @@ def _handleAssignList(state,target,listObject):
     assert type(listObject) is ast.List
 
     l = state.resolveObject(listObject)
+
+    # If we need to wait for a call to finish
+    if type(l) is ReturnObject:
+        return [state]
+
     state.setVar(varName=target.id,var=l)
     
     state.path.pop(0) if len(state.path) > 0 else None

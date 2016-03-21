@@ -108,6 +108,7 @@ Here's a list of things I have left to implement. This is really just a subset o
 * list setters
  * a[x] = 5
  * a[x] += 1
+* Rework ReturnObject to return pyObjectManager objects
 * Add automatic BitVector scaling
  * http://stackoverflow.com/questions/22568867/z3-bitvector-overflow-checking-from-python
  * http://stackoverflow.com/questions/14579377/z3py-how-to-extend-and-trunc-variables

@@ -622,7 +622,14 @@ class State():
         # TODO: This will probably fail on ReturnObjects
         for elm in listObject.elts:
             logger.debug("_resolveList: Adding {0} to tempList".format(elm))
-            if type(elm) is ast.Num:
+            if type(elm) is ReturnObject:
+                elm_resolved = self.resolveObject(elm)
+                t,args = duplicateSort(elm_resolved)
+                var.append(var=t,kwargs=args)
+                if t in [Int, Real, BitVec]:
+                    self.addConstraint(var[-1].getZ3Object() == elm_resolved)
+
+            elif type(elm) is ast.Num:
                 elm_resolved = self.resolveObject(elm)
                 t = Int if elm_resolved.is_int() else Real
                 var.append(t)
@@ -630,19 +637,26 @@ class State():
 
             elif type(elm) is ast.List:
                 # Recursively resolve this
-                var.append(self._resolveList(elm,ctx=ctx,i=i+1))
+                ret = self._resolveList(elm,ctx=ctx,i=i+1)
+                if type(ret) is ReturnObject:
+                    return ret
+                var.append(ret)
 
-            elif type(elm) is ast.Name:
+            elif type(elm) in [ast.Name, ast.BinOp]:
                 # Resolve the name
                 elm_resolved = self.resolveObject(elm)
-                print(type(elm_resolved))
+                if type(elm_resolved) is ReturnObject:
+                    return elm_resolved
+
                 t,args = duplicateSort(elm_resolved)
                 var.append(var=t,kwargs=args)
-                if t in [Int, Real, BitVec]:
+                if pyState.z3Helpers.isZ3Object(elm_resolved):
+                    self.addConstraint(var[-1].getZ3Object() == elm_resolved)
+                elif type(elm_resolved) in [Int, Real, BitVec]:
                     self.addConstraint(var[-1].getZ3Object() == elm_resolved.getZ3Object())
  
             else:
-                err = "Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
+                err = "_resolveList: Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
                 logger.error(err)
                 raise Exception(err)
 
