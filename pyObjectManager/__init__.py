@@ -27,8 +27,9 @@ class ObjectManager:
     }
     """
 
-    def __init__(self,variables=None):
+    def __init__(self,variables=None,returnObjects=None):
         self.variables = {CTX_GLOBAL: {}, CTX_RETURNS: {}} if variables is None else variables
+        self.returnObjects = returnObjects if returnObjects is not None else {}
 
     def newCtx(self,ctx):
         """
@@ -75,6 +76,7 @@ class ObjectManager:
         assert varType in [None, Int, Real, BitVec, List]
         
         create = False
+        count = None
         
         # Check that we already have this variable defined
         if varName in self.variables[ctx]:
@@ -85,6 +87,8 @@ class ObjectManager:
                 # If the variable type is different or it's settings are different, we need to create a new object
                 if type(self.variables[ctx][varName]) is not varType or not self.variables[ctx][varName]._isSame(**kwargs if kwargs is not None else {}):
                     create = True
+                    # Re-using variable names is BAD!
+                    count = self.variables[ctx][varName].count + 1
             
             # If we can just return the current one, let's do it
             if not create:
@@ -97,7 +101,7 @@ class ObjectManager:
             raise Exception(err)
         
         # Make the var
-        self.variables[ctx][varName] = varType(varName=varName,ctx=ctx,**kwargs if kwargs is not None else {})
+        self.variables[ctx][varName] = varType(varName=varName,ctx=ctx,count=count,**kwargs if kwargs is not None else {})
         
         return self.variables[ctx][varName]
 
@@ -108,6 +112,7 @@ class ObjectManager:
         """
 
         return ObjectManager(
-            variables = deepcopy(self.variables)
+            variables = deepcopy(self.variables),
+            returnObjects = deepcopy(self.returnObjects)
         )
 

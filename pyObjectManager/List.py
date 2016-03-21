@@ -48,7 +48,7 @@ class List:
             self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
         elif var is BitVec:
-            logger.debug("append: adding Real")
+            logger.debug("append: adding BitVec")
             self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,**kwargs if kwargs is not None else {}))
 
         elif type(var) is List:

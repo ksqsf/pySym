@@ -14,6 +14,12 @@ class BitVec:
         self.varName = varName
         self.ctx = ctx
         self.size = size
+
+    def increment(self):
+        """
+        Increment the counter
+        """
+        self.count += 1
         
     def getZ3Object(self,increment=False):
         """
@@ -21,7 +27,7 @@ class BitVec:
         """
         
         if increment:
-            self.count += 1
+            self.increment()
         
         return z3.BitVec("{0}{1}@{2}".format(self.count,self.varName,self.ctx),self.size)
     
