@@ -49,10 +49,17 @@ def handle(state,element,ctx=None):
 
     # Resolve the index value
     sub_index = state.resolveObject(sub_slice.value)
-    
-    if not sub_index.isStatic():
+
+    if sub_index.isStatic():
+        index = sub_index.getZ3Object().as_long()
+
+    # Check if it's a variable that only has one possibility
+    elif type(sub_index) in [Int, BitVec] and len(state.any_n_int(sub_index,2)) == 1:
+        index = state.any_int(sub_index)
+
+    else:
         err = "handle: Don't know how to handle symbolic slice integers at the moment"
         logger.error(err)
         raise Exception(err)
 
-    return sub_object[sub_index.getZ3Object().as_long()]
+    return sub_object[index]
