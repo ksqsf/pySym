@@ -91,6 +91,17 @@ def handle(state,element):
     elif type(value) is ast.List:
         return _handleAssignList(state,target,value)
 
+    elif type(value) is ast.Subscript:
+        # Figure out what we're getting back
+        resolved = state.resolveObject(value)
+        if type(resolved) in [Int, Real, BitVec]:
+            return _handleAssignNum(state,target,resolved)
+
+        else:
+            err = "handle: Cannot handle Subscript return of {2} at Line {0} Col {1}".format(element.lineno,element.col_offset,resolved)
+            logger.error(err)
+            raise Exception(err)
+
     elif type(value) is ast.Call:
         ret = state.resolveObject(value)
         # If we don't get a return object back, this is likely a simFunction call

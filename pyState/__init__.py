@@ -2,7 +2,7 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break
+import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript
 import random
 import os.path
 import importlib
@@ -730,6 +730,10 @@ class State():
         elif t == ast.BinOp:
             logger.debug("resolveObject: Resolving object type BinOp")
             return BinOp.handle(self,obj,ctx=ctx)
+
+        elif t == ast.Subscript:
+            logger.debug("resolveObject: Resolving object type Subscript")
+            return pyState.Subscript.handle(self,obj,ctx=ctx)
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
