@@ -7,6 +7,8 @@ import z3
 from pyState import State
 import pyState.Assign
 import pytest
+from pyPath import Path
+from pyPathGroup import PathGroup
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
@@ -14,6 +16,35 @@ from pyObjectManager.BitVec import BitVec
 test1 = "x = 1"
 test2 = "x = 2"
 test3 = "x = 3.1415"
+test4 = """
+x = pyState.Int(x)
+"""
+
+def test_any_n_int():
+    b = ast.parse(test1).body
+    p = Path(b,source=test1)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('x') == 1
+    # Duplicate test to ensure we're not destroying state
+    assert pg.completed[0].state.any_n_int('x',10) == [1]
+    assert pg.completed[0].state.any_n_int('x',10) == [1]
+
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('x') != None
+    # Duplicate test to ensure we're not destroying state
+    assert len(pg.completed[0].state.any_n_int('x',10)) == 10
+    assert len(pg.completed[0].state.any_n_int('x',10)) == 10
+
 
 
 def test_assignInt():
