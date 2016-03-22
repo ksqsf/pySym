@@ -105,6 +105,31 @@ class ObjectManager:
         
         return self.variables[ctx][varName]
 
+    def getParent(self,key,haystack=None):
+        """
+        Returns the parent object for any given object by recursively searching.
+        """
+        # TODO: This might get to be a long search if there are a lot of variables...
+
+        haystack = self.variables if haystack is None else haystack
+
+        if isinstance(haystack,dict):
+            for k,v in haystack.items():
+                if v == key:
+                    return k
+                elif type(v) in [dict, List]:
+                    p = self.getParent(key,v)
+                    if p:
+                        return p
+        elif isinstance(haystack,List):
+            for v in haystack:
+                if v == key:
+                    return haystack
+                elif type(v) in [dict,List]:
+                    p = self.getParent(key,v)
+                    if p:
+                        return p
+
 
     def copy(self):
         """
