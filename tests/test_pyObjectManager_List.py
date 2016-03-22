@@ -11,6 +11,10 @@ import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
 import pytest
+from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
+from pyObjectManager.List import List
 
 test1 = """
 l = [1,2.2,3]
@@ -63,6 +67,41 @@ def test():
 
 l = [1,test(),[test() + test()]]
 """
+
+def test_pyObjectManager_List_setitem():
+    b = ast.parse(test1).body
+    p = Path(b,source=test1)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    
+    l = pg.completed[0].state.getVar('l')
+
+    # Base check
+    assert l[1].count == 0
+    assert type(l[1]) == Real
+
+    # Assign an Int
+    l[1] = Int(varName='x',ctx=0)
+    assert l[1].count == 1
+    assert type(l[1]) == Int
+
+    # Assign back to Real
+    l[1] = Real(varName='x',ctx=0)
+    assert l[1].count == 2
+    assert type(l[1]) == Real
+    
+    # Assign to BitVec
+    l[1] = BitVec(varName='x',ctx=0,size=32)
+    assert l[1].count == 3
+    assert type(l[1]) == BitVec
+    
+    # Assign List
+    l[1] = List(varName='x',ctx=0)
+    assert l[1].count == 4
+    assert type(l[1]) == List
+
 
 def test_pyObjectManager_List_FunctionCalls():
     b = ast.parse(test10).body

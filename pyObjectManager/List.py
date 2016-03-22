@@ -73,3 +73,37 @@ class List:
         We want to be able to do "list[x]", so we define this.
         """
         return self.variables[index]
+
+    def __setitem__(self,key,value):
+        """
+        Sets value at index key. Checks for variable type, updates counter according, similar to getVar call
+        """
+        # Attempt to return variable
+        assert type(key) is int
+        assert type(value) in [Int, Real, BitVec, List]
+
+        # Get that index's current count
+        count = self.variables[key].count + 1
+
+        if type(value) is Int:
+            logger.debug("__setitem__: setting Int")
+            self.variables[key] = Int('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count)
+
+        elif type(value) is Real:
+            logger.debug("__setitem__: setting Real")
+            self.variables[key] = Real('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count)
+
+        elif type(value) is BitVec:
+            logger.debug("__setitem__: setting BitVec")
+            self.variables[key] = BitVec('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count,size=value.size)
+
+        elif type(value) is List:
+            logger.debug("__setitem__: setting List")
+            self.variables[key] = value
+            value.count = count
+
+        else:
+            err = "__setitem__: Don't know how to set object '{0}'".format(value)
+            logger.error(err)
+            raise Exception(err)
+

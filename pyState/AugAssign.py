@@ -27,9 +27,13 @@ def handle(state,element):
     op = element.op    
 
     # Only know how to handle name types
-    if type(target) == ast.Name:
+    if type(target) in [ast.Name, ast.Subscript]:
         # Grab the var name
         target = target.id
+        #oldTarget = state.resolveObject(target)
+    
+    #elif type(target) == ast.Subscript:
+    #    target = state.resolveObject(target)
     
     else:
         err = "Don't know how to handle target type {0} at line {1} col {2}".format(type(target),target.lineno,target.col_offset)
@@ -48,8 +52,6 @@ def handle(state,element):
             value = value.getZ3Object()
 
     elif type(value) == ast.Name:
-        #value = state.getZ3Var(value.id)
-        #value = state.objectManager.getZ3Var(value.id,ctx=state.ctx)
         value = state.getVar(value.id).getZ3Object()
 
     else:
@@ -60,6 +62,7 @@ def handle(state,element):
     # Basic sanity checks complete. For augment assigns we will always need to update the vars.
     # Grab the old var and create a new now
     oldTargetVar = state.getVar(target).getZ3Object()
+    #oldTargetVar = oldTarget.getZ3Object()
 
     # Match up the right hand side
     oldTargetVar, value = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value,op)
