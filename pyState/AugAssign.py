@@ -27,11 +27,16 @@ def handle(state,element):
     op = element.op    
 
     # Only know how to handle name types
-    if type(target) in [ast.Name, ast.Subscript]:
+    if type(target) in [ast.Name]:
+        oldTarget = state.resolveObject(target)
         # Grab the var name
-        target = target.id
-        #oldTarget = state.resolveObject(target)
+        targetName = target.id
     
+    elif type(target) is ast.Subscript:
+        oldTarget = state.resolveObject(target)
+        parent = state.objectManager.getParent(oldTarget)
+        index = parent.index(oldTarget)
+
     #elif type(target) == ast.Subscript:
     #    target = state.resolveObject(target)
     
@@ -61,19 +66,31 @@ def handle(state,element):
     
     # Basic sanity checks complete. For augment assigns we will always need to update the vars.
     # Grab the old var and create a new now
-    oldTargetVar = state.getVar(target).getZ3Object()
-    #oldTargetVar = oldTarget.getZ3Object()
+    #oldTargetVar = state.getVar(target).getZ3Object()
+    oldTargetVar = oldTarget.getZ3Object()
 
     # Match up the right hand side
     oldTargetVar, value = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value,op)
     
     # Z3 gets confused if we don't change our var to Real when comparing w/ Real
     if hasRealComponent(value):
-        newTargetVar = state.getVar(target,varType=Real).getZ3Object(increment=True)
-    elif type(value) is z3.BitVecRef:
-        newTargetVar = state.getVar(target,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
+        if type(target) == ast.Name:
+            newTargetVar = state.getVar(targetName,varType=Real).getZ3Object(increment=True)
+        elif type(target) == ast.Subscript:
+            parent[index] = Real('temp',ctx=state.ctx)
+            newTargetVar = parent[index].getZ3Object()
+    elif type(value) in [z3.BitVecRef,z3.BitVecNumRef]:
+        if type(target) == ast.Name:
+            newTargetVar = state.getVar(targetName,varType=BitVec,kwargs={'size':value.size()}).getZ3Object(increment=True)
+        elif type(target) == ast.Subscript:
+            parent[index] = BitVec('temp',ctx=state.ctx,size=value.size())
+            newTargetVar = parent[index].getZ3Object()
     else:
-        newTargetVar = state.getVar(target).getZ3Object(increment=True)
+        if type(target) == ast.Name:
+            newTargetVar = state.getVar(targetName).getZ3Object(increment=True)
+        elif type(target) == ast.Subscript:
+            parent[index] = Int('temp',ctx=state.ctx)
+            newTargetVar = parent[index].getZ3Object()
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
@@ -104,7 +121,7 @@ def handle(state,element):
         state.addConstraint(newTargetVar == oldTargetVar % value)
 
     elif type(op) == ast.BitXor:
-        logger.debug("{0} = {1} ^ {2}".format(newTargetVar.size(),oldTargetVar.size(),value.size()))
+        logger.debug("{0} = {1} ^ {2}".format(newTargetVar,oldTargetVar,value))
         state.addConstraint(newTargetVar == oldTargetVar ^ value)
 
     elif type(op) == ast.BitOr:
@@ -130,6 +147,6 @@ def handle(state,element):
 
     # Pop the instruction off
     state.path.pop(0)
-    
+
     # Return the state
     return [state]

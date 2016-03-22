@@ -68,6 +68,12 @@ class List:
         """
         return True
 
+    def index(self,elm):
+        """
+        Returns index of the given element. Raises exception if it's not found
+        """
+        return self.variables.index(elm)
+
     def __getitem__(self,index):
         """
         We want to be able to do "list[x]", so we define this.

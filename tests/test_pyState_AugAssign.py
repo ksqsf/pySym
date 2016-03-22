@@ -68,6 +68,63 @@ x = 50%6
 y = x%4
 """
 
+test9 = """
+l = [1,2.2,3]
+l[1] += 5.5
+"""
+
+test10 = """
+x = pyState.BVV(123,32)
+y = pyState.BVV(4,32)
+l = [1,x,3]
+l[1] += y
+"""
+
+test11 = """
+l = [1,2,3]
+l[1] += 2
+"""
+
+test12 = """
+x = pyState.BVV(5,32)
+l = [1,x,3]
+l[1] ^= 2
+"""
+
+def test_pySym_AugAssign_Subscript():
+    b = ast.parse(test9).body
+    p = Path(b,source=test9)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,7.7,3]
+
+    b = ast.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1, 127, 3]
+
+    b = ast.parse(test11).body
+    p = Path(b,source=test11)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1, 4, 3]
+
+    b = ast.parse(test12).body
+    p = Path(b,source=test12)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1, 7, 3]
+
+
 def test_pySym_AugAssign_Mod():
     b = ast.parse(test8).body
     p = Path(b,source=test8)
