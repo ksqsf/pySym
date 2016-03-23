@@ -23,6 +23,24 @@ l = [1,2,3]
 x = l[i]
 """
 
+test3 = """
+def test():
+    return 4
+
+l = [1,2,3,[test(),5]]
+x = l[3][0]
+"""
+
+def test_pyState_Subscript_MultiDimentional():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('x') == 4
+
+
 def test_pyState_Subscript_VariableSubscript():
     b = ast.parse(test2).body
     p = Path(b,source=test2)

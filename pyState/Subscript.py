@@ -36,7 +36,7 @@ def handle(state,element,ctx=None,parent=False):
         logger.error(err)
         raise Exception(err)
 
-    if type(sub_value) is not ast.Name:
+    if type(sub_value) not in [ast.Name,ast.Subscript]:
         err = "handle: Don't know how to handle value type {0}".format(sub_value)
         logger.error(err)
         raise Exception(err)
