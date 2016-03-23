@@ -31,6 +31,38 @@ l = [1,2,3,[test(),5]]
 x = l[3][0]
 """
 
+test4 = """
+def test():
+    return 4
+
+l = [1,2,3,[test(),5]]
+x = l[3]
+"""
+
+test5 = """
+l = [1,2,3,[4,[5,6,7]]]
+x = l[3][1]
+"""
+
+def test_pyState_AssignListFromSubscript():
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('x') == [4,5]
+
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('x') == [5,6,7]
+
+
+
 def test_pyState_Subscript_MultiDimentional():
     b = ast.parse(test3).body
     p = Path(b,source=test3)

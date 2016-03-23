@@ -51,9 +51,13 @@ def _handleAssignNum(state,target,value):
 
 def _handleAssignList(state,target,listObject):
     assert type(target) is ast.Name
-    assert type(listObject) is ast.List
+    assert type(listObject) in [ast.List, List]
 
-    l = state.resolveObject(listObject)
+
+    if type(listObject) is ast.List:
+        l = state.resolveObject(listObject)
+    else:
+        l = listObject
 
     # If we need to wait for a call to finish
     if type(l) is ReturnObject:
@@ -96,6 +100,9 @@ def handle(state,element):
         resolved = state.resolveObject(value)
         if type(resolved) in [Int, Real, BitVec]:
             return _handleAssignNum(state,target,resolved)
+
+        elif type(resolved) is List:
+            return _handleAssignList(state,target,resolved)
 
         else:
             err = "handle: Cannot handle Subscript return of {2} at Line {0} Col {1}".format(element.lineno,element.col_offset,resolved)
