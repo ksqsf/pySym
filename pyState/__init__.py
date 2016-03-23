@@ -687,7 +687,7 @@ class State():
         return var
 
 
-    def resolveObject(self,obj,parent=None,ctx=None):
+    def resolveObject(self,obj,parent=None,ctx=None,varType=None,kwargs=None):
         """
         Input:
             obj = Some ast object (i.e.: ast.Name, ast.Num, etc)
@@ -695,6 +695,8 @@ class State():
                 last return value
             (optional) parent = parent node of obj. This is needed for resolving calls
             (optional) ctx = Context other than current to resolve in
+            (optional) varType = Type of the var to resolve. Needed if resolving a var that doesn't exist yet
+            (optional) kwargs = kwargs for the var, needed if resolving a var that doesn't exist yet
         Action:
             Resolve object into something that can be used in a constraint
         Return:
@@ -708,7 +710,7 @@ class State():
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
-            return self.getVar(obj.id,ctx=ctx)
+            return self.getVar(obj.id,ctx=ctx,varType=varType,kwargs=kwargs)
         
         elif t == ast.Num:
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))

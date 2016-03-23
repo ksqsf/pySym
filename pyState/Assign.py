@@ -63,7 +63,15 @@ def _handleAssignList(state,target,listObject):
     if type(l) is ReturnObject:
         return [state]
 
-    state.setVar(varName=target.id,var=l)
+    # Resolve the object
+    target = state.resolveObject(target,varType=List)
+    parent = state.objectManager.getParent(target)
+    index = parent.index(target)
+
+    # Set the new list
+    parent[index] = l
+
+    #state.setVar(varName=target.id,var=l)
     
     state.path.pop(0) if len(state.path) > 0 else None
     return [state]

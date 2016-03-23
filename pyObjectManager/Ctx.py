@@ -19,12 +19,18 @@ class Ctx:
         self.ctx = ctx
         self.variables = {}
 
+    def __iter__(self): return iter(self.variables)
+
+    def items(self): return self.variables.items()
 
     def index(self,elm):
         """
-        Returns index of the given element. Raises exception if it's not found
+        Returns "index" of the given element. Raises exception if it's not found
+        For a pseudo dict class, this is just the key for the key,val pair
         """
-        return self.variables.index(elm)
+        val = [k for k,v in self.variables.items() if v is elm]
+        assert len(val) == 1
+        return val[0]
 
     def __getitem__(self,index):
         """

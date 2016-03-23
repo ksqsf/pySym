@@ -7,7 +7,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
-
+from pyObjectManager.Ctx import Ctx
 
 logger = logging.getLogger("ObjectManager")
 
@@ -19,16 +19,8 @@ class ObjectManager:
     Object Manager will keep track of objects. Generally, Objects will be variables such as ints, lists, strings, etc.
     """
 
-    """
-    variables = {
-        <ctx> : {
-            <varName> : <var Class Instance>
-        }
-    }
-    """
-
     def __init__(self,variables=None,returnObjects=None):
-        self.variables = {CTX_GLOBAL: {}, CTX_RETURNS: {}} if variables is None else variables
+        self.variables = {CTX_GLOBAL: Ctx(CTX_GLOBAL), CTX_RETURNS: Ctx(CTX_RETURNS)} if variables is None else variables
         self.returnObjects = returnObjects if returnObjects is not None else {}
 
     def newCtx(self,ctx):
@@ -37,7 +29,7 @@ class ObjectManager:
         """
         assert ctx is not None
 
-        self.variables[ctx] = {}
+        self.variables[ctx] = Ctx(ctx)
 
     def setVar(self,varName,ctx,var):
         """
@@ -113,11 +105,11 @@ class ObjectManager:
 
         haystack = self.variables if haystack is None else haystack
 
-        if isinstance(haystack,dict):
+        if type(haystack) in [dict, Ctx]:
             for k,v in haystack.items():
                 if v == key:
-                    return k
-                elif type(v) in [dict, List]:
+                    return haystack
+                elif type(v) in [dict, List, Ctx]:
                     p = self.getParent(key,v)
                     if p:
                         return p
