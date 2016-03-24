@@ -24,6 +24,51 @@ $ workon pySym
 (pySym)$ py.test --cov=. --cov-config=.coveragerc
 ```
 
+# Basic/Medium Example
+Since the first example, I've implemented more things. It's still very much in development, but you can do better things with it now. Here's an example program:
+
+```python
+def test(x,y):
+    out = 2
+    while x < y:
+        out *= x
+        x += 1
+
+    return out
+
+x = 0
+z = 0
+while x < 5:
+    y = 0
+    while y < 3:
+        z += test(x,y)
+        y += 1
+    x += 1
+```
+
+You can use a path group to automagically walk through the program as follows:
+
+```python
+from pyPath import Path
+import ast
+import Colorer
+from pyPathGroup import PathGroup
+b = ast.parse(source).body
+p = Path(b,source=source)
+pg = PathGroup(p)
+pg.explore()
+```
+
+That will tell pySym to attempt to find all the paths through the program to completion. Once it completes, you can ask what the value of z was at completion.
+
+```python
+In [4]: pg
+Out[4]: <PathGroup with 45 deadended, 1 completed>
+
+In [5]: pg.completed[0].state.any_int('z')
+Out[5]: 26
+```
+
 # Basic Example
 A lot of the layout for pySym is shamelessly stolen from the angr project. If you're familiar with their calls, this will make sense to you.
 
