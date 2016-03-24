@@ -1,11 +1,12 @@
 import z3
 import ast
+from pyObjectManager.Real import Real
 
-def handle(state,var):
+def handle(state):
     """
     Returns a z3 Real object. Use this to inform pySym that something should be Real symbolic
     """
 
-    assert type(var) is ast.Name
-    
-    return z3.Real(var.id)
+    myReal = state.resolveObject(ast.Name('temp',0),ctx=1,varType=Real)
+
+    return myReal

@@ -14,6 +14,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
+from pyObjectManager.Ctx import Ctx
 
 
 # The current directory for running pySym
@@ -707,6 +708,10 @@ class State():
         """
         ctx = self.ctx if ctx is None else ctx
         t = type(obj)
+
+        # If the object is already resolved, just return it
+        if t in [Int, Real, BitVec, List, Ctx]:
+            return obj
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))

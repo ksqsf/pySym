@@ -17,10 +17,10 @@ test1 = "x = 1"
 test2 = "x = 2"
 test3 = "x = 3.1415"
 test4 = """
-x = pyState.Int(x)
+x = pyState.Int()
 """
 test5 = """
-x = pyState.Real(x)
+x = pyState.Real()
 """
 
 def test_any_n_real():

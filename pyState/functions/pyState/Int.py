@@ -1,12 +1,13 @@
 
 import z3
 import ast
+from pyObjectManager.Int import Int
 
-def handle(state,var):
+def handle(state):
     """
     Returns an Int object. Use this to inform pySym that something should be Int symbolic
     """
 
-    assert type(var) is ast.Name
-    
-    return z3.Int(var.id)
+    myInt = state.resolveObject(ast.Name('temp',0),ctx=1,varType=Int)
+
+    return myInt
