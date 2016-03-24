@@ -39,9 +39,10 @@ def _handleAssignNum(state,target,value):
     # Return the state
     return [state]
 
+
 def _handleAssignList(state,target,listObject):
     assert type(target) is ast.Name
-    assert type(listObject) is List # [ast.List, List]
+    assert type(listObject) is List 
 
     # Resolve the object
     target = state.resolveObject(target,varType=List)
