@@ -237,9 +237,14 @@ class State():
 
         elif type(var) is List:
             newList = self.getVar('tempRecurisveCopy',ctx=1,varType=List)
+            newList.increment()
+            newList = deepcopy(newList)
             # Recursively copy the list
             for elm in var:
-                newList.append(self.recursiveCopy(elm))
+                ret = self.recursiveCopy(elm)
+                newList.append(ret)
+                if type(ret) in [Int, Real, BitVec]:
+                    self.addConstraint(newList[-1].getZ3Object() == ret.getZ3Object())
 
             return newList
 

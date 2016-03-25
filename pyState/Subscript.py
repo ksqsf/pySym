@@ -113,8 +113,7 @@ def _handleSlice(state,sub_object,sub_slice):
             raise Exception(err)
 
     # Get slice
-    newList = sub_object[lower:upper:step]
-    print(newList.variables)
+    newList = state.recursiveCopy(sub_object[lower:upper:step])
     
     step = 1 if step is None else step
     
@@ -132,7 +131,10 @@ def _handleSlice(state,sub_object,sub_slice):
 
     j = 0
     for i in range(lower,upper,step):
-        state.addConstraint(newList[j].getZ3Object() == sub_object[i].getZ3Object())
+        if type(sub_object[i]) in [Int, Real, BitVec]:
+            state.addConstraint(newList[j].getZ3Object() == sub_object[i].getZ3Object())
+        else:
+            newList[j] = state.recursiveCopy(sub_object[i])
         j += 1
 
 

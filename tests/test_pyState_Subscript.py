@@ -56,6 +56,39 @@ l = [1,2.2,3.1415,4,i]
 x = l[::-1]
 """
 
+test8 = """
+i = pyState.BVV(123,64)
+l = [1,2.2,3.1415,4,i,8,[1,2,3]]
+x = l[:]
+"""
+
+test9 = """
+i = pyState.BVV(123,64)
+l = [1,2.2,3.1415,4,i,8,[1,2,3]]
+x = l[::-1]
+"""
+
+test10 = """
+i = pyState.BVV(123,64)
+l = [1,2.2,3.1415,4,i,8,[1,2,3]]
+x = l[1:7:2]
+"""
+
+test11 = """
+l = [1,[2,3],4]
+x = l[0:2][1][1]
+"""
+
+def test_pyState_nestedSlice():
+    b = ast.parse(test11).body
+    p = Path(b,source=test11)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('x') == 3
+
+
 def test_pyState_SubscriptSlice():
     b = ast.parse(test6).body
     p = Path(b,source=test6)
@@ -72,6 +105,31 @@ def test_pyState_SubscriptSlice():
     pg.explore()
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('x') == [123, 4, 3.1415, 2.2, 1]
+
+    b = ast.parse(test8).body
+    p = Path(b,source=test8)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('x') == [1,2.2,3.1415,4,123,8,[1,2,3]]
+
+    b = ast.parse(test9).body
+    p = Path(b,source=test9)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('x') == [1,2.2,3.1415,4,123,8,[1,2,3]][::-1]
+
+    b = ast.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('x') == [2.2, 4, 8]
+
 
 
 def test_pyState_AssignListFromSubscript():
