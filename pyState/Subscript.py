@@ -10,13 +10,12 @@ from copy import deepcopy
 
 logger = logging.getLogger("pyState:Subscript")
 
-def handle(state,element,ctx=None,parent=False):
+def handle(state,element,ctx=None):
     """
     Input:
         state = State object
         element = ast.Subscript element to parse
         (optional) ctx = context to resolve subscript in if not current
-        (optional) parent = Boolean, should I return the parent object as well
     Action:
         Parse out the subscript. Return element type expected. If this is an
         index, that means the element itself. If it's a range, that means a list
@@ -62,8 +61,5 @@ def handle(state,element,ctx=None,parent=False):
         err = "handle: Don't know how to handle symbolic slice integers at the moment"
         logger.error(err)
         raise Exception(err)
-
-    if parent:
-        return sub_object[index], sub_object
 
     return sub_object[index]
