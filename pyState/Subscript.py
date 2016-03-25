@@ -35,6 +35,111 @@ def _handleIndex(state,sub_object,sub_slice):
     return sub_object[index]
 
 
+def _handleSlice(state,sub_object,sub_slice):
+
+    if type(sub_object) is not List:
+        err = "handleIndex: Don't know how to subscript type {0}".format(sub_object)
+        logger.error(err)
+        raise Exception(err)
+
+    # Resolve our variables for this
+    lower = state.resolveObject(sub_slice.lower) if sub_slice.lower is not None else None
+
+    if type(lower) is pyState.ReturnObject:
+        return [state]
+
+    upper = state.resolveObject(sub_slice.upper) if sub_slice.upper is not None else None
+    
+    if type(upper) is pyState.ReturnObject:
+        return [state]
+
+    step = state.resolveObject(sub_slice.step) if sub_slice.step is not None else None
+    
+    if type(step) is pyState.ReturnObject:
+        return [state]
+
+    ##################
+    # Lower Concrete #
+    ##################
+    # NOTE: Assuming these are going to be Int types. Maybe bad assumption?
+
+    if type(lower) not in [int,type(None)]:
+        if lower.isStatic():
+            lower = lower.value
+    
+        # Check if it's a variable that only has one possibility
+        elif type(lower) in [Int, BitVec] and len(state.any_n_int(lower,2)) == 1:
+            lower = state.any_int(lower)
+    
+        else:
+            err = "_handleSlice: Don't know how to handle symbolic lower slice integers at the moment"
+            logger.error(err)
+            raise Exception(err)
+
+    ##################
+    # Upper Concrete #
+    ##################
+    # NOTE: Assuming these are going to be Int types. Maybe bad assumption?
+
+    if type(upper) not in [int,type(None)]:
+        if upper.isStatic():
+            upper = upper.value
+
+        # Check if it's a variable that only has one possibility
+        elif type(upper) in [Int, BitVec] and len(state.any_n_int(upper,2)) == 1:
+            upper = state.any_int(upper)
+
+        else:
+            err = "_handleSlice: Don't know how to handle symbolic upper slice integers at the moment"
+            logger.error(err)
+            raise Exception(err)
+
+    #################
+    # Step Concrete #
+    #################
+    # NOTE: Assuming these are going to be Int types. Maybe bad assumption?
+
+    if type(step) not in [int,type(None)]:
+        if step.isStatic():
+            step = step.value
+
+        # Check if it's a variable that only has one possibility
+        elif type(step) in [Int, BitVec] and len(state.any_n_int(step,2)) == 1:
+            step = state.any_int(step)
+
+        else:
+            err = "_handleSlice: Don't know how to handle symbolic step slice integers at the moment"
+            logger.error(err)
+            raise Exception(err)
+
+    # Get slice
+    newList = sub_object[lower:upper:step]
+    print(newList.variables)
+    
+    step = 1 if step is None else step
+    
+    if lower is None:
+        if step > 0:
+            lower = 0
+        else:
+            lower = -1
+
+    if upper is None:
+        if step > 0:
+            upper = sub_object.length()
+        else:
+            upper = -sub_object.length() - 1
+
+    j = 0
+    for i in range(lower,upper,step):
+        state.addConstraint(newList[j].getZ3Object() == sub_object[i].getZ3Object())
+        j += 1
+
+
+    # Return new List
+    return newList
+
+
 def handle(state,element,ctx=None):
     """
     Input:
@@ -64,6 +169,9 @@ def handle(state,element,ctx=None):
 
     if type(sub_slice) is ast.Index:
         return _handleIndex(state,sub_object,sub_slice)
+
+    elif type(sub_slice) is ast.Slice:
+        return _handleSlice(state,sub_object,sub_slice)
 
     else:
         err = "handle: Don't know how to handle slice type {0}".format(sub_slice)

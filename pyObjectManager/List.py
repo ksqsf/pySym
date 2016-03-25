@@ -39,16 +39,17 @@ class List:
         """
         # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
 
-        if var is Int:
+        if var is Int or type(var) is Int:
             logger.debug("append: adding Int")
             self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
-        elif var is Real:
+        elif var is Real or type(var) is Real:
             logger.debug("append: adding Real")
             self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
-        elif var is BitVec:
+        elif var is BitVec or type(var) is BitVec:
             logger.debug("append: adding BitVec")
+            kwargs = {'size': var.size} if kwargs is None else kwargs
             self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,**kwargs if kwargs is not None else {}))
 
         elif type(var) is List:
@@ -78,6 +79,15 @@ class List:
         """
         We want to be able to do "list[x]", so we define this.
         """
+        if type(index) is slice:
+            # Build a new List object containing the sliced stuff
+            newList = List("temp",ctx=self.ctx)
+            oldList = self.variables[index]
+            for var in oldList:
+                newList.append(var)
+            return newList
+            
+
         return self.variables[index]
 
     def __setitem__(self,key,value):
@@ -113,3 +123,5 @@ class List:
             logger.error(err)
             raise Exception(err)
 
+    def length(self):
+        return len(self.variables)

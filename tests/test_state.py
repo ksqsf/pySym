@@ -23,6 +23,32 @@ test5 = """
 x = pyState.Real()
 """
 
+test6 = """
+i = pyState.BVV(123,64)
+l = [1,2.2,3.1415,4,i,8,[1,2,3]]
+"""
+
+def test_recursiveCopy():
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state
+
+    l = s.getVar('l')
+    l2 = s.recursiveCopy(s.getVar('l'))
+    
+    assert l != l2
+    
+    l2[-1][2].value = 4
+    
+    assert l[-1][2].value != l2[-1][2].value
+
+
 def test_any_n_real():
     b = ast.parse(test3).body
     p = Path(b,source=test3)

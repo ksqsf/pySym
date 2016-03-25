@@ -219,6 +219,32 @@ class State():
 
         return self.objectManager.getVar(varName,ctx,varType,kwargs)
 
+    def recursiveCopy(self,var):
+        """
+        Create a recursive copy of the given ObjectManager variable.
+        This includes creating the relevant z3 constraints
+        Returns the copy
+        """
+        assert type(var) in [Int, Real, BitVec, List]
+        
+        if type(var) in [Int, Real, BitVec]:
+            t, kwargs = duplicateSort(var)
+            newVar = self.getVar('tempRecurisveCopy',ctx=1,varType=t,kwargs=kwargs)
+            newVar.increment()
+            # Add the constraints to the solver
+            self.addConstraint(var.getZ3Object() == newVar.getZ3Object())
+            return deepcopy(newVar)
+
+        elif type(var) is List:
+            newList = self.getVar('tempRecurisveCopy',ctx=1,varType=List)
+            # Recursively copy the list
+            for elm in var:
+                newList.append(self.recursiveCopy(elm))
+
+            return newList
+
+        # We shouldn't get here
+        assert False
         
     def lineno(self):
         """
@@ -787,6 +813,12 @@ class State():
             
                 # Return the ReturnObject back to caller to inform them of the pending call
                 return retObj
+
+        elif t == ast.UnaryOp:
+            # TODO: Not sure if there will be symbolic UnaryOp objects... This wouldn't work for those.
+            logger.debug("resolveObject: Resolving UnaryOp type object")
+            return ast.literal_eval(obj)
+
 
         else:
             err = "resolveObject: unable to resolve object '{0}'".format(obj)

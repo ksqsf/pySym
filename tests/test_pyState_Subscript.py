@@ -44,6 +44,36 @@ l = [1,2,3,[4,[5,6,7]]]
 x = l[3][1]
 """
 
+test6 = """
+i = pyState.BVV(123,64)
+l = [1,2.2,3.1415,4,i]
+x = l[::2]
+"""
+
+test7 = """
+i = pyState.BVV(123,64)
+l = [1,2.2,3.1415,4,i]
+x = l[::-1]
+"""
+
+def test_pyState_SubscriptSlice():
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('x') == [1, 3.1415, 123]
+
+    b = ast.parse(test7).body
+    p = Path(b,source=test7)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('x') == [123, 4, 3.1415, 2.2, 1]
+
+
 def test_pyState_AssignListFromSubscript():
     b = ast.parse(test4).body
     p = Path(b,source=test4)
