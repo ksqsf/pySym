@@ -41,7 +41,7 @@ class List:
 
         if var is Int or type(var) is Int:
             logger.debug("append: adding Int")
-            self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+            self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,**kwargs if kwargs is not None else {}))
 
         elif var is Real or type(var) is Real:
             logger.debug("append: adding Real")
