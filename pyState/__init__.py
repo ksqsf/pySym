@@ -2,7 +2,7 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript
+import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For
 import random
 import os.path
 import importlib
@@ -321,7 +321,8 @@ class State():
             ast.Return: pyState.Return,
             ast.If: pyState.If,
             ast.While: pyState.While,
-            ast.Break: pyState.Break
+            ast.Break: pyState.Break,
+            ast.For: pyState.For
             }
 
         # Return initial return state

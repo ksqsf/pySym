@@ -125,3 +125,6 @@ class List:
 
     def length(self):
         return len(self.variables)
+
+    def pop(self,i):
+        return self.variables.pop(i)

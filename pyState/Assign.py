@@ -50,7 +50,7 @@ def _handleAssignList(state,target,listObject):
     index = parent.index(target)
 
     # Set the new list
-    parent[index] = listObject
+    parent[index] = deepcopy(listObject)
 
     return [state]
 

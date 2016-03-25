@@ -2,4 +2,5 @@ def handle(state,s):
     """
     Pretend to print stuff
     """
-    print(s)
+    
+    print(state.any_int(state.resolveObject(s)))
