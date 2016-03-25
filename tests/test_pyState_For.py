@@ -34,6 +34,27 @@ for x in q:
         out += x + y
 """
 
+test4 = """
+out = 0
+q = [1,2,3,4,5]
+for x in q[:2]:
+    for y in [10,11,12,13]:
+        out += x + y
+
+    if x == 3:
+        break
+"""
+
+def test_pySym_variableSlice():
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_int('out') == 104
+
+
 def test_pySym_variableFor():
     b = ast.parse(test3).body
     p = Path(b,source=test3)
