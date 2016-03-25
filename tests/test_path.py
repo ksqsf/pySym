@@ -83,7 +83,7 @@ def test_simpleIf():
     assert len(elseSide.state.path) == 2
     
     # Neither have anything to do after the if statement
-    assert len(ifSide.state.callStack) == 0
+    assert len(ifSide.state.callStack) == 1
     assert len(elseSide.state.callStack) == 0
     
     # If side should not be possible

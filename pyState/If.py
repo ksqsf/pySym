@@ -63,8 +63,9 @@ def handle(state,element):
     # Saving off the current path so we can return to it and pick up at the next instruction
     cs = deepcopy(stateIf.path)
     # Only push our stack if it's not empty
-    if len(cs) > 0:
-        stateIf.pushCallStack(cs,state.ctx,state.retID)
+    if len(cs) == 0:
+        cs.append(ast.Pass(lineno=0,col_offset=0))
+    stateIf.pushCallStack(cs,state.ctx,state.retID)
 
     # Our new path becomes the inside of the if statement
     stateIf.path = element.body
