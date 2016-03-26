@@ -1,4 +1,4 @@
-def handle(state,s):
+def handle(state,call,s):
     """
     Pretend to print stuff
     """

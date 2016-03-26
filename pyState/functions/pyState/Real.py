@@ -2,7 +2,7 @@ import z3
 import ast
 from pyObjectManager.Real import Real
 
-def handle(state):
+def handle(state,call):
     """
     Returns a z3 Real object. Use this to inform pySym that something should be Real symbolic
     """

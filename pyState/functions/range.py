@@ -2,7 +2,7 @@ from copy import deepcopy
 from pyObjectManager.List import List
 from pyObjectManager.Int import Int
 
-def handle(state,a,b=None,c=None):
+def handle(state,call,a,b=None,c=None):
     """
     Simulate range funcion
     """

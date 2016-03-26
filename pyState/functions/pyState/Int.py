@@ -3,7 +3,7 @@ import z3
 import ast
 from pyObjectManager.Int import Int
 
-def handle(state):
+def handle(state,call):
     """
     Returns an Int object. Use this to inform pySym that something should be Int symbolic
     """

@@ -2,7 +2,7 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For
+import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For, pyState.ListComp
 import random
 import os.path
 import importlib
@@ -620,7 +620,11 @@ class State():
         
         # If this is an attr form (i.e.: telnetlib.Telnet())
         elif type(call.func) == ast.Attribute:
-            funcName = call.func.value.id + "." + call.func.attr
+            # If this is a variable, this is an attribute of the varType
+            try:
+                funcName = self.getVar(call.func.value.id).__class__.__name__ + "." + call.func.attr
+            except:
+                funcName = call.func.value.id + "." + call.func.attr
             
         else:
                 err = "resolveCall: unknown call-type object '{0}'".format(type(call))
@@ -776,8 +780,11 @@ class State():
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
-            #return self.getVar('ret{0}'.format(obj.retID),ctx=1).getZ3Object()
             return self.objectManager.returnObjects[obj.retID]
+
+        elif t == ast.ListComp:
+            logger.debug("resolveObject: Resolving ListComprehension")
+            return pyState.ListComp.handle(self,obj,ctx=ctx)
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:
@@ -787,24 +794,7 @@ class State():
             # If this is a simFunction
             if type(func) is ModuleType:
                 # Simple pass it off to the handler, filling in args as appropriate
-                return func.handle(self,*obj.args)
-                """
-                # If we're returning something, replace the call w/ the return value
-                if ret:
-                    assert replaceObjectWithObject(self.path[0],obj,ret)
-               
-                # Ignore return 
-                elif ret is None:
-                    pass
-                
-                else:
-                    err = "resolveObject: unknown simFunction return object '{0}' from call '{1}'".format(ret,func)
-                    logger.error(err)
-                    raise Exception(err)
-                
-                # TODO: Maybe return something here?
-                return
-                """ 
+                return func.handle(self, obj, *obj.args)
 
             # If we get here, we're a normal symbolic function
             else:
