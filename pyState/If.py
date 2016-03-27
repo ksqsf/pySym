@@ -18,8 +18,8 @@ def handle(state,element):
     stateIf = state
 
     # path2 == we take the else statement
-    stateElse = state.copy()
-    ret_states = [stateIf,stateElse]
+    #stateElse = state.copy()
+    #ret_states = [stateIf,stateElse]
 
 
     # Check what type of test this is    
@@ -30,6 +30,9 @@ def handle(state,element):
         # If we're waiting on resolution of a call, just return the initial state
         if type(trueConstraint) is pyState.ReturnObject:
             return [state]
+
+        # Important to copy after Constraint generation since it may have added to the state!
+        stateElse = state.copy()
     
         # If we're good to go, pop the instructions
         stateIf.path.pop(0)
@@ -47,6 +50,9 @@ def handle(state,element):
         if type(trueConstraint) is pyState.ReturnObject:
             return [state]
 
+        # Important to copy after Constraint generation since it may have added to the state!
+        stateElse = state.copy()
+
         # Not waiting on anything, move forward
         stateIf.path.pop(0)
         stateElse.path.pop(0)
@@ -58,6 +64,7 @@ def handle(state,element):
     else:
         logger.error("handle: I don't know how to handle type {0}".format(type(element.test)))
 
+    ret_states = [stateIf,stateElse]
 
     # Check if statement. We'll have at least one instruction here, so treat this as a call
     # Saving off the current path so we can return to it and pick up at the next instruction
