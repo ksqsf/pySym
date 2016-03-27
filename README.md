@@ -150,15 +150,13 @@ Much work left to do as I have only implimented a limited set of operations. How
 # To-Do
 Here's a list of things I have left to implement. This is really just a subset of things, but these are high on my list.
 
+* Create pyObjectManager.String
+* Create pyObjectManager.Dict
+* Create pyObjectManager.Set
 * Add automatic BitVector scaling
  * http://stackoverflow.com/questions/22568867/z3-bitvector-overflow-checking-from-python
  * http://stackoverflow.com/questions/14579377/z3py-how-to-extend-and-trunc-variables
 * ifelse inline (x = 1 if 1 > 2 else 2)
-* list comprehensions
- * Basic completed..
- * Add in "if" support
- * Add in multiple generator support
- * Add in return support for non-linear list (i.e.: [ [x,y] for x in range(1,5) for y in [1]])
 * function calls (mostly completed)
  * starargs
 * imports
