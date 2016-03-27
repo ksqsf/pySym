@@ -9,7 +9,7 @@ import pyState
 
 logger = logging.getLogger("pyState:ListComp")
 
-import astunparse
+#import astunparse
 
 def handle(state,element,ctx=None):
     """
@@ -25,12 +25,8 @@ def handle(state,element,ctx=None):
     # Create the function to be called
     fun = ast.parse("def tempFunction():\n\tl = []").body[0]
 
-    # Create the ast body
-    #body = []
-    
-    # Initialize the out list
-    #body.append(ast.parse("def tempFunction():\n\tl = []").body[0])
-    
+    # Pointer to deepest statement
+    last = None
     # These are the "for" commands    
     for generator in element.generators:
         if type(generator.target) is not ast.Name:
@@ -43,15 +39,29 @@ def handle(state,element,ctx=None):
         # Populate it with the generator information
         f.target = generator.target
         f.iter = generator.iter
+
+        # Our new for loop is the deepest
+        last = f.body
+        
         # TODO: Add ifs here
-    
+        for ifStmnt in generator.ifs:
+            tmpIf = ast.parse("if x > y:\n\tpass").body[0]
+            tmpIf.test = ifStmnt
+            f.body.append(tmpIf)
+            # This if is now the deepend
+            last = tmpIf.body
+
         # Create our append statement
-        a = ast.parse("l.append({0})".format(generator.target.id)).body[0]
-        f.body[-1] = a
+        #a = ast.parse("l.append({0})".format(generator.target.id)).body[0]
+        #f.body.append(a)
         
         fun.body.append(f)
         # TODO: Add multiple generators
    
+    # Generate our list at the deepest level
+    a = ast.parse("l.append({0})".format(generator.target.id)).body[0]
+    last.append(a)
+
     # Need to return the var
     fun.body.append(ast.parse("return l").body[0])
 
@@ -68,24 +78,8 @@ def handle(state,element,ctx=None):
     state.Call(ast.parse("blergy()").body[0].value,func=fun,retObj=retObj)
 
     # Return the ReturnObject
+    #print(astunparse.unparse(fun))
     return retObj
     #print(astunparse.unparse(fun))
 
 
-"""
-def handle(state,element,ctx=None):
-    Given ast.ListComp element, return corresponding pyObjectManager.List object
-    ctx = state.ctx if ctx is None else ctx
-
-    assert type(element) is ListComp
-    
-    elt = element.elt
-    gens = element.generators
-    
-    # Grab our return list variable
-    ret = state.getVar('tempListComp',ctx=ctx,varType=List)
-    ret.increment()
-    
-"""
-    
-    

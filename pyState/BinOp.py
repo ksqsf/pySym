@@ -18,7 +18,7 @@ def handle(state,element,ctx=None):
     Action:
         Parse out the element with respect to the state
     Returns:
-        Z3 constraint representing this BinOp
+        pyObjectManager object representing this BinOp
     """
     ctx = state.ctx if ctx is None else ctx
     
@@ -113,6 +113,7 @@ def handle(state,element,ctx=None):
 
         retVar.increment()
         # Now that we have a clean variable to return, add constraints and return it
+        logger.debug("Adding constraint {0} == {1}".format(retVar.getZ3Object(),ret))
         state.addConstraint(retVar.getZ3Object() == ret)
         return deepcopy(retVar)
 
