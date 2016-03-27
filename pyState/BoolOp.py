@@ -15,7 +15,7 @@ def handle(state, element):
     Action:
         Generate appropriate constraint objects
     Return:
-        Return the constraint objects (ifSide, elseSide) or (ReturnObject, None)
+        Return the constraint objects for ifSide or ReturnObject
     """
 
     assert type(element) == ast.BoolOp
@@ -31,15 +31,15 @@ def handle(state, element):
     # Loop through our requested checks
     for value in values:
         if type(value) is ast.Compare:
-            ifSide, elseSide = pyState.Compare.handle(state,value)
+            ifSide = pyState.Compare.handle(state,value)
 
             # If we need to resolve a call, wait
             if type(ifSide) == pyState.ReturnObject:
-                return ifSide, None
+                return ifSide
             
             # Add these to our list
             ifSideConstraints.append(ifSide)
-            elseSideConstraints.append(elseSide)
+            #elseSideConstraints.append(z3.Not(ifSide))
 
         else:
             err = "handle: Don't know how to handle type '{0}' at line {1} column {2}".format(type(value),value.lineno,value.col_offset)
@@ -50,13 +50,15 @@ def handle(state, element):
     # Change the checks into a Z3 Expression
     if type(op) is ast.And:
         ifSide = z3.And(ifSideConstraints)
-        elseSide = z3.And(elseSideConstraints)
-        return ifSide, elseSide
+        #elseSide = z3.And(elseSideConstraints)
+        #elseSide = z3.Not(ifSide)
+        return ifSide
     
     elif type(op) is ast.Or:
         ifSide = z3.Or(ifSideConstraints)
-        elseSide = z3.Or(elseSideConstraints)
-        return ifSide, elseSide
+        #elseSide = z3.Or(elseSideConstraints)
+        #elseSide = z3.Not(ifSide)
+        return ifSide
 
     else:
         err = "handle: Don't know how to handle op type '{0}' at line {1} column {2}".format(type(op),element.lineno,element.col_offset)

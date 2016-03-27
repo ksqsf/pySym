@@ -21,12 +21,12 @@ def _handleLeftVarInt(state,element,left):
               therefor it must be either an int or a z3 object type
         ex: if x > 5
     Return:
-        Created constraint expressions as a (ifSide,elseSide) tuple, or (ReturnObject, None) if we're waiting on a call
+        Created constraint expressions for True state, or ReturnObject if we're waiting on a call
     """
 
     # Looks like we're making a call, go ahead and return
     if type(left) == pyState.ReturnObject:
-        return left, None
+        return left
 
     # Resolve the z3 object
     if type(left) in [Int, Real, BitVec]:
@@ -48,7 +48,7 @@ def _handleLeftVarInt(state,element,left):
     
     # Resolve Call first
     if type(right) == pyState.ReturnObject:
-        return right, None
+        return right
 
     if type(right) in [Int, Real, BitVec]:
         right = right.getZ3Object()
@@ -60,22 +60,22 @@ def _handleLeftVarInt(state,element,left):
 
     # Assume success. Add constraints
     if type(ops) == ast.Gt:
-        return left > right, left <= right 
+        return left > right
     
     elif type(ops) == ast.GtE:
-        return left >= right, left < right
+        return left >= right
 
     elif type(ops) == ast.Lt:
-        return left < right, left >= right
+        return left < right
 
     elif type(ops) == ast.LtE:
-        return left <= right, left > right
+        return left <= right
 
     elif type(ops) == ast.Eq:
-        return left == right, left != right
+        return left == right
 
     elif type(ops) == ast.NotEq:
-        return left != right, left == right
+        return left != right
 
     else:
         err = "_handleLeftVar: Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)

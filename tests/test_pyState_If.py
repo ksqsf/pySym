@@ -17,14 +17,14 @@ test1 = """
 x = 5
 y = 6
 if x == y or 2 == 2:
-    print("yay!")
+    pass
 """
 
 test2 = """
 x = 5
 y = 5
 if x == y and y + 2 == x + 2:
-    print("yay!")
+    pass
 """
 
 def test_pySym_ifBoolOp():

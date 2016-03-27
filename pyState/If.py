@@ -17,15 +17,10 @@ def handle(state,element):
     # path == we take the if statement
     stateIf = state
 
-    # path2 == we take the else statement
-    #stateElse = state.copy()
-    #ret_states = [stateIf,stateElse]
-
-
     # Check what type of test this is    
     if type(element.test) == ast.Compare:
         # Try to handle the compare
-        trueConstraint, falseConstraint = pyState.Compare.handle(state,element.test)
+        trueConstraint = pyState.Compare.handle(state,element.test)
         
         # If we're waiting on resolution of a call, just return the initial state
         if type(trueConstraint) is pyState.ReturnObject:
@@ -40,11 +35,11 @@ def handle(state,element):
         
         # Add the constraints we just got
         stateIf.addConstraint(trueConstraint)
-        stateElse.addConstraint(falseConstraint)
+        stateElse.addConstraint(z3.Not(trueConstraint))
 
 
     elif type(element.test) == ast.BoolOp:
-        trueConstraint, falseConstraint = pyState.BoolOp.handle(state, element.test)
+        trueConstraint = pyState.BoolOp.handle(state, element.test)
     
         # If we're waiting on resolution of a call, just return the initial state
         if type(trueConstraint) is pyState.ReturnObject:
@@ -57,9 +52,10 @@ def handle(state,element):
         stateIf.path.pop(0)
         stateElse.path.pop(0)
         
+        #print(trueConstraint)
         # Add the constraints we just got
         stateIf.addConstraint(trueConstraint)
-        stateElse.addConstraint(falseConstraint)
+        stateElse.addConstraint(z3.Not(trueConstraint))
 
     else:
         logger.error("handle: I don't know how to handle type {0}".format(type(element.test)))

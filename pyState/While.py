@@ -21,11 +21,10 @@ def handle(state,element):
     # Check what type of test this is    
     if type(element.test) == ast.Compare:
         # Try to handle the compare
-        ifConstraint, elseConstraint = pyState.Compare.handle(state,element.test)
+        ifConstraint = pyState.Compare.handle(state,element.test)
         
         # If we're waiting on resolution of a call, just return the initial state
         if type(ifConstraint) is pyState.ReturnObject:
-            #print(stateIf.callStack[-1]['path'][0].test.comparators)
             return [stateIf]
     
         # If we're good to go, pop the instructions
@@ -34,7 +33,7 @@ def handle(state,element):
 
         # Add the constraints
         stateIf.addConstraint(ifConstraint)
-        stateElse.addConstraint(elseConstraint)
+        stateElse.addConstraint(z3.Not(ifConstraint))
 
     else:
         err = "handle: I don't know how to handle type {0}".format(type(element.test))
