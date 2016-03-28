@@ -8,6 +8,7 @@ from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 from pyObjectManager.Ctx import Ctx
+from pyObjectManager.String import String
 
 logger = logging.getLogger("ObjectManager")
 
@@ -65,7 +66,7 @@ class ObjectManager:
         # Attempt to return variable
         assert type(varName) is str
         assert type(ctx) is int
-        assert varType in [None, Int, Real, BitVec, List]
+        assert varType in [None, Int, Real, BitVec, List, String]
         
         create = False
         count = None

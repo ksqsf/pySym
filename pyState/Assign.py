@@ -9,6 +9,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
+from pyObjectManager.String import String
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -54,6 +55,20 @@ def _handleAssignList(state,target,listObject):
 
     return [state]
 
+def _handleAssignString(state,target,stringObject):
+    assert type(target) is ast.Name
+    assert type(stringObject) is String
+
+    # Resolve the object
+    target = state.resolveObject(target,varType=String)
+    parent = state.objectManager.getParent(target)
+    index = parent.index(target)
+
+    # Set the new list
+    parent[index] = deepcopy(stringObject)
+
+    return [state]
+
 
 def handle(state,element):
     """
@@ -89,6 +104,9 @@ def handle(state,element):
 
     elif type(value) is List:
         return _handleAssignList(state,target,value)
+
+    elif type(value) is String:
+        return _handleAssignString(state,target,value)
 
     else:
         err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)

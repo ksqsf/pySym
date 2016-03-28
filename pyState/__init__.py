@@ -15,6 +15,7 @@ from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 from pyObjectManager.Ctx import Ctx
+from pyObjectManager.String import String
 
 
 # The current directory for running pySym
@@ -644,6 +645,31 @@ class State():
             logger.error(err)
             raise Exception(err)
 
+
+    def _resolveString(self,stringObject,ctx=None):
+        """
+        Input:
+            stringObject = ast.List object
+            (optional) ctx = Context of String to resolve. Default is current context
+        Action:
+            Resolve ast.String object into pyObjectManager.String.String object with Z3 constraints already added
+        Returns:
+            pyObjectManager.String.String object
+        """
+        assert type(stringObject) is ast.Str
+
+        ctx = self.ctx if ctx is None else ctx
+        
+        # Get a temporary variable created
+        newString = self.getVar('tmpResolveString',ctx=1,varType=String,kwargs={'string':stringObject.s})
+        
+        # Populate the Z3 with restrictions
+        for i in range(len(stringObject.s)):
+            # TODO: Not sure this will work all the time.. Might have encoding errors..
+            self.addConstraint(newString[i].getZ3Object() == ord(stringObject.s[i]))
+
+        return newString
+
     def _resolveList(self,listObject,ctx=None,i=0):
         """
         Input:
@@ -746,7 +772,7 @@ class State():
         t = type(obj)
 
         # If the object is already resolved, just return it
-        if t in [Int, Real, BitVec, List, Ctx]:
+        if t in [Int, Real, BitVec, List, Ctx, String]:
             return obj
         
         if t == ast.Name:
@@ -762,13 +788,13 @@ class State():
             #return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         
         elif t == ast.List:
-            logger.debug("resolveObject: Resolving object type List: {0}".format(obj))
+            logger.debug("resolveObject: Resolving object type list: {0}".format(obj))
             return self._resolveList(obj,ctx=ctx)
     
-        #elif t == ast.Str:
-        #    logger.debug("resolveObject: Resolving object type Str: {0}".format(obj.s))
-        #    # Return real val or int val
-        #    return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
+        elif t == ast.Str:
+            logger.debug("resolveObject: Resolving object type str: {0}".format(obj.s))
+            #return self.getVar('tmp',ctx=1,varType=String,kwargs={'string':obj.s})
+            return self._resolveString(obj,ctx=ctx)
         
         elif t == ast.BinOp:
             logger.debug("resolveObject: Resolving object type BinOp")
@@ -1012,6 +1038,44 @@ class State():
             s.addConstraint(varZ3Object != myInt)
 
         return out
+
+
+    def any_str(self,var,ctx=None):
+        """
+        Input:
+            var == variable name. i.e.: "x" --or-- ObjectManager object (i.e.: String)
+            (optional) ctx = context if not current one
+        Action:
+            Resolve a possible value for this variable
+        Return:
+            Discovered variable or None if none found
+        """
+        assert type(var) in [str, String]
+
+        # Grab appropriate ctx
+        ctx = ctx if ctx is not None else self.ctx
+
+        # Solve model first
+        if not self.isSat():
+            logger.debug("any_int: No valid model found")
+            # No valid ints
+            return None
+
+        # Get model
+        m = self.solver.model()
+
+        # Check if we have it in our variable
+        if type(var) is str and self.getVar(var,ctx=ctx) == None:
+            logger.debug("any_string: var '{0}' not in known variables".format(var))
+            return None
+
+
+        # Resolve the variable
+        var = self.getVar(var,ctx=ctx) if type(var) is str else var
+        
+        # Return a possible string
+        return ''.join([chr(m.eval(c.getZ3Object()).as_long()) for c in var])
+        
 
 
     def any_int(self,var,ctx=None):

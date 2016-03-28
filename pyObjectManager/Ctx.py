@@ -5,6 +5,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
+from pyObjectManager.String import String
 
 logger = logging.getLogger("ObjectManager:Ctx")
 
@@ -43,7 +44,7 @@ class Ctx:
         Sets value at index key. Checks for variable type, updates counter according, similar to getVar call
         """
         # Attempt to return variable
-        assert type(value) in [Int, Real, BitVec, List]
+        assert type(value) in [Int, Real, BitVec, List, String]
 
         # Get that index's current count
         if key in self.variables:
@@ -63,7 +64,7 @@ class Ctx:
             logger.debug("__setitem__: setting BitVec")
             self.variables[key] = BitVec('{0}'.format(value.varName),ctx=self.ctx,count=count,size=value.size)
 
-        elif type(value) is List:
+        elif type(value) in [List, String]:
             logger.debug("__setitem__: setting List")
             self.variables[key] = value
             value.count = count
