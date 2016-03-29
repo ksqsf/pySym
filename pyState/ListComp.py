@@ -9,7 +9,36 @@ import pyState
 
 logger = logging.getLogger("pyState:ListComp")
 
-#import astunparse
+import astunparse
+
+def _findAllInputVariables(haystack):
+    """
+    Find all input variables (ast.Name objects). Return as a list
+    """
+    ret = []
+
+    if type(haystack) is ast.ListComp:
+        for generator in haystack.generators:
+            ret += _findAllInputVariables(generator)
+        return ret
+
+    if type(haystack) is ast.Name:
+        return [haystack]
+
+    if type(haystack) is ast.comprehension:
+        return _findAllInputVariables(haystack.iter)
+
+    if type(haystack) is ast.Call:
+        if haystack.args is not None:
+            for arg in haystack.args:
+                ret += _findAllInputVariables(arg)
+        if haystack.kwargs is not None:
+            for arg in haystack.kwargs:
+                ret += _findAllInputVariables(arg)
+        return ret
+    
+    return []
+
 
 def handle(state,element,ctx=None):
     """
@@ -23,7 +52,7 @@ def handle(state,element,ctx=None):
     lineno = element.lineno
 
     # Create the function to be called
-    fun = ast.parse("def tempFunction():\n\tl = []").body[0]
+    fun = ast.parse("def tempFunction():\n\tpySymTempList = []").body[0]
 
     # Pointer to deepest statement
     last = fun
@@ -56,24 +85,31 @@ def handle(state,element,ctx=None):
             last = tmpIf
 
     # Generate our list at the deepest level
-    a = ast.parse("l.append({0})".format(generator.target.id)).body[0]
+    a = ast.parse("pySymTempList.append({0})".format(generator.target.id)).body[0]
     a.value.args = [element.elt]
     last.body.append(a)
 
     # Need to return the var
-    fun.body.append(ast.parse("return l").body[0])
+    fun.body.append(ast.parse("return pySymTempList").body[0])
 
     # Change this list comprehention into a ReturnObject
     retObj = pyState.ReturnObject(1)
     
     # Replace list comprehension with our ReturnObject
     pyState.replaceObjectWithObject(state.path[0],element,retObj)
+    
+    # Determine variables we need to pass in
+    allInputVars = set(_findAllInputVariables(element))
 
-    # Call our new function
-    state.Call(ast.parse("blergy()").body[0].value,func=fun,retObj=retObj)
+    # Add these args into the function def
+    for inputVar in allInputVars:
+        fun.args.args.append(ast.arg(inputVar.id,0))
 
-    # Return the ReturnObject
-    #print(astunparse.unparse(fun))
+    print(astunparse.unparse(fun))
+
+    # Call our new function.
+    state.Call(ast.parse("blergy({0})".format(','.join([x.id for x in allInputVars]))).body[0].value,func=fun,retObj=retObj)
+
     return retObj
 
 

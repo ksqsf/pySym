@@ -16,6 +16,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 from pyObjectManager.Ctx import Ctx
 from pyObjectManager.String import String
+from pyObjectManager.Char import Char
 
 
 # The current directory for running pySym
@@ -86,12 +87,15 @@ def duplicateSort(obj):
             return Int, {'value': obj.n}
         return Real, {'value': obj.n}
 
-    if type(obj) in [Int, Real]:
+    if type(obj) in [Int, Real, Char]:
         return type(obj), None
 
     if type(obj) is BitVec:
         return type(obj), {'size': obj.size}
 
+    if type(obj) is String:
+        # Create a string with the same length
+        return type(obj), {'string': "A"*obj.length() if obj.length() > 0 else None}
     
     if type(obj) in [z3.IntNumRef,z3.RatNumRef,z3.ArithRef, z3.BitVecRef, z3.BitVecNumRef]:
         kind = obj.sort_kind()
@@ -181,7 +185,7 @@ class State():
  
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
-        self.objectManager = objectManager if objectManager is not None else ObjectManager()
+        self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
         self.solver = z3.Solver() if solver is None else solver
         # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
@@ -220,34 +224,51 @@ class State():
 
         return self.objectManager.getVar(varName,ctx,varType,kwargs)
 
-    def recursiveCopy(self,var):
+    def recursiveCopy(self,var,ctx=None,varName=None):
         """
         Create a recursive copy of the given ObjectManager variable.
         This includes creating the relevant z3 constraints
+        (optional) ctx = Context to copy in. Defaults to ctx 1 (RETURN_CONTEXT).
+        (optional) varName = Specify what to name this variable
         Returns the copy
         """
-        assert type(var) in [Int, Real, BitVec, List]
+        assert type(var) in [Int, Real, BitVec, List, String]
+        assert type(varName) in [type(None), str]
+
+        ctx = ctx if ctx is not None else 1
+        varName = "tempRecursiveCopy" if varName is None else varName
         
         if type(var) in [Int, Real, BitVec]:
             t, kwargs = duplicateSort(var)
-            newVar = self.getVar('tempRecurisveCopy',ctx=1,varType=t,kwargs=kwargs)
+            newVar = self.getVar(varName,ctx=ctx,varType=t,kwargs=kwargs)
             newVar.increment()
             # Add the constraints to the solver
             self.addConstraint(var.getZ3Object() == newVar.getZ3Object())
-            return deepcopy(newVar)
+            return newVar.copy()
 
         elif type(var) is List:
-            newList = self.getVar('tempRecurisveCopy',ctx=1,varType=List)
+            newList = self.getVar(varName,ctx=ctx,varType=List)
             newList.increment()
-            newList = deepcopy(newList)
+            newList = newList.copy()
             # Recursively copy the list
             for elm in var:
-                ret = self.recursiveCopy(elm)
+                ret = self.recursiveCopy(elm,varName=varName)
                 newList.append(ret)
                 if type(ret) in [Int, Real, BitVec]:
                     self.addConstraint(newList[-1].getZ3Object() == ret.getZ3Object())
 
             return newList
+
+        elif type(var) is String:
+            newString = self.getVar(varName,ctx=ctx,varType=String)
+            newString.increment()
+            newString = newString.copy()
+            newString.setTo("A"*var.length())
+            for i in range(var.length()):
+                self.addConstraint(newString[i].getZ3Object() == var[i].getZ3Object())
+            
+            return newString
+            
 
         # We shouldn't get here
         assert False
@@ -400,11 +421,12 @@ class State():
         self.path = []
 
 
-    def Call(self,call,func=None,retObj=None):
+    def Call(self,call,func=None,retObj=None,ctx=None):
         """
         Input:
             call = ast.Call object
             (optional) func = resolved function for Call (i.e.: state.resolveCall(call)). This is here to remove duplicate calls to resolveCall from resolveObject
+            (optional) ctx = Context to execute under. If left blank, new Context will be created.
         Action:
             Modify state in accordance w/ call
         Returns:
@@ -430,8 +452,12 @@ class State():
         
         # Grab a new context
         oldCtx = self.ctx
-        self.maxCtx += 1
-        self.ctx = self.maxCtx
+
+        if ctx is None:
+            self.maxCtx += 1
+            self.ctx = self.maxCtx
+        else:
+            self.ctx = ctx
         
         logger.debug("Call: Old CTX = {0} ... New CTX = {1}".format(oldCtx,self.ctx))
         
@@ -440,20 +466,24 @@ class State():
         ######################
 
         # Create local vars dict
-        #self.localVars[self.ctx] = {}
-        self.objectManager.newCtx(self.ctx)
+        if self.ctx not in self.objectManager.variables:
+            self.objectManager.newCtx(self.ctx)
         
         # If there are arguments, fill them in
         for i in range(len(call.args)):
             #caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
+            print(caller_arg)
             #caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
             # We don't want static variables...
             kwargs.pop("value",None) if kwargs is not None else None
-            dest_arg = self.getVar(func.args.args[i].arg,varType=varType,kwargs=kwargs)
-            self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
-            logger.debug("Call: Setting argument {0} = {1}".format(dest_arg,caller_arg))
+            #dest_arg = self.getVar(func.args.args[i].arg,varType=varType,kwargs=kwargs)
+            #parent = self.objectManager.getParent(dest_arg)
+            #index = parent.index(dest_arg)
+            self.objectManager.variables[self.ctx][func.args.args[i].arg] = self.recursiveCopy(caller_arg,varName=func.args.args[i].arg)
+            #self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
+            logger.debug("Call: Setting argument {0} = {1}".format(self.objectManager.variables[self.ctx][func.args.args[i].arg],caller_arg))
         
         # Grab any unset vars
         unsetArgs = func.args.args[len(call.args):]
@@ -658,16 +688,15 @@ class State():
         """
         assert type(stringObject) is ast.Str
 
-        ctx = self.ctx if ctx is None else ctx
+        ctx = 1 if ctx is None else ctx
         
         # Get a temporary variable created
-        newString = self.getVar('tmpResolveString',ctx=1,varType=String,kwargs={'string':stringObject.s})
+        newString = self.getVar('tmpResolveString',ctx=ctx,varType=String,kwargs={'string':stringObject.s})
         
         # Populate the Z3 with restrictions
         for i in range(len(stringObject.s)):
             # TODO: Not sure this will work all the time.. Might have encoding errors..
             self.addConstraint(newString[i].getZ3Object() == ord(stringObject.s[i]))
-
         return newString
 
     def _resolveList(self,listObject,ctx=None,i=0):
@@ -958,6 +987,8 @@ class State():
                 out.append(self.any_real(elm,ctx=ctx))
             elif type(elm) is List:
                 out.append(self.any_list(elm,ctx=ctx))
+            elif type(elm) is Char:
+                out.append(self.any_char(elm,ctx=ctx))
             else:
                 err = "any_list: unable to resolve object '{0}'".format(elm)
                 logger.error(err)
@@ -1039,6 +1070,38 @@ class State():
 
         return out
 
+    def any_char(self,var,ctx=None):
+        """
+        Input:
+            var == variable name. i.e.: "x" --or-- ObjectManager object (i.e.: Char)
+            (optional) ctx = context if not current one
+        Action:
+            Resolve a possible value for this variable
+        Return:
+            Discovered variable or None if none found
+        """
+        assert type(var) in [str, Char]
+
+        # Solve model first
+        if not self.isSat():
+            logger.debug("any_char: No valid model found")
+            return None
+
+        # Get model
+        m = self.solver.model()
+
+        # Check if we have it in our variable
+        if type(var) is str and self.getVar(var,ctx=ctx) == None:
+            logger.debug("any_char: var '{0}' not in known variables".format(var))
+            return None
+
+
+        # Resolve the variable
+        var = self.getVar(var,ctx=ctx) if type(var) is str else var
+
+        # Return a possible string
+        return chr(m.eval(var.getZ3Object()).as_long())
+
 
     def any_str(self,var,ctx=None):
         """
@@ -1057,8 +1120,7 @@ class State():
 
         # Solve model first
         if not self.isSat():
-            logger.debug("any_int: No valid model found")
-            # No valid ints
+            logger.debug("any_str: No valid model found")
             return None
 
         # Get model
@@ -1066,7 +1128,7 @@ class State():
 
         # Check if we have it in our variable
         if type(var) is str and self.getVar(var,ctx=ctx) == None:
-            logger.debug("any_string: var '{0}' not in known variables".format(var))
+            logger.debug("any_str: var '{0}' not in known variables".format(var))
             return None
 
 
@@ -1214,7 +1276,7 @@ class State():
         solverCopy = z3.Solver()
         solverCopy.add(self.solver.assertions())
         
-        return State(
+        newState = State(
             solver=solverCopy,
             ctx=self.ctx,
             functions=self.functions,
@@ -1229,4 +1291,9 @@ class State():
             maxCtx=self.maxCtx,
             objectManager=self.objectManager.copy()
             )
+        
+        # Make sure to give the objectManager the new state
+        newState.objectManager.setState(newState)
+        
+        return newState
         

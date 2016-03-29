@@ -4,7 +4,6 @@ import ast
 from pyState import hasRealComponent, ReturnObject
 import pyState.z3Helpers
 import pyState.BinOp, pyState.Call
-from copy import deepcopy
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
@@ -34,8 +33,9 @@ def _handleAssignNum(state,target,value):
 
     parent = state.objectManager.getParent(x)
     index = parent.index(x)
+    parent[index] = value
 
-    state.addConstraint(x.getZ3Object(increment=True) == value.getZ3Object())
+    #state.addConstraint(x.getZ3Object(increment=True) == value.getZ3Object())
 
     # Return the state
     return [state]
@@ -51,7 +51,7 @@ def _handleAssignList(state,target,listObject):
     index = parent.index(target)
 
     # Set the new list
-    parent[index] = deepcopy(listObject)
+    parent[index] = listObject.copy()
 
     return [state]
 
@@ -65,7 +65,7 @@ def _handleAssignString(state,target,stringObject):
     index = parent.index(target)
 
     # Set the new list
-    parent[index] = deepcopy(stringObject)
+    parent[index] = stringObject.copy()
 
     return [state]
 

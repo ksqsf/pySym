@@ -1,5 +1,6 @@
 import z3
 import logging
+import pyState
 
 logger = logging.getLogger("ObjectManager:Int")
 
@@ -8,7 +9,7 @@ class Int:
     Define an Int
     """
     
-    def __init__(self,varName,ctx,count=None,value=None):
+    def __init__(self,varName,ctx,count=None,value=None,state=None):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(value) in [type(None),int]
@@ -17,6 +18,27 @@ class Int:
         self.varName = varName
         self.ctx = ctx
         self.value = value
+        
+        if state is not None:
+            self.setState(state)
+
+
+    def copy(self):
+        return Int(
+            varName = self.varName,
+            ctx = self.ctx,
+            count = self.count,
+            value = self.value
+        )
+
+    def setState(self,state):
+        """
+        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
+        """
+        assert type(state) == pyState.State
+
+        self.state = state
+
 
     def increment(self):
         self.count += 1

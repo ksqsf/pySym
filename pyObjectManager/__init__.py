@@ -9,6 +9,8 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 from pyObjectManager.Ctx import Ctx
 from pyObjectManager.String import String
+from pyObjectManager.Char import Char
+import pyState
 
 logger = logging.getLogger("ObjectManager")
 
@@ -20,9 +22,24 @@ class ObjectManager:
     Object Manager will keep track of objects. Generally, Objects will be variables such as ints, lists, strings, etc.
     """
 
-    def __init__(self,variables=None,returnObjects=None):
+    def __init__(self,variables=None,returnObjects=None,state=None):
         self.variables = {CTX_GLOBAL: Ctx(CTX_GLOBAL), CTX_RETURNS: Ctx(CTX_RETURNS)} if variables is None else variables
         self.returnObjects = returnObjects if returnObjects is not None else {}
+
+        if state is not None:
+            self.setState(state)
+
+
+    def setState(self,state):
+        """
+        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
+        """
+        assert type(state) == pyState.State
+        
+        self.state = state
+        for ctx in self.variables:
+            self.variables[ctx].setState(state)
+        
 
     def newCtx(self,ctx):
         """
@@ -31,6 +48,7 @@ class ObjectManager:
         assert ctx is not None
 
         self.variables[ctx] = Ctx(ctx)
+        self.variables[ctx].setState(self.state)
 
     def setVar(self,varName,ctx,var):
         """
@@ -66,7 +84,7 @@ class ObjectManager:
         # Attempt to return variable
         assert type(varName) is str
         assert type(ctx) is int
-        assert varType in [None, Int, Real, BitVec, List, String]
+        assert varType in [None, Int, Real, BitVec, List, String, Char]
         
         create = False
         count = None
@@ -130,7 +148,7 @@ class ObjectManager:
         """
 
         return ObjectManager(
-            variables = deepcopy(self.variables),
-            returnObjects = deepcopy(self.returnObjects)
+            variables = {key:self.variables[key].copy() for key in self.variables},
+            returnObjects = {key:self.returnObjects[key].copy() for key in self.returnObjects}
         )
 

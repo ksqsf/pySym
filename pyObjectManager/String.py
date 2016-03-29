@@ -5,6 +5,8 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
+from pyObjectManager.Char import Char
+import pyState
 
 logger = logging.getLogger("ObjectManager:String")
 
@@ -13,7 +15,7 @@ class String:
     Define a String
     """
 
-    def __init__(self,varName,ctx,count=None,string=None):
+    def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
@@ -22,51 +24,38 @@ class String:
         self.varName = varName
         self.ctx = ctx
         # Treating string as a list of BitVecs
-        self.variables = []
+        self.variables = [] if variables is None else variables
 
         if string is not None:
             self.setTo(string)
 
+        if state is not None:
+            self.setState(state)
+
+
+    def copy(self):
+        return String(
+            varName = self.varName,
+            ctx = self.ctx,
+            count = self.count,
+            variables = [x.copy() for x in self.variables]
+        )
+
+    def setState(self,state):
+        """
+        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
+        """
+        assert type(state) == pyState.State
+
+        self.state = state
+        for var in self.variables:
+            var.setState(state)
 
     def increment(self):
         self.count += 1
         # reset variable list if we're incrementing our count
         self.variables = []
     
-    """ 
-    def append(self,var,kwargs=None):
-        Input:
-            var = pyObjectManager oject to append (i.e.: Int/Real/etc)
-            (optional) kwargs = optional keyword args needed to instantiate type
-        Action:
-            Resolves object, creates variable if needed
-        Returns:
-            Nothing
-        # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
-
-        if var is Int or type(var) is Int:
-            logger.debug("append: adding Int")
-            self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,**kwargs if kwargs is not None else {}))
-
-        elif var is Real or type(var) is Real:
-            logger.debug("append: adding Real")
-            self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
-
-        elif var is BitVec or type(var) is BitVec:
-            logger.debug("append: adding BitVec")
-            kwargs = {'size': var.size} if kwargs is None else kwargs
-            self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,**kwargs if kwargs is not None else {}))
-
-        elif type(var) is List:
-            logger.debug("append: adding List")
-            self.variables.append(var)
-
-        else:
-            err = "append: Don't know how to append/resolve object '{0}'".format(var)
-            logger.error(err)
-            raise Exception(err)
-    """
-
     def setTo(self,var):
         """
         Sets this String object to be equal/copy of another. Type can be str or String.
@@ -78,7 +67,8 @@ class String:
         for c in var:
             # Assuming 8-bit BitVec for now
             # TODO: Figure out a better way to handle this... Characters might be of various bitlength... Some asian encodings are up to 4 bytes...
-            self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,size=16))
+            #self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,size=16))
+            self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
 
 
     def _isSame(self,**args):
@@ -99,6 +89,7 @@ class String:
         We want to be able to do "string[x]", so we define this.
         """
         if type(index) is slice:
+            # TODO: Redo this to return as string object
             # Build a new List object containing the sliced stuff
             newList = String("temp",ctx=self.ctx)
             oldList = self.variables[index]
@@ -120,3 +111,9 @@ class String:
 
     def length(self):
         return len(self.variables)
+
+    def pop(self,index):
+        """
+        Not exactly something you can do on a string, but helpful for our symbolic execution
+        """
+        return self.variables.pop(index)

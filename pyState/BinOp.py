@@ -115,7 +115,7 @@ def handle(state,element,ctx=None):
         # Now that we have a clean variable to return, add constraints and return it
         logger.debug("Adding constraint {0} == {1}".format(retVar.getZ3Object(),ret))
         state.addConstraint(retVar.getZ3Object() == ret)
-        return deepcopy(retVar)
+        return retVar.copy()
 
     else:
         err = "BinOP: Don't know how to handle variable type {0} at line {1} col {2}".format(t,op.lineno,op.col_offset)

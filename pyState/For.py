@@ -8,6 +8,8 @@ from pyObjectManager.List import List
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
+from pyObjectManager.String import String
+from pyObjectManager.Char import Char
 
 logger = logging.getLogger("pyState:For")
 
@@ -36,7 +38,7 @@ def handle(state,element):
     if type(newIter) == pyState.ReturnObject:
         return [state]
 
-    if type(newIter) is not List:
+    if type(newIter) not in [List, String]:
         err = "handle: I don't know how to handle iter type {0}".format(type(newIter))
         logger.error(err)
         raise Exception(err)
@@ -86,8 +88,8 @@ def handle(state,element):
     t, kwargs = pyState.duplicateSort(elm)
     target = state.resolveObject(target,varType=t,kwargs=kwargs)
     target.increment()
-    
-    if type(target) in [Int, Real, BitVec]:
+
+    if type(target) in [Int, Real, BitVec, Char]:
         # Copy the constraint
         state.addConstraint(target.getZ3Object() == elm.getZ3Object())
     

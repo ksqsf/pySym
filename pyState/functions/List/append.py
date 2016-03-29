@@ -3,6 +3,7 @@ from pyObjectManager.List import List
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
+from pyObjectManager.Char import Char
 
 logger = logging.getLogger("pyState:SimFunction:List:append")
 
@@ -20,7 +21,7 @@ def handle(state,call,var):
     # Resolve what we're going to be appending
     var = state.resolveObject(var)
     
-    if type(var) in [Int, Real, BitVec]:
+    if type(var) in [Int, Real, BitVec, Char]:
         root.append(var)
         state.addConstraint(root[-1].getZ3Object() == var.getZ3Object())
     
