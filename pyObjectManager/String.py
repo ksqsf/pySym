@@ -38,8 +38,13 @@ class String:
             varName = self.varName,
             ctx = self.ctx,
             count = self.count,
-            variables = [x.copy() for x in self.variables]
+            variables = [x.copy() for x in self.variables],
+            state = self.state if hasattr(self,"state") else None
         )
+
+    def __deepcopy__(self,blerg):
+        return self.copy()
+
 
     def setState(self,state):
         """

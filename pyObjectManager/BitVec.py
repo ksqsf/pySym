@@ -26,6 +26,7 @@ class BitVec:
             ctx = self.ctx,
             size = self.size,
             count = self.count,
+            state = self.state if hasattr(self,"state") else None
         )
 
 

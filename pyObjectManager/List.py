@@ -33,8 +33,12 @@ class List:
             varName = self.varName,
             ctx = self.ctx,
             count = self.count,
-            variables = [x.copy() for x in self.variables]
+            variables = [x.copy() for x in self.variables],
+            state = self.state if hasattr(self,"state") else None
         )
+
+    def __deepcopy__(self,blerg):
+        return self.copy()
 
     def setState(self,state):
         """
@@ -119,7 +123,7 @@ class List:
         """
         if type(index) is slice:
             # Build a new List object containing the sliced stuff
-            newList = List("temp",ctx=self.ctx)
+            newList = List("temp",ctx=self.ctx,state=self.state)
             oldList = self.variables[index]
             for var in oldList:
                 newList.append(var)

@@ -30,7 +30,8 @@ class Char:
             varName = self.varName,
             ctx = self.ctx,
             count = self.count,
-            variable = self.variable.copy()
+            variable = self.variable.copy(),
+            state = self.state if hasattr(self,"state") else None
         )
 
     def setState(self,state):

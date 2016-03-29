@@ -28,6 +28,5 @@ def test_pySym_pass():
     
     assert p.state.any_int('x') == 4
     assert len(p.state.backtrace) == 2
-    assert len(p.state.solver.assertions()) == 1
 
 

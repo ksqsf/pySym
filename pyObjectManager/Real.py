@@ -27,7 +27,8 @@ class Real:
             varName = self.varName,
             ctx = self.ctx,
             count = self.count,
-            value = self.value
+            value = self.value,
+            state = self.state if hasattr(self,"state") else None
         )
 
 

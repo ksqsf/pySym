@@ -187,13 +187,9 @@ class State():
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
         self.solver = z3.Solver() if solver is None else solver
-        # functions = {'func_name': ast.function declaration}
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
-        #self.retVar = self.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
-        #self.retVar = self.objectManager.getZ3Var('ret',increment=True,varType=z3.IntSort(),ctx=1) if retVar is None else retVar
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
-        # callStack == list of dicts to keep track of state (i.e.: {'path': [1,2,3],'ctx': 1, 'ast_call': <ast call object>}
         self.callStack = [] if callStack is None else callStack
         self.backtrace = [] if backtrace is None else backtrace
         # Keep track of what our return ID is
@@ -473,7 +469,6 @@ class State():
         for i in range(len(call.args)):
             #caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
-            print(caller_arg)
             #caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
             # We don't want static variables...

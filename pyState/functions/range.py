@@ -84,5 +84,5 @@ def handle(state,call,a,b=None,c=None):
         out.append(Int,kwargs={'value':var})
     
     # Return a copy
-    return deepcopy(out)
+    return out.copy()
         

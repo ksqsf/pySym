@@ -112,7 +112,7 @@ class ObjectManager:
             raise Exception(err)
         
         # Make the var
-        self.variables[ctx][varName] = varType(varName=varName,ctx=ctx,count=count,**kwargs if kwargs is not None else {})
+        self.variables[ctx][varName] = varType(varName=varName,ctx=ctx,count=count,state=self.state,**kwargs if kwargs is not None else {})
         
         return self.variables[ctx][varName]
 
