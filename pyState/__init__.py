@@ -212,13 +212,13 @@ class State():
         ctx = self.ctx if ctx is None else ctx
         return self.objectManager.setVar(varName=varName,ctx=ctx,var=var)
 
-    def getVar(self,varName,ctx=None,varType=None,kwargs=None):
+    def getVar(self,varName,ctx=None,varType=None,kwargs=None,softFail=None):
         """
         Convinence function that adds current ctx to getVar request
         """
         ctx = self.ctx if ctx is None else ctx
 
-        return self.objectManager.getVar(varName,ctx,varType,kwargs)
+        return self.objectManager.getVar(varName,ctx,varType,kwargs,softFail=softFail)
 
     def recursiveCopy(self,var,ctx=None,varName=None):
         """
@@ -647,10 +647,12 @@ class State():
         # If this is an attr form (i.e.: telnetlib.Telnet())
         elif type(call.func) == ast.Attribute:
             # If this is a variable, this is an attribute of the varType
-            try:
-                funcName = self.getVar(call.func.value.id).__class__.__name__ + "." + call.func.attr
-            except:
+            funcName = self.getVar(call.func.value.id,softFail=True)
+            
+            if funcName is None:
                 funcName = call.func.value.id + "." + call.func.attr
+            else:
+                funcName = funcName.__class__.__name__ + "." + call.func.attr
             
         else:
                 err = "resolveCall: unknown call-type object '{0}'".format(type(call))
@@ -1095,7 +1097,7 @@ class State():
         var = self.getVar(var,ctx=ctx) if type(var) is str else var
 
         # Return a possible string
-        return chr(m.eval(var.getZ3Object()).as_long())
+        return chr(m.eval(var.getZ3Object(),model_completion=True).as_long())
 
 
     def any_str(self,var,ctx=None):
@@ -1131,7 +1133,7 @@ class State():
         var = self.getVar(var,ctx=ctx) if type(var) is str else var
         
         # Return a possible string
-        return ''.join([chr(m.eval(c.getZ3Object()).as_long()) for c in var])
+        return ''.join([chr(m.eval(c.getZ3Object(),model_completion=True).as_long()) for c in var])
         
 
 
@@ -1165,7 +1167,7 @@ class State():
         var = self.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
         
         # Try getting the value
-        value = m.eval(var)
+        value = m.eval(var,model_completion=True)
         
         # Check if we have a known solution
         # Assuming local for now
@@ -1242,7 +1244,7 @@ class State():
         var = self.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
 
         # Try getting the value
-        value = m.eval(var)
+        value = m.eval(var,model_completion=True)
 
         # Check if we have a known solution
         # Assuming local for now

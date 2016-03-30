@@ -67,13 +67,14 @@ class ObjectManager:
         self.variables[ctx][varName] = var
         
 
-    def getVar(self,varName,ctx,varType=None,kwargs=None):
+    def getVar(self,varName,ctx,varType=None,kwargs=None,softFail=None):
         """
         Input:
             varName = name of variable to get
             ctx = Context for variable
             (optional) varType = Class type of variable (ex: pyObjectManager.Int)
             (optional) kwargs = args needed to instantiate variable
+            (optional) softFail = True/False, should raise an exception if getVar fails. Default is False
         Action:
             Find appropriate variable object, creating one if necessary
         Returns:
@@ -85,6 +86,7 @@ class ObjectManager:
         assert type(ctx) is int
         assert varType in [None, Int, Real, BitVec, List, String, Char]
         
+        softFail = False if softFail is None else softFail
         create = False
         count = None
         
@@ -106,9 +108,13 @@ class ObjectManager:
 
         # Looks like we need to create a var
         if varType == None:
-            err = "getVar: Need to create '{0}' but no type information given".format(varName)
-            logger.error(err)
-            raise Exception(err)
+            if not softFail:
+                err = "getVar: Need to create '{0}' but no type information given".format(varName)
+                logger.error(err)
+                raise Exception(err)
+            else:
+                # We're soft failing, just return None
+                return None
         
         # Make the var
         self.variables[ctx][varName] = varType(varName=varName,ctx=ctx,count=count,state=self.state,**kwargs if kwargs is not None else {})

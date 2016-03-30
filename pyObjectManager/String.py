@@ -15,7 +15,7 @@ class String:
     Define a String
     """
 
-    def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None):
+    def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None,length=None):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
@@ -26,11 +26,17 @@ class String:
         # Treating string as a list of BitVecs
         self.variables = [] if variables is None else variables
 
+        if state is not None:
+            self.setState(state)
+
+
         if string is not None:
             self.setTo(string)
 
-        if state is not None:
-            self.setState(state)
+        # Add generic characters to this string
+        if length is not None:
+            for x in range(length):
+                self._addChar()
 
 
     def copy(self):
@@ -58,9 +64,22 @@ class String:
 
     def increment(self):
         self.count += 1
+        length = self.length()
         # reset variable list if we're incrementing our count
         self.variables = []
+
+        # Add generic characters to this string
+        if length is not None:
+            for x in range(length):
+                self._addChar()
+
     
+    def _addChar(self):
+        """
+        Append a generic Char item to this string.
+        """
+        self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state))
+
     def setTo(self,var):
         """
         Sets this String object to be equal/copy of another. Type can be str or String.
@@ -73,14 +92,17 @@ class String:
             # Assuming 8-bit BitVec for now
             # TODO: Figure out a better way to handle this... Characters might be of various bitlength... Some asian encodings are up to 4 bytes...
             #self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,size=16))
-            self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+            #self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+            self._addChar()
 
 
-    def _isSame(self,**args):
+    def _isSame(self,length=None,**args):
         """
         Checks if variables for this object are the same as those entered.
         Assumes checks of type will be done prior to calling.
         """
+        if length is not self.length():
+            return False
         return True
 
     def index(self,elm):

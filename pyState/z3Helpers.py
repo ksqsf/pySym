@@ -10,6 +10,7 @@ import logging
 logger = logging.getLogger("pyState:z3Helpers")
 
 Z3_DEFAULT_BITVEC_SIZE = 64
+Z3_MAX_STRING_LENGTH = 256
 
 #############################
 # Watch for BitVec Overflow #
