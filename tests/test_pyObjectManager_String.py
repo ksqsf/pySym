@@ -25,6 +25,20 @@ s = "Test"
 l = [x for x in s]
 """
 
+def test_pyObjectMAnager_String_mustBe():
+    b = ast.parse(test1).body
+    p = Path(b,source=test1)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.getVar('s')
+
+    assert s.mustBe("Test")
+    assert not s.mustBe("test")
+
+
 def test_pyObjectManager_String_canBe():
     b = ast.parse(test1).body
     p = Path(b,source=test1)

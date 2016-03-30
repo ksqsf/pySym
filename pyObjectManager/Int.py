@@ -69,8 +69,25 @@ class Int:
 
     def isStatic(self):
         """
-        Returns True if this object is a static variety (i.e.: IntVal(12))
+        Returns True if this object is a static variety (i.e.: IntVal(12)).
+        Also returns True if object has only one possibility
         """
+        # If this is a static int
         if self.value is not None:
             return True
+        
+        # If this is an integer with only one possibility
+        if len(self.state.any_n_int(self,2)) == 1:
+            return True
+
         return False
+
+    def getValue(self):
+        """
+        Resolves the value of this integer. Assumes that isStatic method is called
+        before this is called to ensure the value is not symbolic
+        """
+        if self.value is not None:
+            return self.value
+        
+        return self.state.any_int(self)

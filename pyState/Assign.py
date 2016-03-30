@@ -102,7 +102,7 @@ def handle(state,element):
     ret = []
     
     # Change value into a list if it isn't already
-    if type(value) is not list:
+    if type(values) is not list:
         values = [values]
 
     # For every possible assign value, get the state

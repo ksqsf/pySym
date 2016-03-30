@@ -21,7 +21,7 @@ def _handleIndex(state,sub_object,sub_slice):
     sub_index = state.resolveObject(sub_slice.value)
 
     if sub_index.isStatic():
-        index = sub_index.getZ3Object().as_long()
+        index = sub_index.getValue()
 
     # Check if it's a variable that only has one possibility
     elif type(sub_index) in [Int, BitVec] and len(state.any_n_int(sub_index,2)) == 1:

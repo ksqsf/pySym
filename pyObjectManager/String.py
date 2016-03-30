@@ -131,6 +131,28 @@ class String:
         """
         return self.state.any_str(self)
 
+    def mustBe(self,var):
+        """
+        Test if this string must be equal to the given variable. This means there's no other options and it's not symbolic
+        """
+        assert type(var) is str
+
+        # TODO: Re-assess how i do this. Can probably make this more efficient...
+
+        # If it's not even possible, just return no
+        if not self.canBe(var):
+            return False
+
+        # If we can possible be this value, see if we MUST be this value
+        # Loop through all our characters and see if they have more than one possibility
+        for c in self:
+            # If this has more than one option, return False
+            if self.state.any_n_int(c,2) == 2:
+                return False
+
+        # Looks like we've got a match...
+        return True
+
     def canBe(self,var):
         """
         Test if this string can be equal to the given variable
