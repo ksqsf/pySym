@@ -90,26 +90,36 @@ def handle(state,element):
     target = targets[0]
 
     # Resolve the value
-    value = state.resolveObject(value)
+    values = state.resolveObject(value)
 
     # Check for return object
-    if type(value) == ReturnObject:
+    if type(values) == ReturnObject:
         return [state]
 
     # No return object, time to pop instruction
     state.path.pop(0) if len(state.path) > 0 else None
 
-    if type(value) in [Int, Real, BitVec]:
-        return _handleAssignNum(state,target,value)
+    ret = []
+    
+    # Change value into a list if it isn't already
+    if type(value) is not list:
+        values = [values]
 
-    elif type(value) is List:
-        return _handleAssignList(state,target,value)
+    # For every possible assign value, get the state
+    for value in values:
 
-    elif type(value) is String:
-        return _handleAssignString(state,target,value)
+        if type(value) in [Int, Real, BitVec]:
+            ret += _handleAssignNum(state.copy(),target,value)
+    
+        elif type(value) is List:
+            ret += _handleAssignList(state.copy(),target,value)
+    
+        elif type(value) is String:
+            ret += _handleAssignString(state.copy(),target,value)
+    
+        else:
+            err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
+            logger.error(err)
+            raise Exception(err)
 
-    else:
-        err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
-        logger.error(err)
-        raise Exception(err)
-
+    return ret

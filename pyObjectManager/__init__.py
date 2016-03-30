@@ -1,7 +1,6 @@
 import z3
 import ast
 import logging
-from copy import deepcopy
 #from pyState import z3Helpers
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
