@@ -7,6 +7,7 @@ import z3
 from pyPath import Path
 import pyState.Compare
 import pytest
+from pyPathGroup import PathGroup
 
 compare1 = """
 x = {0}
@@ -37,6 +38,22 @@ else:
     print("Two")
     x = 7
 """
+
+compare4 = """
+s = pyState.String(10)
+if s[2] == 't':
+    print("Yes")
+"""
+
+def test_pySym_Compare_Symbolic_String():
+    b = ast.parse(compare4).body
+    p = Path(b,source=compare4)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 2
+
+    assert pg.completed[1].state.any_str('s')[2] == "t"
 
 
 

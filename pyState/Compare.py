@@ -5,6 +5,8 @@ import pyState
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
+from pyObjectManager.Char import Char
+from pyObjectManager.String import String
 
 
 logger = logging.getLogger("pyState:Compare")
@@ -29,9 +31,19 @@ def _handleLeftVarInt(state,element,left):
         return left
 
     # Resolve the z3 object
-    if type(left) in [Int, Real, BitVec]:
+    if type(left) in [Int, Real, BitVec, Char]:
         left = left.getZ3Object()
     
+    # If this is a String, let's hope it's only one char...
+    elif type(left) is String and left.length() == 1:
+        left = left[0].getZ3Object()
+    
+    else:
+        err = "_handleLeftVar: Don't know how to handle type '{0}'".format(type(left))
+        logger.error(err)
+        raise Exception(err)
+
+
     # Operators that we're comparing with
     ops = element.ops
     comp = element.comparators
@@ -50,8 +62,18 @@ def _handleLeftVarInt(state,element,left):
     if type(right) == pyState.ReturnObject:
         return right
 
-    if type(right) in [Int, Real, BitVec]:
+    if type(right) in [Int, Real, BitVec, Char]:
         right = right.getZ3Object()
+
+    # If this is a String, let's hope it's only one char...
+    elif type(right) is String and right.length() == 1:
+        right = right[0].getZ3Object()
+
+    else:
+        err = "_handleLeftVar: Don't know how to handle type '{0}'".format(type(left))
+        logger.error(err)
+        raise Exception(err)
+
 
     # Adjust the types if needed
     left,right = pyState.z3Helpers.z3_matchLeftAndRight(left,right,ops)

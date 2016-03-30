@@ -6,14 +6,15 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
+from pyObjectManager.String import String
 from copy import deepcopy
 
 logger = logging.getLogger("pyState:Subscript")
 
 def _handleIndex(state,sub_object,sub_slice):
 
-    if type(sub_object) is not List:
-        err = "handleIndex: Don't know how to subscript type {0}".format(sub_object)
+    if type(sub_object) not in [List, String]:
+        err = "handleIndex: Don't know how to subscript type {0}".format(type(sub_object))
         logger.error(err)
         raise Exception(err)
 
