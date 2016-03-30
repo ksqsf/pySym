@@ -169,7 +169,7 @@ class String:
         # Loop through all our characters and see if they have more than one possibility
         for c in self:
             # If this has more than one option, return False
-            if self.state.any_n_int(c,2) == 2:
+            if len(self.state.any_n_int(c,2)) == 2:
                 return False
 
         # Looks like we've got a match...
