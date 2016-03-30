@@ -42,7 +42,7 @@ class String:
             state = self.state if hasattr(self,"state") else None
         )
 
-    def __deepcopy__(self,blerg):
+    def __deepcopy__(self, _):
         return self.copy()
 
 
@@ -95,12 +95,14 @@ class String:
         """
         if type(index) is slice:
             # TODO: Redo this to return as string object
-            # Build a new List object containing the sliced stuff
-            newList = String("temp",ctx=self.ctx)
-            oldList = self.variables[index]
-            for var in oldList:
-                newList.append(var)
-            return newList
+            # Build a new String object containing the sliced stuff
+            # Create a copy
+            newString = self.copy()
+
+            # Adjust the variables down to the slice
+            newString.variables = newString.variables[index]
+
+            return newString
             
 
         return self.variables[index]
@@ -122,3 +124,34 @@ class String:
         Not exactly something you can do on a string, but helpful for our symbolic execution
         """
         return self.variables.pop(index)
+
+    def __str__(self):
+        """
+        str will change this object into a possible representation by calling state.any_str
+        """
+        return self.state.any_str(self)
+
+    def canBe(self,var):
+        """
+        Test if this string can be equal to the given variable
+        Returns True or False
+        """
+
+        # May need to add String object canBe later
+        assert type(var) is str
+        
+        # It can't be equal if it's a different length...
+        if self.length() != len(var):
+            return False
+        
+        # Ask the solver...
+        s = self.state.copy()
+        for (me,you) in zip(self,var):
+            # Add the constraint
+            s.addConstraint(me.getZ3Object() == ord(you))
+            # If we're not possible, return False
+            if not s.isSat():
+                return False
+        
+        # If we made it here, it's a possibility
+        return True

@@ -25,6 +25,23 @@ s = "Test"
 l = [x for x in s]
 """
 
+def test_pyObjectManager_String_canBe():
+    b = ast.parse(test1).body
+    p = Path(b,source=test1)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.getVar('s')
+    
+    assert s.canBe("Test")
+    assert not s.canBe("test")
+    assert s[0:1].canBe("T")
+    assert not s[0:2].canBe("T3")
+    assert s[:3].canBe("Tes")
+
+
 def test_pyObjectManager_String_ListComp():
     b = ast.parse(test2).body
     p = Path(b,source=test2)
