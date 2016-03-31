@@ -2,6 +2,7 @@
 import z3
 import ast
 from pyState.z3Helpers import Z3_DEFAULT_BITVEC_SIZE
+from pyObjectManager.BitVec import BitVec
 
 def handle(state,call,size=ast.Num(Z3_DEFAULT_BITVEC_SIZE)):
     """

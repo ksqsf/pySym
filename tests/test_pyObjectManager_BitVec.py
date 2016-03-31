@@ -17,19 +17,19 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 
 test1 = """
-x = 1
+x = pyState.BVV(5,16)
 """
 
 test2 = """
-x = pyState.Int()
-y = 5
+x = pyState.BVS(32)
+y = pyState.BVV(15,32)
 """
 
 test3 = """
-x = 12
+x = pyState.BVV(1234,32)
 """
 
-def test_pyObjectManager_Int_strPrint():
+def test_pyObjectManager_BitVec_strPrint():
     b = ast.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
@@ -38,9 +38,10 @@ def test_pyObjectManager_Int_strPrint():
     assert len(pg.completed) == 1
 
     x = pg.completed[0].state.getVar('x')
-    assert x.__str__() == "12"
+    assert x.__str__() == "1234"
 
-def test_pyObjectManager_Int_setTo():
+
+def test_pyObjectManager_BitVec_setTo():
     b = ast.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
@@ -50,14 +51,17 @@ def test_pyObjectManager_Int_setTo():
 
     x = pg.completed[0].state.getVar('x')
     y = pg.completed[0].state.getVar('y')
+
     x.setTo(1337)
     assert pg.completed[0].state.any_int('x') == 1337
+
     x.increment()
     x.setTo(y)
-    assert pg.completed[0].state.any_int('x') == 5
+    assert pg.completed[0].state.any_int('x') == 15
+    
 
 
-def test_pyObjectManager_Int_isStatic():
+def test_pyObjectManager_BitVec_isStatic():
     b = ast.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
@@ -68,6 +72,6 @@ def test_pyObjectManager_Int_isStatic():
     x = pg.completed[0].state.getVar('x')
     
     assert x.isStatic()
-    assert x.getValue() == 1
+    assert x.getValue() == 5
 
 

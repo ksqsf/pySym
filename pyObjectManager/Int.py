@@ -91,3 +91,22 @@ class Int:
             return self.value
         
         return self.state.any_int(self)
+
+    def setTo(self,var):
+        """
+        Sets this Int object to be equal/copy of another. Type can be int or Int
+        """
+        assert type(var) in [Int, int]
+
+        # Add the constraints
+        if type(var) is int:
+            self.state.addConstraint(self.getZ3Object() == var)
+        else:
+            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+
+    def __str__(self):
+        """
+        str will change this object into a possible representation by calling state.any_int
+        """
+        return str(self.state.any_int(self))
+

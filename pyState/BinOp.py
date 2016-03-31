@@ -146,7 +146,7 @@ def handle(state,element,ctx=None):
     # Save a copy so that we don't lose it
     left = left.copy()
 
-    logger.debug("BinOp: BinOp Left = {0}".format(left))
+    logger.debug("BinOp: BinOp Left = {0}".format(type(left)))
 
     right = state.resolveObject(element.right,parent=element,ctx=ctx)
 
@@ -156,7 +156,7 @@ def handle(state,element,ctx=None):
     # Save a copy so that we don't lose it
     right = right.copy()
 
-    logger.debug("BinOp: BinOp Right = {0}".format(right))
+    logger.debug("BinOp: BinOp Right = {0}".format(type(right)))
 
     op = element.op
 

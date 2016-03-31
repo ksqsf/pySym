@@ -82,7 +82,6 @@ class String:
     def setTo(self,var):
         """
         Sets this String object to be equal/copy of another. Type can be str or String.
-        Remember that this doesn't set anything in Z3
         """
         assert type(var) in [String, str]
         

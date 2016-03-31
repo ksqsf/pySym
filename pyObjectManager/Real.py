@@ -2,6 +2,9 @@ import z3
 import logging
 import pyState
 
+from pyObjectManager.Int import Int
+from pyObjectManager.BitVec import BitVec
+
 logger = logging.getLogger("ObjectManager:Real")
 
 class Real:
@@ -72,6 +75,10 @@ class Real:
         """
         if self.value is not None:
             return True
+
+        elif len(self.state.any_n_real(self,2)) == 1:
+            return True
+
         return False
 
     def getValue(self):
@@ -83,4 +90,22 @@ class Real:
             return self.value
 
         return self.state.any_real(self)
+
+    def setTo(self,var):
+        """
+        Sets this Real object to be equal/copy of another. Type can be float, Real, Int, or int
+        """
+        assert type(var) in [Real, float, Int, int]
+
+        # Add the constraints
+        if type(var) in [float, int]:
+            self.state.addConstraint(self.getZ3Object() == var)
+        else:
+            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+
+    def __str__(self):
+        """
+        str will change this object into a possible representation by calling state.any_real
+        """
+        return str(self.state.any_real(self))
 

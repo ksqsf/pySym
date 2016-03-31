@@ -61,3 +61,49 @@ class BitVec:
         """
         assert type(size) is int
         return True if size == self.size else False
+
+
+    def setTo(self,var):
+        """
+        Sets this BitVec object to be equal/copy of another. Type can be int, or BitVec
+        """
+        assert type(var) in [int, BitVec]
+
+        # Add the constraints
+        if type(var) is int:
+            self.state.addConstraint(self.getZ3Object() == var)
+        else:
+            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+
+    def isStatic(self):
+        """
+        Returns True if this object is a static variety (i.e.: BitVecVal(12)).
+        Also returns True if object has only one possibility
+        """
+        # If this is a static BitVec
+        #if self.value is not None:
+        #    return True
+
+        # If this is a BitVec with only one possibility
+        if len(self.state.any_n_int(self,2)) == 1:
+            return True
+
+        return False
+
+
+    def getValue(self):
+        """
+        Resolves the value of this BitVec. Assumes that isStatic method is called
+        before this is called to ensure the value is not symbolic
+        """
+        #if self.value is not None:
+        #    return self.value
+
+        return self.state.any_int(self)
+
+    def __str__(self):
+        """
+        str will change this object into a possible representation by calling state.any_int
+        """
+        return str(self.state.any_int(self))
+

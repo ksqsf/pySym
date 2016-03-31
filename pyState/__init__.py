@@ -393,7 +393,7 @@ class State():
         if type(obj) == ReturnObject:
             return obj
         
-        logger.debug("Return: Returning element {0}".format(obj))
+        logger.debug("Return: Returning element {0}".format(type(obj)))
         # Store it off in the objectManager
         self.objectManager.returnObjects[self.retID] = obj
         """ 
@@ -476,7 +476,7 @@ class State():
             #index = parent.index(dest_arg)
             self.objectManager.variables[self.ctx][func.args.args[i].arg] = self.recursiveCopy(caller_arg,varName=func.args.args[i].arg)
             #self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
-            logger.debug("Call: Setting argument {0} = {1}".format(self.objectManager.variables[self.ctx][func.args.args[i].arg],caller_arg))
+            logger.debug("Call: Setting argument {0} = {1}".format(type(self.objectManager.variables[self.ctx][func.args.args[i].arg]),type(caller_arg)))
         
         # Grab any unset vars
         unsetArgs = func.args.args[len(call.args):]
@@ -497,7 +497,7 @@ class State():
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
             # Remove arg after it has been satisfied
             unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
-            logger.debug("Call: Setting keyword argument {0} = {1}".format(dest_arg,caller_arg))
+            logger.debug("Call: Setting keyword argument {0} = {1}".format(type(dest_arg),type(caller_arg)))
 
 
         # Handle any defaults
@@ -510,7 +510,7 @@ class State():
             kwargs.pop("value",None) if kwargs is not None else None
             dest_arg = self.getVar(arg.arg,varType=varType,kwargs=kwargs)
             self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
-            logger.debug("Call: Setting default argument {0} = {1}".format(dest_arg,caller_arg))
+            logger.debug("Call: Setting default argument {0} = {1}".format(type(dest_arg),type(caller_arg)))
 
        
         ####################

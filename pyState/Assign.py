@@ -20,7 +20,7 @@ def _handleAssignNum(state,target,value):
     value should already be resolved via state.resolveObject (meaning it is now an expression)
     """
     
-    logger.debug("_handleAssignNum: Handling {0} = {1}".format(target,value))
+    logger.debug("_handleAssignNum: Handling {0} = {1}".format(type(target),type(value)))
     
     if type(value) is Real:
         x = state.resolveObject(target,varType=Real)
