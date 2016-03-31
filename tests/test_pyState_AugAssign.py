@@ -91,6 +91,29 @@ l = [1,x,3]
 l[1] ^= 2
 """
 
+test13 = """
+s = pyState.String(10)
+x = 1
+x += s.index("b")
+"""
+
+def test_pySym_AugAssign_MultipleStates():
+    b = ast.parse(test13).body
+    p = Path(b,source=test13)
+    pg = PathGroup(p)
+    pg.explore()
+
+    # There should be 10 possible states here
+    assert len(pg.completed) == 10
+    
+    # Get the output states
+    rets = []
+    for p in pg.completed:
+        rets.append(p.state.any_int('x'))
+    
+    assert set(rets) == set([1+x for x in range(10)])
+
+
 def test_pySym_AugAssign_Subscript():
     b = ast.parse(test9).body
     p = Path(b,source=test9)

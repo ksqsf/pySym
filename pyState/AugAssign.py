@@ -10,24 +10,16 @@ from pyObjectManager.BitVec import BitVec
 
 logger = logging.getLogger("pyState:AugAssign")
 
-def handle(state,element):
+def _handleNum(state,element,value,op):
     """
-    Attempt to handle the AugAssign element
-    Example of this: x += 1
+    Handle the case where we're AugAssigning numbers
     """
-    # Value is what to set them to
-    value = state.resolveObject(element.value)
-        
-    # Check if we're making a call and need to wait for that to finish
-    if type(value) == ReturnObject:
-        return [state]
 
-    # The operations to do (Add/Mul/etc)
-    op = element.op    
-
+    # Find the parent object
     oldTarget = state.resolveObject(element.target)
     parent = state.objectManager.getParent(oldTarget)
     index = parent.index(oldTarget)
+
 
     # Basic sanity checks complete. For augment assigns we will always need to update the vars.
     # Grab the old var and create a new now
@@ -54,7 +46,7 @@ def handle(state,element):
             # Check for over and underflows
             state.solver.add(pyState.z3Helpers.bvadd_safe(oldTargetVar,valueVar))
         state.addConstraint(newTargetVar == oldTargetVar + valueVar)
-    
+
     elif type(op) == ast.Sub:
         if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
             # Check for over and underflows
@@ -66,13 +58,13 @@ def handle(state,element):
             # Check for over and underflows
             state.solver.add(pyState.z3Helpers.bvmul_safe(oldTargetVar,valueVar))
         state.addConstraint(newTargetVar == oldTargetVar * valueVar)
-    
+
     elif type(op) == ast.Div:
         if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
             # Check for over and underflows
             state.solver.add(pyState.z3Helpers.bvdiv_safe(oldTargetVar,valueVar))
         state.addConstraint(newTargetVar == oldTargetVar / valueVar)
-    
+
     elif type(op) == ast.Mod:
         state.addConstraint(newTargetVar == oldTargetVar % valueVar)
 
@@ -85,7 +77,7 @@ def handle(state,element):
 
     elif type(op) == ast.BitAnd:
         state.addConstraint(newTargetVar == oldTargetVar & valueVar)
-    
+
     elif type(op) == ast.LShift:
         state.addConstraint(newTargetVar == oldTargetVar << valueVar)
 
@@ -106,3 +98,32 @@ def handle(state,element):
 
     # Return the state
     return [state]
+
+
+def handle(state,element):
+    """
+    Attempt to handle the AugAssign element
+    Example of this: x += 1
+    """
+    # Value is what to set them to
+    value = state.resolveObject(element.value)
+    
+    # Normalize the input
+    values = [value] if type(value) is not list else value
+    
+    # Check if we're making a call and need to wait for that to finish
+    if type(values[0]) == ReturnObject:
+        return [state]
+
+    # The operations to do (Add/Mul/etc)
+    op = element.op    
+
+    ret = []
+
+    # Loop through possible values, creating states as we go
+    for value in values:
+
+        if type(value) in [Int, BitVec, Real]:
+            ret += _handleNum(state.copy(),element,value,op)
+    
+    return ret
