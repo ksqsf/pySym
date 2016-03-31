@@ -985,6 +985,8 @@ class State():
                 out.append(self.any_list(elm,ctx=ctx))
             elif type(elm) is Char:
                 out.append(self.any_char(elm,ctx=ctx))
+            elif type(elm) is String:
+                out.append(self.any_str(elm,ctx=ctx))
             else:
                 err = "any_list: unable to resolve object '{0}'".format(elm)
                 logger.error(err)

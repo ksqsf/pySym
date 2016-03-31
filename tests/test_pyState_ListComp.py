@@ -42,6 +42,20 @@ s = "abcd"
 l = [x for x in s if x == "b"]
 """
 
+test8 = """
+l = [str(i) for i in range(10)]
+"""
+
+def test_pyState_ListComp_MoreFunctions():
+    b = ast.parse(test8).body
+    p = Path(b,source=test8)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [str(i) for i in range(10)]
+
+
 def test_pyState_ListComp_StringCmp():
     b = ast.parse(test7).body
     p = Path(b,source=test7)

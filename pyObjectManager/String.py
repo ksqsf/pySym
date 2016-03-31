@@ -4,7 +4,6 @@ import logging
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
 from pyObjectManager.Char import Char
 import pyState
 

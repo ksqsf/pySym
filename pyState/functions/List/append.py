@@ -4,6 +4,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
+from pyObjectManager.String import String
 
 logger = logging.getLogger("pyState:SimFunction:List:append")
 
@@ -25,9 +26,9 @@ def handle(state,call,var):
         root.append(var)
         state.addConstraint(root[-1].getZ3Object() == var.getZ3Object())
     
-    elif type(var) is List:
+    elif type(var) in [List, String]:
         root.append(state.recursiveCopy(var))
-    
+
     else:
         err = "handle: Don't know how to handle appending type {0}".format(type(var))
         logger.error(err)

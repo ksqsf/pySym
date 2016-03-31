@@ -5,6 +5,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
+from pyObjectManager.String import String
 import pyState
 
 logger = logging.getLogger("ObjectManager:List")
@@ -95,12 +96,12 @@ class List:
             if type(var) is Char:
                 self.state.addConstraint(self.variables[-1].getZ3Object() == var.getZ3Object())
 
-        elif type(var) is List:
-            logger.debug("append: adding List")
+        elif type(var) in [List, String]:
+            logger.debug("append: adding {0}".format(type(var)))
             self.variables.append(var)
 
         else:
-            err = "append: Don't know how to append/resolve object '{0}'".format(var)
+            err = "append: Don't know how to append/resolve object '{0}'".format(type(var))
             logger.error(err)
             raise Exception(err)
 
