@@ -97,6 +97,24 @@ x = 1
 x += s.index("b")
 """
 
+test14 = """
+l = ["a","b","c"]
+l[1] += "d"
+l[1] += "E"
+"""
+
+def test_pySym_AugAssign_String_In_List():
+    b = ast.parse(test14).body
+    p = Path(b,source=test14)
+    pg = PathGroup(p)
+    pg.explore()
+
+    # There should be 10 possible states here
+    assert len(pg.completed) == 1
+    
+    assert pg.completed[0].state.any_list('l') == ['a', 'bdE', 'c']
+
+
 def test_pySym_AugAssign_MultipleStates():
     b = ast.parse(test13).body
     p = Path(b,source=test13)

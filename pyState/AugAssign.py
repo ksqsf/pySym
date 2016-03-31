@@ -6,7 +6,7 @@ import pyState.z3Helpers
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
-
+from pyObjectManager.String import String
 
 logger = logging.getLogger("pyState:AugAssign")
 
@@ -99,6 +99,32 @@ def _handleNum(state,element,value,op):
     # Return the state
     return [state]
 
+def _handleString(state,element,value,op):
+    """
+    Handle the case where we're AugAssigning Strings
+    """
+
+    # Find the parent object
+    oldTarget = state.resolveObject(element.target)
+    parent = state.objectManager.getParent(oldTarget)
+    index = parent.index(oldTarget)
+
+    # Create a new string
+    newString = state.getVar("AugAssignTempString",ctx=1,varType=String)
+    newString.increment()
+    
+    # Set the new string
+    newString.variables = oldTarget.variables + value.variables
+
+    # Assign the new string
+    parent[index] = newString.copy()
+
+    # Pop the instruction off
+    state.path.pop(0)
+
+    # Return the state
+    return [state]
+
 
 def handle(state,element):
     """
@@ -125,5 +151,13 @@ def handle(state,element):
 
         if type(value) in [Int, BitVec, Real]:
             ret += _handleNum(state.copy(),element,value,op)
-    
+
+        elif type(value) is String:
+            ret += _handleString(state.copy(),element,value,op)
+
+        else:
+            err = "handle: Don't know how to handle type {0}".format(type(value))
+            logger.error(err)
+            raise Exception(err)
+
     return ret

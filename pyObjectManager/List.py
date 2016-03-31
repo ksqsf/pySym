@@ -140,7 +140,7 @@ class List:
         """
         # Attempt to return variable
         assert type(key) is int
-        assert type(value) in [Int, Real, BitVec, List]
+        assert type(value) in [Int, Real, BitVec, List, String]
 
         # Get that index's current count
         count = self.variables[key].count + 1
@@ -160,10 +160,10 @@ class List:
             self.variables[key] = BitVec('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count,size=value.size)
             self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
-        elif type(value) is List:
-            logger.debug("__setitem__: setting List")
+        elif type(value) in [List, String]:
+            logger.debug("__setitem__: setting {0}".format(type(value)))
             self.variables[key] = value
-            value.count = count
+            #value.count = count
 
         else:
             err = "__setitem__: Don't know how to set object '{0}'".format(value)
