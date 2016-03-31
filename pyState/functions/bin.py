@@ -15,7 +15,7 @@ def handle(state,call,obj):
     obj = state.resolveObject(obj)
     
     if type(obj) not in [Int, Real, BitVec]:
-        err = "handle: This shouldn't happen. Possibly a target program bug?"
+        err = "handle: This shouldn't happen. Possibly a target program bug? Got obj type {0}".format(type(obj))
         logger.error(err)
         raise Exception(err)
 

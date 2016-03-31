@@ -17,8 +17,10 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 
 test1 = """
+s = 5
 x = bin(12)
 y = bin(13)[2:]
+z = bin(s)
 """
 
 
@@ -32,4 +34,5 @@ def test_function_bin():
     
     assert pg.completed[0].state.any_str('x') == bin(12)
     assert pg.completed[0].state.any_str('y') == bin(13)[2:]
+    assert pg.completed[0].state.any_str('z') == bin(5)
 
