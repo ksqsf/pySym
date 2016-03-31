@@ -19,6 +19,7 @@ from pyObjectManager.List import List
 test1 = """
 s = str(12)
 s2 = str(1.2)
+s3 = str([1,2,3])
 """
 
 
@@ -32,4 +33,4 @@ def test_function_str():
     
     assert pg.completed[0].state.any_str('s') == str(12)
     assert pg.completed[0].state.any_str('s2') == str(1.2)
-
+    assert pg.completed[0].state.any_str('s3') == str([1,2,3])

@@ -831,7 +831,7 @@ class State():
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
             # Resolve this to an objectManager class
             t,args = duplicateSort(obj)
-            return t('tmp',ctx=ctx,**args if args is not None else {})
+            return t('tmp',ctx=ctx,state=self,**args if args is not None else {})
             # Return real val or int val
             #return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         

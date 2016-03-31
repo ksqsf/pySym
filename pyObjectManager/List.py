@@ -67,27 +67,27 @@ class List:
 
         if type(var) is Int or var is Int:
             logger.debug("append: adding Int")
-            self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,**kwargs if kwargs is not None else {}))
+            self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state,**kwargs if kwargs is not None else {}))
             # We're being given an object. Let's make sure we link it to Z3 appropriately
             if type(var) is Int:
                 self.state.addConstraint(self.variables[-1].getZ3Object() == var.getZ3Object())
 
         elif type(var) is Real or var is Real:
             logger.debug("append: adding Real")
-            self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+            self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state))
             if type(var) is Real:
                 self.state.addConstraint(self.variables[-1].getZ3Object() == var.getZ3Object())
 
         elif type(var) is BitVec or var is BitVec:
             logger.debug("append: adding BitVec")
             kwargs = {'size': var.size} if kwargs is None else kwargs
-            self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,**kwargs if kwargs is not None else {}))
+            self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state,**kwargs if kwargs is not None else {}))
             if type(var) is BitVec:
                 self.state.addConstraint(self.variables[-1].getZ3Object() == var.getZ3Object())
         
         elif type(var) is Char or var is Char:
             logger.debug("append: adding Char")
-            self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+            self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state))
             if type(var) is Char:
                 self.state.addConstraint(self.variables[-1].getZ3Object() == var.getZ3Object())
 
@@ -206,6 +206,24 @@ class List:
 
     def __str__(self):
         return str(self.state.any_list(self))
+
+    def getValue(self):
+        """
+        Return a possible value. You probably want to check isStatic before calling this.
+        """
+        return self.state.any_list(self)
+
+    def isStatic(self):
+        """
+        Checks if this list can only have one possible value overall (including all elements).
+        Returns True/False
+        """
+        # Check each of my items for static-ness
+        for var in self:
+            if not var.isStatic():
+                return False
+
+        return True
 
 # Circular importing problem. Don't hate :-)
 from pyObjectManager.Int import Int
