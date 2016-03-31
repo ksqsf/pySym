@@ -2,6 +2,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
+from pyObjectManager.Char import Char
 import logging
 
 logger = logging.getLogger("pyState:functions:int")
@@ -14,7 +15,7 @@ def handle(state,call,obj,base=10):
     # Resolve the object
     obj = state.resolveObject(obj)
     
-    if type(obj) not in [Int, Real, BitVec, String]:
+    if type(obj) not in [Int, Real, BitVec, String, Char]:
         err = "handle: Don't know how to handle type {0}".format(type(obj))
         logger.error(err)
         raise Exception(err)
