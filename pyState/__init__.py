@@ -644,13 +644,32 @@ class State():
         
         # If this is an attr form (i.e.: telnetlib.Telnet())
         elif type(call.func) == ast.Attribute:
+            try:
+                funcName = self.resolveObject(call.func.value)
+                
+                # If we're making a call, return it
+                if type(funcName) is ReturnObject:
+                    return funcName
+                
+                funcName = funcName.__class__.__name__ + "." + call.func.attr
+
+            except:
+                funcName = call.func.value.id + "." + call.func.attr
+
             # If this is a variable, this is an attribute of the varType
-            funcName = self.getVar(call.func.value.id,softFail=True)
+            """
+            #funcName = self.getVar(call.func.value.id,softFail=True)
+            funcName = self.resolveObject(call.func.value)
+            
+            # If we're making a call, return it
+            if type(funcName) is ReturnObject:
+                return funcName
             
             if funcName is None:
                 funcName = call.func.value.id + "." + call.func.attr
             else:
                 funcName = funcName.__class__.__name__ + "." + call.func.attr
+            """
             
         else:
                 err = "resolveCall: unknown call-type object '{0}'".format(type(call))
