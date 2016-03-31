@@ -1,11 +1,6 @@
 import z3
 import ast
 import logging
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.Char import Char
-from pyObjectManager.String import String
 import pyState
 
 logger = logging.getLogger("ObjectManager:List")
@@ -175,3 +170,11 @@ class List:
 
     def pop(self,i):
         return self.variables.pop(i)
+
+# Circular importing problem. Don't hate :-)
+from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
+from pyObjectManager.Char import Char
+from pyObjectManager.String import String
+

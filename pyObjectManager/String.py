@@ -1,10 +1,6 @@
 import z3
 import ast
 import logging
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.Char import Char
 import pyState
 
 logger = logging.getLogger("ObjectManager:String")
@@ -220,4 +216,30 @@ class String:
 
             # If we made it here, it's a possibility
             return True
+
+    def isStatic(self):
+        """
+        Returns True if this object is a static variety (i.e.: "test").
+        Also returns True if object has only one possibility
+        """
+        # Check every character for multiple possible values
+        for c in self:
+            if not c.isStatic():
+                return False
+
+        # If all of them are static, this is a static string
+        return True
+
+    def getValue(self):
+        """
+        Resolves the value of this String. Assumes that isStatic method is called
+        before this is called to ensure the value is not symbolic
+        """
+        return self.state.any_str(self)
+
+# Circular importing problem. Don't hate :-)
+from pyObjectManager.Int import Int
+from pyObjectManager.Real import Real
+from pyObjectManager.BitVec import BitVec
+from pyObjectManager.Char import Char
 

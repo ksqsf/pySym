@@ -1,7 +1,6 @@
 import z3
 import ast
 import logging
-from pyObjectManager.BitVec import BitVec
 import pyState
 
 logger = logging.getLogger("ObjectManager:Char")
@@ -34,6 +33,34 @@ class Char:
             state = self.state if hasattr(self,"state") else None
         )
 
+    def __str__(self):
+        return chr(self.state.any_int(self))
+
+    def setTo(self,var):
+        """
+        Sets this Char to the variable. Raises exception on failure.
+        """
+        if type(var) not in [str, String, Char]:
+            err = "setTo: Invalid argument type {0}".format(type(var))
+            logger.error(err)
+            raise Exception(err)
+
+        if (type(var) is String and var.length() != 1) or (type(var) is str and len(var) != 1):
+            err = "setTo: Cannot set Char element to more than 1 length"
+            logger.error(err)
+            raise Exception(err)
+
+        # Go ahead and add the constraints
+        if type(var) is str:
+            self.state.addConstraint(self.getZ3Object() == ord(var))
+        
+        else:
+            if type(var) is String:
+                var = var[0]
+            
+            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+
+
     def setState(self,state):
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
@@ -56,3 +83,70 @@ class Char:
 
     def getZ3Object(self):
         return self.variable.getZ3Object()
+
+    def isStatic(self):
+        """
+        Returns True if this object is a static variety (i.e.: "a").
+        Also returns True if object has only one possibility
+        """
+        if len(self.state.any_n_int(self,2)) == 1:
+            return True
+
+        return False
+
+    def getValue(self):
+        """
+        Resolves the value of this Char. Assumes that isStatic method is called
+        before this is called to ensure the value is not symbolic
+        """
+        return chr(self.state.any_int(self))
+
+    def mustBe(self,var):
+        """
+        Return True if this Char must be equivalent to input (str/Char). False otherwise.
+        """
+        assert type(var) in [str, Char]
+        
+        # If we can't be, then mustBe is also False
+        if not self.canBe(var):
+            return False
+        
+        # If we can be, determine if this is the only option
+        if len(self.state.any_n_int(self,2)) == 1:
+            return True
+        
+        # Looks like we're only one option
+        return False
+
+
+    def canBe(self,var):
+        """
+        Test if this Char can be equal to the given variable
+        Returns True or False
+        """
+
+        assert type(var) in [str, Char]
+
+        if type(var) is str and len(var) != 1:
+            return False
+        
+        if type(var) is str:
+            s = self.state.copy()
+            s.addConstraint(self.getZ3Object() == ord(var))
+            if s.isSat():
+                return True
+            return False
+
+        elif type(var) is Char:
+            s = self.state.copy()
+            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+            if s.isSat():
+                return True
+            return False
+
+
+
+# Circular importing problem. Don't hate :-)
+from pyObjectManager.BitVec import BitVec
+from pyObjectManager.String import String
+

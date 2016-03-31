@@ -32,6 +32,28 @@ f = "Abcd"
 g = pyState.String(4)
 """
 
+test4 = """
+s = "abcd"
+d = pyState.String(5)
+"""
+
+def test_pyObjectManager_String_isStatic():
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    
+    s = pg.completed[0].state.getVar('s')
+    d = pg.completed[0].state.getVar('d')
+
+    assert s.isStatic()
+    assert s.getValue() == "abcd"
+    
+    assert not d.isStatic()
+
+
 def test_pyObjectManager_String_canBe_mustBe_String():
     b = ast.parse(test3).body
     p = Path(b,source=test3)

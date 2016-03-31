@@ -2,9 +2,6 @@ import z3
 import logging
 import pyState
 
-from pyObjectManager.Int import Int
-from pyObjectManager.BitVec import BitVec
-
 logger = logging.getLogger("ObjectManager:Real")
 
 class Real:
@@ -108,4 +105,9 @@ class Real:
         str will change this object into a possible representation by calling state.any_real
         """
         return str(self.state.any_real(self))
+
+
+# Circular importing problem. Don't hate :-)
+from pyObjectManager.Int import Int
+from pyObjectManager.BitVec import BitVec
 
