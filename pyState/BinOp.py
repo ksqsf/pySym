@@ -6,6 +6,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
+from pyObjectManager.List import List
 from copy import deepcopy
 
 logger = logging.getLogger("pyState:BinOp")
@@ -105,6 +106,20 @@ def _handleStr(state,left,right,op):
     return s.copy()
 
 
+def _handleList(state,left,right,op):
+    """
+    Handle BinOp for List types
+    """
+    assert type(left) is List
+    assert type(right) is List
+    
+    # Because Lists are just class abstractions, we can do this without touching Z3
+    s = state.getVar("tempBinOpList",ctx=1,varType=List)
+    s.increment()
+    s.variables = left.copy().variables + right.copy().variables
+    return s.copy()
+
+
 def handle(state,element,ctx=None):
     """
     Input:
@@ -128,12 +143,18 @@ def handle(state,element,ctx=None):
     if type(left) == pyState.ReturnObject:
         return left
 
+    # Save a copy so that we don't lose it
+    left = left.copy()
+
     logger.debug("BinOp: BinOp Left = {0}".format(left))
 
     right = state.resolveObject(element.right,parent=element,ctx=ctx)
 
     if type(right) == pyState.ReturnObject:
         return right
+
+    # Save a copy so that we don't lose it
+    right = right.copy()
 
     logger.debug("BinOp: BinOp Right = {0}".format(right))
 
@@ -145,6 +166,9 @@ def handle(state,element,ctx=None):
 
     elif type(left) is String:
         return _handleStr(state,left,right,op)
+
+    elif type(left) is List:
+        return _handleList(state,left,right,op)
 
     else:
         err = "BinOP: Don't know how to handle variable type {0}".format(type(left))

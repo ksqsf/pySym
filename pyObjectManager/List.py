@@ -55,6 +55,7 @@ class List:
         self.count += 1
         # reset variable list if we're incrementing our count
         self.variables = []
+
         
     def append(self,var,kwargs=None):
         """

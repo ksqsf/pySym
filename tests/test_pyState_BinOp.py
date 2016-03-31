@@ -69,6 +69,20 @@ s2 = pyState.String(8) + " blerg"
 s3 = "This " + "is " + "a " + "test"
 """
 
+test11 = """
+l = [1,2,3] + [4,5,6]
+"""
+
+def test_pySym_BinOp_ListConcat():
+    b = ast.parse(test11).body
+    p = Path(b,source=test11)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == [1,2,3] + [4,5,6]
+
+
 def test_pySym_BinOp_StrConcat():
     b = ast.parse(test10).body
     p = Path(b,source=test10)
