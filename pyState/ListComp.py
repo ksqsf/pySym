@@ -16,7 +16,6 @@ def _findAllInputVariables(haystack):
     Find all input variables (ast.Name objects). Return as a list
     """
     ret = []
-    print("type",type(haystack))
 
     if type(haystack) is ast.ListComp:
         for generator in haystack.generators:
