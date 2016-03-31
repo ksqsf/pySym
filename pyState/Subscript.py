@@ -38,7 +38,7 @@ def _handleIndex(state,sub_object,sub_slice):
 
 def _handleSlice(state,sub_object,sub_slice):
 
-    if type(sub_object) is not List:
+    if type(sub_object) not in [List, String]:
         err = "handleIndex: Don't know how to subscript type {0}".format(sub_object)
         logger.error(err)
         raise Exception(err)
@@ -101,9 +101,6 @@ def _handleSlice(state,sub_object,sub_slice):
             logger.error(err)
             raise Exception(err)
 
-    # Get slice
-    newList = state.recursiveCopy(sub_object[lower:upper:step])
-    
     step = 1 if step is None else step
     
     if lower is None:
@@ -118,17 +115,24 @@ def _handleSlice(state,sub_object,sub_slice):
         else:
             upper = -sub_object.length() - 1
 
-    j = 0
-    for i in range(lower,upper,step):
-        if type(sub_object[i]) in [Int, Real, BitVec]:
-            state.addConstraint(newList[j].getZ3Object() == sub_object[i].getZ3Object())
-        else:
-            newList[j] = state.recursiveCopy(sub_object[i])
-        j += 1
+    if type(sub_object) is List:
+        # Get slice
+        newObject = state.recursiveCopy(sub_object[lower:upper:step])
+
+        j = 0
+        for i in range(lower,upper,step):
+            if type(sub_object[i]) in [Int, Real, BitVec]:
+                state.addConstraint(newObject[j].getZ3Object() == sub_object[i].getZ3Object())
+            else:
+                newObject[j] = state.recursiveCopy(sub_object[i])
+            j += 1
+
+    elif type(sub_object) is String:
+        newObject = sub_object[lower:upper:step].copy()
 
 
     # Return new List
-    return newList
+    return newObject
 
 
 def handle(state,element,ctx=None):
@@ -151,7 +155,7 @@ def handle(state,element,ctx=None):
     sub_slice = element.slice
     sub_value = element.value
 
-    if type(sub_value) not in [ast.Name,ast.Subscript]:
+    if type(sub_value) not in [ast.Name,ast.Subscript, ast.Call]:
         err = "handle: Don't know how to handle value type {0}".format(sub_value)
         logger.error(err)
         raise Exception(err)
