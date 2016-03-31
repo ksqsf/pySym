@@ -110,13 +110,42 @@ def _handleList(state,left,right,op):
     """
     Handle BinOp for List types
     """
-    assert type(left) is List
-    assert type(right) is List
+    assert type(left) in [List, Int, BitVec]
+    assert type(right) in [List, Int, BitVec]
     
     # Because Lists are just class abstractions, we can do this without touching Z3
     s = state.getVar("tempBinOpList",ctx=1,varType=List)
     s.increment()
-    s.variables = left.copy().variables + right.copy().variables
+
+    if type(op) is ast.Add:
+        # It's only valid to add two lists together, not list and int
+        s.variables = left.copy().variables + right.copy().variables
+
+    elif type(op) is ast.Mult:
+        # It's only valid to multiply a list and a number
+        assert (type(left) is List and type(right) in [Int, BitVec]) or (type(right) is List and type(left) in [Int, BitVec])
+
+        oldList = left if type(left) is List else right
+        myInt = left if type(left) in [Int, BitVec] else right
+    
+        # TODO: Add symbolic here    
+        if not myInt.isStatic():
+            err = "_handleList: Don't know how to handle symbolic list multiplication"
+            logger.error(err)
+            raise Exception(err)
+
+        # Resolve the value
+        myIntVal = myInt.getValue()
+        
+        # Populate the new variable
+        s.variables = oldList.variables * myIntVal
+
+    else:
+        err = "_handleList: Don't know how to handle op type {0}".format(type(op))
+        logger.error(err)
+        raise Exception(err)
+
+
     return s.copy()
 
 
@@ -160,15 +189,15 @@ def handle(state,element,ctx=None):
 
     op = element.op
 
-    # TODO: Assuming like types here... Maybe check both left and right?
-    if type(left) in [Int, Real, BitVec]:
-        return _handleNum(state,left,right,op)
+    if type(left) is List or type(right) is List:
+        return _handleList(state,left,right,op)
 
-    elif type(left) is String:
+    elif type(left) is String or type(right) is String:
         return _handleStr(state,left,right,op)
 
-    elif type(left) is List:
-        return _handleList(state,left,right,op)
+    # TODO: Assuming like types here... Maybe check both left and right?
+    elif type(left) in [Int, Real, BitVec]:
+        return _handleNum(state,left,right,op)
 
     else:
         err = "BinOP: Don't know how to handle variable type {0}".format(type(left))
