@@ -752,6 +752,11 @@ class State():
                     return ret
                 var.append(ret)
 
+            elif type(elm) is ast.Str:
+                elm_resolved = self.resolveObject(elm)
+                var.append(elm_resolved.copy())
+                
+
             elif type(elm) in [ast.Name, ast.BinOp]:
                 # Resolve the name
                 elm_resolved = self.resolveObject(elm)
