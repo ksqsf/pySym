@@ -66,11 +66,7 @@ def _handleSlice(state,sub_object,sub_slice):
 
     if type(lower) not in [int,type(None)]:
         if lower.isStatic():
-            lower = lower.value
-    
-        # Check if it's a variable that only has one possibility
-        elif type(lower) in [Int, BitVec] and len(state.any_n_int(lower,2)) == 1:
-            lower = state.any_int(lower)
+            lower = lower.getValue()
     
         else:
             err = "_handleSlice: Don't know how to handle symbolic lower slice integers at the moment"
@@ -84,11 +80,7 @@ def _handleSlice(state,sub_object,sub_slice):
 
     if type(upper) not in [int,type(None)]:
         if upper.isStatic():
-            upper = upper.value
-
-        # Check if it's a variable that only has one possibility
-        elif type(upper) in [Int, BitVec] and len(state.any_n_int(upper,2)) == 1:
-            upper = state.any_int(upper)
+            upper = upper.getValue()
 
         else:
             err = "_handleSlice: Don't know how to handle symbolic upper slice integers at the moment"
@@ -102,11 +94,7 @@ def _handleSlice(state,sub_object,sub_slice):
 
     if type(step) not in [int,type(None)]:
         if step.isStatic():
-            step = step.value
-
-        # Check if it's a variable that only has one possibility
-        elif type(step) in [Int, BitVec] and len(state.any_n_int(step,2)) == 1:
-            step = state.any_int(step)
+            step = step.getValue()
 
         else:
             err = "_handleSlice: Don't know how to handle symbolic step slice integers at the moment"

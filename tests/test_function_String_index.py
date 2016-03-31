@@ -26,6 +26,32 @@ s = pyState.String(10)
 x = s.index('a')
 """
 
+test3 = """
+s = pyState.String(10)
+x = -1
+if s[3] == "a":
+    x = s.index('a')
+"""
+
+def test_function_String_Index_PartiallySymbolic():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+
+    pg.explore()
+
+    # Every index should be a possibility
+    assert len(pg.completed) == 5
+
+    indexes = []
+    # Make sure we got all of them
+    for path in pg.completed:
+        indexes.append(path.state.any_int('x'))
+
+    assert set(indexes) == set(range(4)).union({-1})
+
+
+
 def test_function_String_Index_Symbolic():
     b = ast.parse(test2).body
     p = Path(b,source=test2)

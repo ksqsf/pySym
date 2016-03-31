@@ -118,7 +118,7 @@ def handle(state,element):
             ret += _handleAssignString(state.copy(),target,value)
     
         else:
-            err = "Don't know how to assign type {0} at line {1} col {2}".format(type(value),value.lineno,value.col_offset)
+            err = "Don't know how to assign type {0}".format(type(value))
             logger.error(err)
             raise Exception(err)
 

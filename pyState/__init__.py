@@ -2,7 +2,7 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For, pyState.ListComp
+import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For, pyState.ListComp, pyState.UnaryOp
 import random
 import os.path
 import importlib
@@ -865,7 +865,8 @@ class State():
         elif t == ast.UnaryOp:
             # TODO: Not sure if there will be symbolic UnaryOp objects... This wouldn't work for those.
             logger.debug("resolveObject: Resolving UnaryOp type object")
-            return ast.literal_eval(obj)
+            #return ast.literal_eval(obj)
+            return pyState.UnaryOp.handle(self,obj,ctx=ctx)
 
 
         else:
