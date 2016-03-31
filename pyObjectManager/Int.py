@@ -110,4 +110,41 @@ class Int:
         """
         return str(self.state.any_int(self))
 
+    def mustBe(self,var):
+        """
+        Test if this Int must be equal to another variable
+        Returns True or False
+        """
+        if not self.canBe(var):
+            return False
 
+        # So we can be, now must we?
+        if len(self.state.any_n_int(self,2)) == 1:
+            return True
+        
+        return False
+
+
+    def canBe(self,var):
+        """
+        Test if this Int can be equal to the given variable
+        Returns True or False
+        """
+        
+        if type(var) not in [Int, BitVec,int]:
+            return False
+        
+        # Ask the solver
+        s = self.state.copy()
+
+        if type(var) in [Int, BitVec]:
+            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+        else:
+            s.addConstraint(self.getZ3Object() == var)
+        
+        if s.isSat():
+            return True
+        
+        return False
+
+from pyObjectManager.BitVec import BitVec

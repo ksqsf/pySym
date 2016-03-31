@@ -171,6 +171,42 @@ class List:
     def pop(self,i):
         return self.variables.pop(i)
 
+    def mustBe(self,var):
+        """
+        Test if this List must be equal to another
+        """
+        if not self.canBe(var):
+            return False
+
+        # Check each item in turn to see if it must be
+        for (item,val) in zip(self,var):
+            if not item.mustBe(val):
+                return False
+        
+        return True
+
+    def canBe(self,var):
+        """
+        Test if this List can be equal to another List
+        Returns True or False
+        """
+        if type(var) is not List:
+            return False
+        
+        # If not the same length, we can't be the same
+        if self.length() != var.length():
+            return False
+        
+        # Compare pairwise Chars
+        for (me,you) in zip(self,var):
+            if not me.canBe(you):
+                return False
+
+        return True
+
+    def __str__(self):
+        return str(self.state.any_list(self))
+
 # Circular importing problem. Don't hate :-)
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real

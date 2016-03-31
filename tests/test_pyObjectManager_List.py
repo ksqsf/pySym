@@ -68,6 +68,30 @@ def test():
 l = [1,test(),[test() + test()]]
 """
 
+test11 = """
+l = [1,2,3]
+k = [1,2,3]
+j = [2,2,3]
+"""
+
+def test_pyObjectManager_List_canBe():
+    b = ast.parse(test11).body
+    p = Path(b,source=test11)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    
+    l = pg.completed[0].state.getVar('l')
+    k = pg.completed[0].state.getVar('k')
+    j = pg.completed[0].state.getVar('j')
+    
+    assert l.canBe(k)
+    assert not l.canBe(j)
+
+    assert l.mustBe(k)
+
+
 def test_pyObjectManager_List_setitem():
     b = ast.parse(test1).body
     p = Path(b,source=test1)
