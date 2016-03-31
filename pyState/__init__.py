@@ -259,9 +259,7 @@ class State():
             newString = self.getVar(varName,ctx=ctx,varType=String)
             newString.increment()
             newString = newString.copy()
-            newString.setTo("A"*var.length())
-            for i in range(var.length()):
-                self.addConstraint(newString[i].getZ3Object() == var[i].getZ3Object())
+            newString.setTo(var)
             
             return newString
             

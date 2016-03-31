@@ -74,3 +74,13 @@ class Real:
             return True
         return False
 
+    def getValue(self):
+        """
+        Resolves the value of this real. Assumes that isStatic method is called
+        before this is called to ensure the value is not symbolic
+        """
+        if self.value is not None:
+            return self.value
+
+        return self.state.any_real(self)
+

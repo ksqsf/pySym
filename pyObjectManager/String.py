@@ -87,13 +87,16 @@ class String:
         """
         assert type(var) in [String, str]
         
+        self.variables = []
+
         # For now, just add as many characters as there was originally
-        for c in var:
-            # Assuming 8-bit BitVec for now
-            # TODO: Figure out a better way to handle this... Characters might be of various bitlength... Some asian encodings are up to 4 bytes...
-            #self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,size=16))
-            #self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx))
+        for val in var:
             self._addChar()
+            if type(val) is str:
+                self.state.addConstraint(self[-1].getZ3Object() == ord(val))
+            else:
+                self.state.addConstraint(self[-1].getZ3Object() == val.getZ3Object())
+            
 
 
     def _isSame(self,length=None,**args):
