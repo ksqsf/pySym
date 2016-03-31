@@ -9,7 +9,7 @@ import pyState
 
 logger = logging.getLogger("pyState:ListComp")
 
-import astunparse
+#import astunparse
 
 def _findAllInputVariables(haystack):
     """
@@ -114,7 +114,7 @@ def handle(state,element,ctx=None):
     for inputVar in allInputVars:
         fun.args.args.append(ast.arg(inputVar.id,0))
 
-    print(astunparse.unparse(fun))
+    #print(astunparse.unparse(fun))
 
     # Call our new function.
     state.Call(ast.parse("blergy({0})".format(','.join([x.id for x in allInputVars]))).body[0].value,func=fun,retObj=retObj)
