@@ -63,6 +63,27 @@ def test(x,y):
 x = test(2,4)**8
 """
 
+test10 = """
+s = "test" + " blerg"
+s2 = pyState.String(8) + " blerg"
+s3 = "This " + "is " + "a " + "test"
+"""
+
+def test_pySym_BinOp_StrConcat():
+    b = ast.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_str('s') == "test" + " blerg"
+    
+    assert len(pg.completed[0].state.any_str('s2')) == 8 + len(" blerg")
+    assert pg.completed[0].state.any_str('s2').endswith(" blerg")
+
+    assert pg.completed[0].state.any_str('s3') == "This " + "is " + "a " + "test"
+
+
 def test_pySym_BinOp_Exp():
     b = ast.parse(test9).body
     p = Path(b,source=test9)

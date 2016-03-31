@@ -33,6 +33,8 @@ if s[3] == "a":
     x = s.index('a')
 """
 
+
+
 def test_function_String_Index_PartiallySymbolic():
     b = ast.parse(test3).body
     p = Path(b,source=test3)

@@ -14,15 +14,22 @@ def handle(state,call,sub,start=None,end=None):
     """
     Determine location of char in string.
     """
-    assert type(sub) is ast.Str 
-
     # The root (i.e.: "s" in s.index())
     root = state.resolveObject(call.func.value)
 
     assert type(root) is String
 
     # Resolve the vars
-    sub = sub.s
+    sub = state.resolveObject(sub)
+
+    # If we're indexing a Char, just change it into a String
+    if type(sub) is Char:
+        c = sub
+        sub = String("tempIndex",1,state=state)
+        sub.variables.append(c)
+
+    assert type(sub) is String
+
     start = state.resolveObject(start) if start is not None else None
     end = state.resolveObject(end) if end is not None else None
 
@@ -51,13 +58,13 @@ def handle(state,call,sub,start=None,end=None):
     ret = []
 
     # Move the size window through the input
-    for i in range(0,subStr.length() - len(sub) + 1):
+    for i in range(0,subStr.length() - sub.length() + 1):
         # If it is possible to have this index here, add it
-        if subStr[i:i+len(sub)].canBe(sub):
+        if subStr[i:i+sub.length()].canBe(sub):
             ret.append(Int('tempStrIndex',1,value=i))
         
         # If this is the only possible place, we must stop
-        if subStr[i:i+len(sub)].mustBe(sub):
+        if subStr[i:i+sub.length()].mustBe(sub):
             break
 
     return ret

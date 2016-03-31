@@ -37,6 +37,21 @@ test6 = """
 l = [x**2 for x in range(5)]
 """
 
+test7 = """
+s = "abcd"
+l = [x for x in s if x == "b"]
+"""
+
+def test_pyState_ListComp_StringCmp():
+    b = ast.parse(test7).body
+    p = Path(b,source=test7)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_list('l') == ["b"]
+
+
 def test_pyState_ListComp_outputModifier():
     b = ast.parse(test6).body
     p = Path(b,source=test6)

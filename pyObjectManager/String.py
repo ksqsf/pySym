@@ -157,7 +157,7 @@ class String:
         """
         Test if this string must be equal to the given variable. This means there's no other options and it's not symbolic
         """
-        assert type(var) is str
+        assert type(var) in [str, String]
 
         # TODO: Re-assess how i do this. Can probably make this more efficient...
 
@@ -182,20 +182,41 @@ class String:
         """
 
         # May need to add String object canBe later
-        assert type(var) is str
+        assert type(var) in [str, String]
         
-        # It can't be equal if it's a different length...
-        if self.length() != len(var):
-            return False
-        
-        # Ask the solver...
-        s = self.state.copy()
-        for (me,you) in zip(self,var):
-            # Add the constraint
-            s.addConstraint(me.getZ3Object() == ord(you))
-            # If we're not possible, return False
-            if not s.isSat():
+        # If we're dealing with a python string
+        if type(var) is str:
+            # It can't be equal if it's a different length...
+            if self.length() != len(var):
                 return False
+            
+            # Ask the solver...
+            s = self.state.copy()
+            for (me,you) in zip(self,var):
+                # Add the constraint
+                s.addConstraint(me.getZ3Object() == ord(you))
+                # If we're not possible, return False
+                if not s.isSat():
+                    return False
         
-        # If we made it here, it's a possibility
-        return True
+            # If we made it here, it's a possibility
+            return True
+    
+        # if we're dealing with a String object
+        if type(var) is String:
+            # It can't be equal if it's a different length...
+            if self.length() != var.length():
+                return False
+
+            # Ask the solver...
+            s = self.state.copy()
+            for (me,you) in zip(self,var):
+                # Add the constraint
+                s.addConstraint(me.getZ3Object() == you.getZ3Object())
+                # If we're not possible, return False
+                if not s.isSat():
+                    return False
+
+            # If we made it here, it's a possibility
+            return True
+

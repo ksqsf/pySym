@@ -25,6 +25,33 @@ s = "Test"
 l = [x for x in s]
 """
 
+test3 = """
+s = "abcd"
+d = "abcd"
+f = "Abcd"
+g = pyState.String(4)
+"""
+
+def test_pyObjectManager_String_canBe_mustBe_String():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.getVar('s')
+    d = pg.completed[0].state.getVar('d')
+    f = pg.completed[0].state.getVar('f')
+    g = pg.completed[0].state.getVar('g')
+
+    assert s.canBe(d)
+    assert not s.canBe(f)
+    assert g.canBe(s)
+    assert not g.mustBe(s)
+    assert g.canBe(f)
+
+
 def test_pyObjectMAnager_String_mustBe():
     b = ast.parse(test1).body
     p = Path(b,source=test1)
