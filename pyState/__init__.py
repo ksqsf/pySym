@@ -2,7 +2,7 @@ import z3, z3util
 import ast
 import logging
 from copy import copy, deepcopy
-import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For, pyState.ListComp, pyState.UnaryOp
+import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For, pyState.ListComp, pyState.UnaryOp, pyState.GeneratorExp
 import random
 import os.path
 import importlib
@@ -862,6 +862,10 @@ class State():
         elif t == ast.ListComp:
             logger.debug("resolveObject: Resolving ListComprehension")
             return pyState.ListComp.handle(self,obj,ctx=ctx)
+
+        elif t == ast.GeneratorExp:
+            logger.debug("resolveObject: Resolving GeneratorExpression")
+            return pyState.GeneratorExp.handle(self,obj,ctx=ctx)
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:
