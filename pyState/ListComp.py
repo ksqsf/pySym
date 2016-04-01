@@ -47,6 +47,27 @@ def _findAllInputVariables(haystack):
 
     return []
 
+def _findAllGeneratedVariables(haystack):
+    """
+    Find all generated variables (ast.Name objects). Return as a list
+    """
+    ret = []
+
+    if type(haystack) is ast.ListComp:
+        ret += _findAllGeneratedVariables(haystack.elt)
+        for generator in haystack.generators:
+            ret += _findAllGeneratedVariables(generator)
+        return ret
+
+    if type(haystack) is ast.Name:
+        return [haystack]
+
+    if type(haystack) is ast.comprehension:
+        return _findAllGeneratedVariables(haystack.target)
+
+    return []
+
+
 
 def handle(state,element,ctx=None):
     """
@@ -107,16 +128,20 @@ def handle(state,element,ctx=None):
     pyState.replaceObjectWithObject(state.path[0],element,retObj)
     
     # Determine variables we need to pass in
-    allInputVars = set(_findAllInputVariables(element))
+    allInputVars = set([x.id for x in _findAllInputVariables(element)])
+    allGeneratedVars = set([x.id for x in _findAllGeneratedVariables(element)])
+    # Make sure the inputs aren't generated
+    #print([x.id for x in allGeneratedVars],[x.id for x in allGeneratedVars])
+    allInputVars = allInputVars.difference(allGeneratedVars)
 
     # Add these args into the function def
     for inputVar in allInputVars:
-        fun.args.args.append(ast.arg(inputVar.id,0))
+        fun.args.args.append(ast.arg(inputVar,0))
 
     #print(astunparse.unparse(fun))
 
     # Call our new function.
-    state.Call(ast.parse("blergy({0})".format(','.join([x.id for x in allInputVars]))).body[0].value,func=fun,retObj=retObj)
+    state.Call(ast.parse("blergy({0})".format(','.join([x for x in allInputVars]))).body[0].value,func=fun,retObj=retObj)
 
     return retObj
 

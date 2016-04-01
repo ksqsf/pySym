@@ -1,11 +1,13 @@
 from pyObjectManager.Int import Int
 
-def handle(state,call,obj):
+def handle(state,call,obj,ctx=None):
     """
     Simulate len funcion
     """
+    ctx = ctx if ctx is not None else state.ctx
+
     # Resolve the object
-    obj = state.resolveObject(obj)
+    obj = state.resolveObject(obj,ctx=ctx)
     
     # Just calling the length function on the object..
     l = obj.length()

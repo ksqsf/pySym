@@ -2,15 +2,16 @@ from copy import deepcopy
 from pyObjectManager.List import List
 from pyObjectManager.Int import Int
 
-def handle(state,call,a,b=None,c=None):
+def handle(state,call,a,b=None,c=None,ctx=None):
     """
     Simulate range funcion
     """
+    ctx = ctx if ctx is not None else state.ctx
 
     # Resolve the vars
-    a = state.resolveObject(a)
-    b = state.resolveObject(b) if b is not None else None
-    c = state.resolveObject(c) if c is not None else None
+    a = state.resolveObject(a,ctx=ctx)
+    b = state.resolveObject(b,ctx=ctx) if b is not None else None
+    c = state.resolveObject(c,ctx=ctx) if c is not None else None
 
     ##############
     # a Concrete #

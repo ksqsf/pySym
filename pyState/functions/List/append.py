@@ -9,18 +9,19 @@ from pyObjectManager.String import String
 logger = logging.getLogger("pyState:SimFunction:List:append")
 
 
-def handle(state,call,var):
+def handle(state,call,var,ctx=None):
     """
     Append var to list
     """
+    ctx = ctx if ctx is not None else state.ctx
     
     # The root (i.e.: "l" in l.append())
-    root = state.resolveObject(call.func.value)
+    root = state.resolveObject(call.func.value,ctx=ctx)
     
     assert type(root) is List
     
     # Resolve what we're going to be appending
-    var = state.resolveObject(var)
+    var = state.resolveObject(var,ctx=ctx)
     
     if type(var) in [Int, Real, BitVec, Char]:
         root.append(var)

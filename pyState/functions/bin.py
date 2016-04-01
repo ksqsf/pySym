@@ -7,12 +7,14 @@ import logging
 logger = logging.getLogger("pyState:functions:bin")
 
 
-def handle(state,call,obj):
+def handle(state,call,obj,ctx=None):
     """
     Simulate bin funcion
     """
+    ctx = ctx if ctx is not None else state.ctx
+
     # Resolve the object
-    obj = state.resolveObject(obj)
+    obj = state.resolveObject(obj,ctx=ctx)
     
     if type(obj) not in [Int, Real, BitVec]:
         err = "handle: This shouldn't happen. Possibly a target program bug? Got obj type {0}".format(type(obj))

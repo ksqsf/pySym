@@ -10,17 +10,19 @@ import ast
 logger = logging.getLogger("pyState:SimFunction:String.zfill")
 
 
-def handle(state,call,width):
+def handle(state,call,width,ctx=None):
     """
     Simulate Python's zfill string method
     """
+    ctx = ctx if ctx is not None else state.ctx
+
     # The root (i.e.: "s" in s.zfill())
-    root = state.resolveObject(call.func.value)
+    root = state.resolveObject(call.func.value,ctx=ctx)
 
     assert type(root) is String
 
     # Resolve the width
-    width = state.resolveObject(width)
+    width = state.resolveObject(width,ctx=ctx)
 
     # TODO: Add symbolic width capability
     if not width.isStatic():

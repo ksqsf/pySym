@@ -9,12 +9,14 @@ import pyState
 logger = logging.getLogger("pyState:functions:int")
 
 
-def handle(state,call,obj,base=10):
+def handle(state,call,obj,base=10,ctx=None):
     """
     Simulate int funcion
     """
+    ctx = ctx if ctx is not None else state.ctx
+
     # Resolve the object
-    obj = state.resolveObject(obj)
+    obj = state.resolveObject(obj,ctx=ctx)
 
     # If we're waiting on a function call
     if type(obj) is pyState.ReturnObject:
@@ -32,7 +34,7 @@ def handle(state,call,obj,base=10):
         raise Exception(err)
 
     # Resolve base
-    base = base if type(base) is int else state.resolveObject(base)
+    base = base if type(base) is int else state.resolveObject(base,ctx=ctx)
 
     # Only dealing with concrete values for now.
     if obj.isStatic() and (type(base) is int or base.isStatic()):

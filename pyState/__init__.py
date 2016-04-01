@@ -231,6 +231,9 @@ class State():
         (optional) varName = Specify what to name this variable
         Returns the copy
         """
+        if type(var) is ReturnObject:
+            return var
+
         assert type(var) in [Int, Real, BitVec, List, String]
         assert type(varName) in [type(None), str]
 
@@ -631,15 +634,17 @@ class State():
             logger.debug("registerFunction: Registering simFunction '{0}'".format(funcName))
             self.simFunctions[funcName] = func
 
-    def resolveCall(self,call):
+    def resolveCall(self,call,ctx=None):
         """
         Input:
             call = ast.Call object
+            (optional) ctx = Context to resolve under
         Action:
             Determine correct ast.func object
         Returns:
             ast.func block
         """
+        ctx = ctx if ctx is not None else self.ctx
         
         # If this is a local context call (i.e.: test())
         if type(call.func) == ast.Name:
@@ -648,7 +653,7 @@ class State():
         # If this is an attr form (i.e.: telnetlib.Telnet())
         elif type(call.func) == ast.Attribute:
             try:
-                funcName = self.resolveObject(call.func.value)
+                funcName = self.resolveObject(call.func.value,ctx=ctx)
                 
                 # If we're making a call, return it
                 if type(funcName) is ReturnObject:
@@ -657,6 +662,7 @@ class State():
                 funcName = funcName.__class__.__name__ + "." + call.func.attr
 
             except:
+                print(call.func.value)
                 funcName = call.func.value.id + "." + call.func.attr
 
             # If this is a variable, this is an attribute of the varType
@@ -870,12 +876,12 @@ class State():
         # Hack-ish solution to handle calls
         elif t == ast.Call:
             # Let's see if this is a real or sim call
-            func = self.resolveCall(obj)
+            func = self.resolveCall(obj,ctx=ctx)
             
             # If this is a simFunction
             if type(func) is ModuleType:
                 # Simple pass it off to the handler, filling in args as appropriate
-                return func.handle(self, obj, *obj.args)
+                return func.handle(self, obj, *obj.args,ctx=ctx)
 
             # If we get here, we're a normal symbolic function
             else:

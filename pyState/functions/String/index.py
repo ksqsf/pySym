@@ -10,17 +10,19 @@ import ast
 logger = logging.getLogger("pyState:SimFunction:String.index")
 
 
-def handle(state,call,sub,start=None,end=None):
+def handle(state,call,sub,start=None,end=None,ctx=None):
     """
     Determine location of char in string.
     """
+    ctx = ctx if ctx is not None else state.ctx
+
     # The root (i.e.: "s" in s.index())
-    root = state.resolveObject(call.func.value)
+    root = state.resolveObject(call.func.value,ctx=ctx)
 
     assert type(root) is String
 
     # Resolve the vars
-    sub = state.resolveObject(sub)
+    sub = state.resolveObject(sub,ctx=ctx)
 
     # If we're indexing a Char, just change it into a String
     if type(sub) is Char:
@@ -30,8 +32,8 @@ def handle(state,call,sub,start=None,end=None):
 
     assert type(sub) is String
 
-    start = state.resolveObject(start) if start is not None else None
-    end = state.resolveObject(end) if end is not None else None
+    start = state.resolveObject(start,ctx=ctx) if start is not None else None
+    end = state.resolveObject(end,ctx=ctx) if end is not None else None
 
     if type(start) not in [int,type(None)]:
         if not start.isStatic():

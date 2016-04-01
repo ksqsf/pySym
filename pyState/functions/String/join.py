@@ -11,17 +11,19 @@ import pyState
 logger = logging.getLogger("pyState:SimFunction:String.join")
 
 
-def handle(state,call,elem):
+def handle(state,call,elem,ctx=None):
     """
     Simulate Python's zfill string method
     """
+    ctx = ctx if ctx is not None else state.ctx
+
     # The root (i.e.: "s" in s.join())
-    root = state.resolveObject(call.func.value)
+    root = state.resolveObject(call.func.value,ctx=ctx)
 
     assert type(root) is String
 
     # Resolve the elem
-    elem = state.resolveObject(elem)
+    elem = state.resolveObject(elem,ctx=ctx)
 
     # If we're waiting on a function return
     if type(elem) is pyState.ReturnObject:

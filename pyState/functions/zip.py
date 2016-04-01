@@ -9,12 +9,14 @@ import pyState
 logger = logging.getLogger("pyState:functions:zip")
 
 
-def handle(state,call,left,right):
+def handle(state,call,left,right,ctx=None):
     """
     Simulate zip funcion
     """
+    ctx = ctx if ctx is not None else state.ctx
+
     # Resolve the object
-    left = state.resolveObject(left)
+    left = state.resolveObject(left,ctx=ctx)
 
     if type(left) is pyState.ReturnObject:
         return left
@@ -22,7 +24,7 @@ def handle(state,call,left,right):
     # Don't want to lose track of our vars
     left = left.copy()
 
-    right = state.resolveObject(right)
+    right = state.resolveObject(right,ctx=ctx)
 
     if type(right) is pyState.ReturnObject:
         return right
