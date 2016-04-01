@@ -9,7 +9,7 @@ class Int:
     Define an Int
     """
     
-    def __init__(self,varName,ctx,count=None,value=None,state=None):
+    def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(value) in [type(None),int]
@@ -21,6 +21,10 @@ class Int:
         
         if state is not None:
             self.setState(state)
+
+        if increment:
+            self.increment()
+
 
 
     def copy(self):

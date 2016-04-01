@@ -6,7 +6,7 @@ class BitVec:
     Define a BitVec
     """
     
-    def __init__(self,varName,ctx,size,count=None,state=None):
+    def __init__(self,varName,ctx,size,count=None,state=None,increment=False):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(size) is int
@@ -18,6 +18,9 @@ class BitVec:
 
         if state is not None:
             self.setState(state)
+
+        if increment:
+            self.increment()
 
 
     def copy(self):

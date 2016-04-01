@@ -10,7 +10,7 @@ class Char:
     Define a Char (Character)
     """
 
-    def __init__(self,varName,ctx,count=None,variable=None,state=None):
+    def __init__(self,varName,ctx,count=None,variable=None,state=None,increment=False):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
@@ -22,6 +22,9 @@ class Char:
 
         if state is not None:
             self.setState(state)
+
+        if increment:
+            self.increment()
 
 
     def copy(self):

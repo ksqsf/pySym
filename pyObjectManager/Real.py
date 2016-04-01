@@ -9,7 +9,7 @@ class Real:
     Define a Real
     """
     
-    def __init__(self,varName,ctx,count=None,value=None,state=None):
+    def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(value) in [type(None),float,int]
@@ -21,6 +21,10 @@ class Real:
         
         if state is not None:
             self.setState(state)
+
+        if increment:
+            self.increment()
+
 
     def copy(self):
         return Real(

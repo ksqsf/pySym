@@ -10,7 +10,7 @@ class List:
     Define a List
     """
 
-    def __init__(self,varName,ctx,count=None,variables=None,state=None):
+    def __init__(self,varName,ctx,count=None,variables=None,state=None,increment=False):
         assert type(varName) is str
         assert type(ctx) is int
 
@@ -22,6 +22,8 @@ class List:
         if state is not None:
             self.setState(state)
 
+        if increment:
+            self.increment()
 
 
     def copy(self):
