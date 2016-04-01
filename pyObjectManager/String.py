@@ -10,7 +10,7 @@ class String:
     Define a String
     """
 
-    def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None,length=None):
+    def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None,length=None,increment=False):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
@@ -20,6 +20,9 @@ class String:
         self.ctx = ctx
         # Treating string as a list of BitVecs
         self.variables = [] if variables is None else variables
+
+        if increment:
+            self.increment()
 
         if state is not None:
             self.setState(state)
@@ -47,6 +50,9 @@ class String:
         return self.copy()
 
 
+
+        if increment:
+            self.increment()
     def setState(self,state):
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
@@ -138,11 +144,14 @@ class String:
     def length(self):
         return len(self.variables)
 
-    def pop(self,index):
+    def pop(self,index=None):
         """
         Not exactly something you can do on a string, but helpful for our symbolic execution
         """
-        return self.variables.pop(index)
+        if index is not None:
+            return self.variables.pop(index)
+        else:
+            return self.variables.pop()
 
     def __str__(self):
         """
