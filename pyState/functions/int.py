@@ -4,6 +4,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
 from pyObjectManager.Char import Char
 import logging
+import pyState
 
 logger = logging.getLogger("pyState:functions:int")
 
@@ -14,6 +15,10 @@ def handle(state,call,obj,base=10):
     """
     # Resolve the object
     obj = state.resolveObject(obj)
+
+    # If we're waiting on a function call
+    if type(obj) is pyState.ReturnObject:
+        return obj
     
     if type(obj) not in [Int, Real, BitVec, String, Char]:
         err = "handle: Don't know how to handle type {0}".format(type(obj))

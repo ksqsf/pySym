@@ -96,6 +96,9 @@ def duplicateSort(obj):
     if type(obj) is String:
         # Create a string with the same length
         return type(obj), {'string': "A"*obj.length() if obj.length() > 0 else None}
+
+    if type(obj) is List:
+        return type(obj), None
     
     if type(obj) in [z3.IntNumRef,z3.RatNumRef,z3.ArithRef, z3.BitVecRef, z3.BitVecNumRef]:
         kind = obj.sort_kind()

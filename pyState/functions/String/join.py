@@ -6,6 +6,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
 from pyObjectManager.String import String
 import ast
+import pyState
 
 logger = logging.getLogger("pyState:SimFunction:String.join")
 
@@ -21,6 +22,10 @@ def handle(state,call,elem):
 
     # Resolve the elem
     elem = state.resolveObject(elem)
+
+    # If we're waiting on a function return
+    if type(elem) is pyState.ReturnObject:
+        return elem
     
     if type(elem) is not List:
         err = "handle: Don't know how to handle non-List join iterators"

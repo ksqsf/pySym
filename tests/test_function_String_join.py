@@ -19,6 +19,7 @@ from pyObjectManager.List import List
 test1 = """
 x = ''.join(["1","2","3"])
 y = ','.join(["4","5","6"])
+z = "".join([str(i) for i in [1,2,3]])
 """
 
 
@@ -32,3 +33,4 @@ def test_function_strJoin():
     
     assert pg.completed[0].state.any_str('x') == ''.join(["1","2","3"])
     assert pg.completed[0].state.any_str('y') == ','.join(["4","5","6"])
+    assert pg.completed[0].state.any_str('z') == "".join([str(i) for i in [1,2,3]])
