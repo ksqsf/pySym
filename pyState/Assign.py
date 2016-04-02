@@ -92,9 +92,16 @@ def handle(state,element):
     # Resolve the value
     values = state.resolveObject(value)
 
-    # Check for return object
-    if type(values) == ReturnObject:
-        return [state]
+    # Normalize
+    values = values if type(values) is list else [values]
+
+    # Check for return object. Return all applicable
+    retObjs = [x.state for x in values if type(x) is ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+    #if type(values[0]) == ReturnObject:
+    #    #return [state]
+    #    return [values[0].state]
 
     # No return object, time to pop instruction
     state.path.pop(0) if len(state.path) > 0 else None

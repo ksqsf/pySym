@@ -84,7 +84,7 @@ def _handleNum(state,left,right,op):
         # Now that we have a clean variable to return, add constraints and return it
         logger.debug("Adding constraint {0} == {1}".format(retVar.getZ3Object(),ret))
         state.addConstraint(retVar.getZ3Object() == ret)
-        return retVar.copy()
+        return [retVar.copy()]
 
     else:
         err = "BinOP: Don't know how to handle variable type {0} at line {1} col {2}".format(t,op.lineno,op.col_offset)
@@ -103,7 +103,7 @@ def _handleStr(state,left,right,op):
     s = state.getVar("tempBinOpString",ctx=1,varType=String)
     s.increment()
     s.variables = left.copy().variables + right.copy().variables
-    return s.copy()
+    return [s.copy()]
 
 
 def _handleList(state,left,right,op):
@@ -146,7 +146,7 @@ def _handleList(state,left,right,op):
         raise Exception(err)
 
 
-    return s.copy()
+    return [s.copy()]
 
 
 def handle(state,element,ctx=None):
@@ -168,40 +168,53 @@ def handle(state,element,ctx=None):
     # Try resolving the parts
     left = state.resolveObject(element.left,parent=element,ctx=ctx)
 
+    # Normalize to a list
+    left = [left] if type(left) is not list else left
+
     # If we need to pause to resolve something, pause
-    if type(left) == pyState.ReturnObject:
-        return left
+    if type(left[0]) == pyState.ReturnObject:
+        return left[0]
 
     # Save a copy so that we don't lose it
-    left = left.copy()
+    left = [x.copy() for x in left]
 
-    logger.debug("BinOp: BinOp Left = {0}".format(type(left)))
+    #logger.debug("BinOp: BinOp Left = {0}".format(type(left)))
 
     right = state.resolveObject(element.right,parent=element,ctx=ctx)
 
-    if type(right) == pyState.ReturnObject:
-        return right
+    # Normalize to a list
+    right = [right] if type(right) is not list else right
+
+    if type(right[0]) == pyState.ReturnObject:
+        return right[0]
 
     # Save a copy so that we don't lose it
-    right = right.copy()
+    right = [x.copy() for x in right]
 
-    logger.debug("BinOp: BinOp Right = {0}".format(type(right)))
+    #logger.debug("BinOp: BinOp Right = {0}".format(type(right)))
 
     op = element.op
+    ret = []
 
-    if type(left) is List or type(right) is List:
-        return _handleList(state,left,right,op)
+    # Loop through all possible combinations
+    for l in left:
 
-    elif type(left) is String or type(right) is String:
-        return _handleStr(state,left,right,op)
+        for r in right:
 
-    # TODO: Assuming like types here... Maybe check both left and right?
-    elif type(left) in [Int, Real, BitVec]:
-        return _handleNum(state,left,right,op)
+            if type(l) is List or type(r) is List:
+                ret += _handleList(state,l,r,op)
+        
+            elif type(l) is String or type(r) is String:
+                ret += _handleStr(state,l,r,op)
+        
+            # TODO: Assuming like types here... Maybe check both left and right?
+            elif type(l) in [Int, Real, BitVec]:
+                ret += _handleNum(state,l,r,op)
+    
+            else:
+                err = "BinOP: Don't know how to handle variable type {0}".format(type(l))
+                logger.error(err)
+                raise Exception(err)
 
-    else:
-        err = "BinOP: Don't know how to handle variable type {0}".format(type(left))
-        logger.error(err)
-        raise Exception(err)
-
-
+    # Return our possibilities
+    return ret

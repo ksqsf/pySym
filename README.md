@@ -150,7 +150,9 @@ Much work left to do as I have only implimented a limited set of operations. How
 # To-Do
 Here's a list of things I have left to implement. This is really just a subset of things, but these are high on my list.
 
-* Create pyObjectManager.String
+* Due to needing loose matching, some expressions will likely fail to work as expected
+ * Need to determine when this will happen
+* Fix explore find=. It's not working correctly
 * Create pyObjectManager.Dict
 * Create pyObjectManager.Set
 * Add automatic BitVector scaling
@@ -161,10 +163,8 @@ Here's a list of things I have left to implement. This is really just a subset o
  * starargs
 * imports
 * "global" keyword
-* symbolic strings
 * symbolic arrays
 * function annotations
 * built-in calls
  * print
  * Some done... need to update this...
-* type attribute calls

@@ -23,12 +23,22 @@ def handle(state,call,elem,ctx=None):
     assert type(root) is String
 
     # Resolve the elem
-    elem = state.resolveObject(elem,ctx=ctx)
+    elems = state.resolveObject(elem,ctx=ctx)
 
-    # If we're waiting on a function return
-    if type(elem) is pyState.ReturnObject:
-        return elem
-    
+    elems = elems if type(elems) is list else [elems]
+
+    # If we're waiting on a symbolic call, return
+    retObjs = [x for x in elems if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    if len(elems) != 1:
+        err = "handle: Don't know how to handle state splitting"
+        logger.error(err)
+        raise Exception(err)
+
+    elem = elems.pop()
+
     if type(elem) is not List:
         err = "handle: Don't know how to handle non-List join iterators"
         logger.error(err)

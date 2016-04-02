@@ -6,6 +6,46 @@ import pyState.Compare
 
 logger = logging.getLogger("pyState:BoolOp")
 
+def _handle(state,op,values,ifSideConstraints=None):
+    ifSideConstraints = [] if ifSideConstraints is None else ifSideConstraints
+
+    # Loop through our requested checks
+    for value in values:
+        if type(value) is ast.Compare:
+            ifSide = pyState.Compare.handle(state,value)
+
+            # If we need to resolve a call, wait
+            if type(ifSide[0]) == pyState.ReturnObject:
+                return [ifSide[0]]
+
+            # Recursively build this
+            v = values[:]
+            v.pop(0)
+            ret = []
+            for i in ifSide:
+                ret += _handle(state.copy(),op,v,ifSideConstraints + [i])
+            return ret
+
+        else:
+            err = "handle: Don't know how to handle type '{0}' at line {1} column {2}".format(type(value),value.lineno,value.col_offset)
+            logger.error(err)
+            raise Exception(err)
+
+    # Change the checks into a Z3 Expression
+    if type(op) is ast.And:
+        ifSide = z3.And(ifSideConstraints)
+        return [ifSide]
+
+    elif type(op) is ast.Or:
+        ifSide = z3.Or(ifSideConstraints)
+        return [ifSide]
+
+    else:
+        err = "handle: Don't know how to handle op type '{0}' at line {1} column {2}".format(type(op),element.lineno,element.col_offset)
+        logger.error(err)
+        raise Exception(err)
+
+
 def handle(state, element):
     """
     Handle the Compare elements (such as <,>,==,etc)
@@ -24,44 +64,4 @@ def handle(state, element):
 
     values = element.values
     
-    # Keep track of them in a list
-    ifSideConstraints = []
-    elseSideConstraints = []
-
-    # Loop through our requested checks
-    for value in values:
-        if type(value) is ast.Compare:
-            ifSide = pyState.Compare.handle(state,value)
-
-            # If we need to resolve a call, wait
-            if type(ifSide) == pyState.ReturnObject:
-                return ifSide
-            
-            # Add these to our list
-            ifSideConstraints.append(ifSide)
-            #elseSideConstraints.append(z3.Not(ifSide))
-
-        else:
-            err = "handle: Don't know how to handle type '{0}' at line {1} column {2}".format(type(value),value.lineno,value.col_offset)
-            logger.error(err)
-            raise Exception(err)
-
-
-    # Change the checks into a Z3 Expression
-    if type(op) is ast.And:
-        ifSide = z3.And(ifSideConstraints)
-        #elseSide = z3.And(elseSideConstraints)
-        #elseSide = z3.Not(ifSide)
-        return ifSide
-    
-    elif type(op) is ast.Or:
-        ifSide = z3.Or(ifSideConstraints)
-        #elseSide = z3.Or(elseSideConstraints)
-        #elseSide = z3.Not(ifSide)
-        return ifSide
-
-    else:
-        err = "handle: Don't know how to handle op type '{0}' at line {1} column {2}".format(type(op),element.lineno,element.col_offset)
-        logger.error(err)
-        raise Exception(err)
-
+    return _handle(state.copy(),op,values)

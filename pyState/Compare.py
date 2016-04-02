@@ -26,10 +26,6 @@ def _handleLeftVarInt(state,element,left):
         Created constraint expressions for True state, or ReturnObject if we're waiting on a call
     """
 
-    # Looks like we're making a call, go ahead and return
-    if type(left) == pyState.ReturnObject:
-        return left
-
     # Resolve the z3 object
     if type(left) in [Int, Real, BitVec, Char]:
         left = left.getZ3Object()
@@ -57,56 +53,65 @@ def _handleLeftVarInt(state,element,left):
     comp = comp[0]
     
     right = state.resolveObject(comp)
-    
+   
+    # normalize to list
+    right = right if type(right) is list else [right]
+     
     # Resolve Call first
-    if type(right) == pyState.ReturnObject:
-        return right
+    if type(right[0]) == pyState.ReturnObject:
+        return [right[0]]
 
-    if type(right) in [Int, Real, BitVec, Char]:
-        right = right.getZ3Object()
+    ret = []
 
-    # If this is a String, let's hope it's only one char...
-    elif type(right) is String and right.length() == 1:
-        right = right[0].getZ3Object()
+    # Loop through all the possible states
+    for r in right:
 
-    else:
-        err = "_handleLeftVar: Don't know how to handle type '{0}'".format(type(left))
-        logger.error(err)
-        raise Exception(err)
+        if type(r) in [Int, Real, BitVec, Char]:
+            r = r.getZ3Object()
+
+        # If this is a String, let's hope it's only one char...
+        elif type(r) is String and r.length() == 1:
+            r = r[0].getZ3Object()
+
+        else:
+            err = "_handleLeftVar: Don't know how to handle type '{0}'".format(type(r))
+            logger.error(err)
+            raise Exception(err)
 
 
-    # Adjust the types if needed
-    left,right = pyState.z3Helpers.z3_matchLeftAndRight(left,right,ops)
+        # Adjust the types if needed
+        l,r = pyState.z3Helpers.z3_matchLeftAndRight(left,r,ops)
 
-    logger.debug("_handleLeftVar: Comparing {0} (type: {2}) and {1} (type: {3})".format(left,right,type(left),type(right)))
-
-    # Assume success. Add constraints
-    if type(ops) == ast.Gt:
-        return left > right
+        logger.debug("_handleLeftVar: Comparing {0} (type: {2}) and {1} (type: {3})".format(l,r,type(l),type(r)))
     
-    elif type(ops) == ast.GtE:
-        return left >= right
-
-    elif type(ops) == ast.Lt:
-        return left < right
-
-    elif type(ops) == ast.LtE:
-        return left <= right
-
-    elif type(ops) == ast.Eq:
-        return left == right
-
-    elif type(ops) == ast.NotEq:
-        return left != right
-
-    else:
-        err = "_handleLeftVar: Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
-        logger.error(err)
-        raise Exception(err)
+        # Assume success. Add constraints
+        if type(ops) == ast.Gt:
+            ret += [l > r]
+        
+        elif type(ops) == ast.GtE:
+            ret += [l >= r]
+    
+        elif type(ops) == ast.Lt:
+            ret += [l < r]
+    
+        elif type(ops) == ast.LtE:
+            ret += [l <= r]
+    
+        elif type(ops) == ast.Eq:
+            ret += [l == r]
+    
+        elif type(ops) == ast.NotEq:
+            ret += [l != r]
+    
+        else:
+            err = "_handleLeftVar: Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
+            logger.error(err)
+            raise Exception(err)
        
+    return ret
     
 
-def handle(state,element):
+def handle(state,element,ctx=None):
     """
     Handle the Compare element (such as <,>,==,etc)
     Input:
@@ -118,8 +123,27 @@ def handle(state,element):
     """
     assert type(element) == ast.Compare
     
+    ctx = ctx if ctx is not None else state.ctx
+
     # The left side of the compare
     left = element.left
+
+    # Resolve it
+    left = state.resolveObject(left,ctx=ctx)
+
+    # Normalize to a list
+    left = [left] if type(left) is not list else left
+
+    # Check for return object
+    if type(left[0]) == pyState.ReturnObject:
+        return left[0]
+
+    ret = []
+
+    # Loop through possibilities
+    for l in left:
     
-    # TODO: Probably need to add checks or consolidate here...
-    return _handleLeftVarInt(state,element,state.resolveObject(left))
+        # TODO: Probably need to add checks or consolidate here...
+        ret += _handleLeftVarInt(state.copy(),element,l)
+
+    return ret

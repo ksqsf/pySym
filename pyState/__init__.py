@@ -28,21 +28,39 @@ logger = logging.getLogger("State")
 class ReturnObject:
     def __init__(self,retID):
         self.retID = retID
+        self.state = None
+    
+    def __deepcopy__(self,_):
+        return ReturnObject(self.retID)
+    
+    def copy(self):
+        return ReturnObject(self.retID)
 
 # I feel bad coding this but I can't find a better way atm.
 def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
     """
     Find instance of fromObj in haystack and replace with toObj
     Terrible hack here, but this is used to ensure we know which function return is ours
+    Also now matches against lineno, col_offset and type. This will likely fail on polymorphic python code
     Returns True on success and False on fail
     """
     parent = haystack if parent is None else parent
     
-    # If we found the object
+    # If we found the object.
     if haystack == fromObj:
         parent[parent.index(fromObj)] = toObj
+            
         return True
     
+    # Gets a little tricky here finding our right index.. Lose matching
+    if type(haystack) is type(fromObj) and haystack.lineno == fromObj.lineno and haystack.col_offset == fromObj.col_offset:
+        index = [parent.index(x) for x in parent if type(x) is type(fromObj) and x.lineno is fromObj.lineno and x.col_offset is fromObj.col_offset]
+        # Hopefully we only find one of these...
+        assert len(index) == 1
+        parent[index[0]] = toObj
+        
+        return True
+
     if type(haystack) == list:
         for x in haystack:
             if replaceObjectWithObject(x,fromObj,toObj,haystack):
@@ -56,7 +74,7 @@ def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
         return False
 
     for field in fields:
-        if getattr(haystack,field) == fromObj:
+        if (getattr(haystack,field) == fromObj) or (type(getattr(haystack,field)) == type(fromObj) and getattr(haystack,field).lineno == fromObj.lineno and getattr(haystack,field).col_offset == fromObj.col_offset):
             setattr(haystack,field,toObj)
             return True
 
@@ -494,6 +512,7 @@ class State():
                 err = "call: Attempting to set invalid keyword '{0}' line {1} col {2}".format(call.keywords[i].arg,call.keywords[i].arg.lineno,call.keywords[i].arg.col_offset)
                 logger.error(err)
                 raise Exception(err)
+            # NOTE: Assuming only one resolve from this due to Call.py handling the resolutions..
             caller_arg = self.resolveObject(call.keywords[i].value,ctx=oldCtx)
             #caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
@@ -533,6 +552,7 @@ class State():
         # This isn't a duplicate call.. It's because I have to handle replacing the call function first using resolveObject..
         # TODO: Fire out better way than this.
         retObj.retID = self.retID
+        retObj.state = self
 
         #################
         # Clearout Loop #
@@ -730,7 +750,7 @@ class State():
         Action:
             Resolve ast.List object into pyObjectManager.List.List object
         Returns:
-            pyObjectManager.List.List object
+           List of  pyObjectManager.List.List object (i.e.: [List1, List2])
         """
         assert type(listObject) is ast.List
 
@@ -744,59 +764,150 @@ class State():
         for elm in listObject.elts:
             if type(elm) is ast.Call:
                 ret = self.resolveObject(elm)
+                ret = ret if type(ret) is list else [ret]
 
                 # If we're making a call, return for now so we can do that
-                if type(ret) is ReturnObject:
-                    return ret
+                retObjs = [x for x in ret if type(x) is pyState.ReturnObject]
+                if len(retObjs) > 0:
+                    return retObjs
+
 
         ####################################
         # Append each element individually #
         ####################################
+        varList = []
         # Create temporary variable if need be
         var = self.getVar('tempList{0}'.format(i),varType=List,ctx=1)
         # Make sure we get a fresh list variable
         var.increment()
-    
+   
+        varList.append(var)
+ 
         # TODO: This will probably fail on ReturnObjects
         for elm in listObject.elts:
             logger.debug("_resolveList: Adding {0} to tempList".format(elm))
             if type(elm) is ReturnObject:
                 elm_resolved = self.resolveObject(elm)
                 t,args = duplicateSort(elm_resolved)
-                var.append(var=t,kwargs=args)
-                if t in [Int, Real, BitVec]:
-                    self.addConstraint(var[-1].getZ3Object() == elm_resolved.getZ3Object())
+                
+                # Add this to all possible Lists
+                for var in varList:
+                    var.append(var=t,kwargs=args)
+                    if t in [Int, Real, BitVec]:
+                        self.addConstraint(var[-1].getZ3Object() == elm_resolved.getZ3Object())
 
             elif type(elm) is ast.Num:
                 elm_resolved = self.resolveObject(elm,ctx=ctx)
-                t, args = duplicateSort(elm_resolved)
-                var.append(t)
-                self.addConstraint(var[-1].getZ3Object() == elm_resolved.getZ3Object())
+                elm_resolved = [elm_resolved] if type(elm_resolved) is not list else elm_resolved
+                
+                newVarList = []
+                
+                for elm in elm_resolved:
+                    t, args = duplicateSort(elm)
+                    
+                    for var in varList:
+                        if len(elm_resolved) > 1:
+                            var = self.recursiveCopy(var)
+                        var.append(t)
+                        self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
+                        newVarList.append(var.copy())
+
+                varList = newVarList
+                 
 
             elif type(elm) is ast.List:
                 # Recursively resolve this
                 ret = self._resolveList(elm,ctx=ctx,i=i+1)
-                if type(ret) is ReturnObject:
-                    return ret
-                var.append(ret)
+                ret = ret if type(ret) is list else [ret]
+
+                # If we're making a call, return for now so we can do that
+                retObjs = [x for x in ret if type(x) is pyState.ReturnObject]
+                if len(retObjs) > 0:
+                    return retObjs
+
+                newVarList = []
+
+                # For each List returned
+                for elm in ret:
+
+                    # For each List already existing
+                    for var in varList:
+                        # Only need a copy if we've got more than 1 returning
+                        if len(ret) > 1:
+                            var = self.recursiveCopy(var)
+                        var.append(elm)
+                        newVarList.append(var.copy())
+                
+                varList = newVarList
 
             elif type(elm) is ast.Str:
                 elm_resolved = self.resolveObject(elm)
-                var.append(elm_resolved.copy())
+                # Append to every List
+                for var in varList:
+                    var.append(elm_resolved.copy())
                 
 
             elif type(elm) in [ast.Name, ast.BinOp]:
                 # Resolve the name
                 elm_resolved = self.resolveObject(elm)
-                if type(elm_resolved) is ReturnObject:
-                    return elm_resolved
+                elm_resolved = elm_resolved if type(elm_resolved) is list else [elm_resolved]
+                retObjs = [x for x in elm_resolved if type(x) is pyState.ReturnObject]
+                if len(retObjs) > 0:
+                    return retObjs
 
-                t,args = duplicateSort(elm_resolved)
-                var.append(var=t,kwargs=args)
-                if pyState.z3Helpers.isZ3Object(elm_resolved):
-                    self.addConstraint(var[-1].getZ3Object() == elm_resolved)
-                elif type(elm_resolved) in [Int, Real, BitVec]:
-                    self.addConstraint(var[-1].getZ3Object() == elm_resolved.getZ3Object())
+                newVarList = []
+                # Loop through each returned element
+                for elm in elm_resolved:
+
+                    t,args = duplicateSort(elm)
+                    
+                    # Each List variable needs to get new objects
+                    for var in varList:
+                        # Optimization. If we only have one element, we don't need multiple copies
+                        if len(elm_resolved) > 1:
+                            # Create a copy
+                            var = self.recursiveCopy(var)
+                        
+                        # Add constraints
+                        var.append(var=t,kwargs=args)
+                        if pyState.z3Helpers.isZ3Object(elm):
+                            self.addConstraint(var[-1].getZ3Object() == elm)
+                        elif type(elm) in [Int, Real, BitVec]:
+                            self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
+                        
+                        # Add to the new var List
+                        newVarList.append(var.copy())
+                
+                # Set the var list
+                varList = newVarList
+
+            elif type(elm) is ast.Call:
+                # Resolve the call
+                elm_resolved = self.resolveObject(elm)
+
+                elm_resolved = elm_resolved if type(elm_resolved) is list else [elm_resolved]
+
+                # If we're waiting on a symbolic call, return
+                retObjs = [x for x in elm_resolved if type(x) is pyState.ReturnObject]
+                if len(retObjs) > 0:
+                    return retObjs
+
+                newVarList = []
+                
+                # Loop through each return element
+                for elm in elm_resolved:
+
+                    # Make sure each List gets updated
+                    for var in varList:
+                        if len(elm_resolved) > 1:
+                            var = self.recursiveCopy(var)
+
+                        # Append it to the list
+                        var.append(elm)
+                        newVarList.append(var.copy())
+                # Update the var list
+                varList = newVarList
+
  
             else:
                 err = "_resolveList: Don't know how to handle type {0} at line {1} col {2}".format(type(elm),listObject.lineno,listObject.col_offset)
@@ -804,7 +915,7 @@ class State():
                 raise Exception(err)
 
         # Return the resolved List
-        return var
+        return varList
 
 
     def resolveObject(self,obj,parent=None,ctx=None,varType=None,kwargs=None):
@@ -873,6 +984,10 @@ class State():
             logger.debug("resolveObject: Resolving GeneratorExpression")
             return pyState.GeneratorExp.handle(self,obj,ctx=ctx)
 
+        elif t == ast.Compare:
+            logger.debug("resolveObject: Resolving Compare")
+            return pyState.Compare.handle(self,obj,ctx=ctx)
+
         # Hack-ish solution to handle calls
         elif t == ast.Call:
             # Let's see if this is a real or sim call
@@ -886,16 +1001,16 @@ class State():
             # If we get here, we're a normal symbolic function
             else:
                 # Create our return object (temporary ID to be filled in by the Call handle)
-                retObj = ReturnObject(1)
+                #retObj = ReturnObject(1)
 
                 # Update state, change call to ReturnObject so we can resolve next time
-                assert replaceObjectWithObject(self.path[0],obj,retObj)
+                #assert replaceObjectWithObject(self.path[0],obj,retObj)
                 
                 # Change our state, record the return object
-                Call.handle(self,obj,retObj=retObj)
+                return Call.handle(self,obj)
             
                 # Return the ReturnObject back to caller to inform them of the pending call
-                return retObj
+                #return retObj
 
         elif t == ast.UnaryOp:
             # TODO: Not sure if there will be symbolic UnaryOp objects... This wouldn't work for those.

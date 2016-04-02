@@ -32,6 +32,22 @@ test7 = """
 l = ["a","b","c"]
 """
 
+test8 = """
+s = pyState.String(8)
+x = s.index('a')
+"""
+
+def test_assign_stateSplit():
+    b = ast.parse(test8).body
+    p = Path(b,source=test8)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    
+    assert len(pg.completed) == 8
+    assert set([p.state.any_int('x') for p in pg.completed]) == set([x for x in range(8)])
+
+
 def test_list_with_strings():
     b = ast.parse(test7).body
     p = Path(b,source=test7)

@@ -22,11 +22,16 @@ def handle(state,element):
     ret = state.Return(element)
     
     logger.debug("handle: ret value = {0}".format(ret))
-    
-    # We're pausing to resolve a call
-    if type(ret) is pyState.ReturnObject:
-        return [state]
-        
+
+    # Normalize
+    ret = [ret] if type(ret) is not list else ret
+
+    # Check for return object. Return all applicable
+    retObjs = [x.state for x in ret if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+
     # Good to go, pop back down
     state.popCallStack()
 

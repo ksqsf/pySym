@@ -78,6 +78,22 @@ l = [1,2,3] * 3
 p = 3 * [1,2,3]
 """
 
+test13 = """
+s = pyState.String(8)
+x = 1 + s.index('x')
+"""
+
+def test_pySym_BinOp_StateSplit():
+    b = ast.parse(test13).body
+    p = Path(b,source=test13)
+    pg = PathGroup(p)
+    pg.explore()
+
+    # There should be 8 states now
+    assert len(pg.completed) == 8
+    assert set([p.state.any_int('x') for p in pg.completed]) == set([x for x in range(1,9)])
+
+
 def test_pySym_BinOp_ListMult():
     b = ast.parse(test12).body
     p = Path(b,source=test12)

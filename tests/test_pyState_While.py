@@ -98,6 +98,26 @@ while x < 10:
 print(o)
 """
 
+test7 = """
+s = pyState.String(3)
+x = 0
+while x < s.index('a'):
+    x += 1
+"""
+
+
+def test_pySym_While_StateSplit():
+    # TODO: I'm not 100% sure this is right.. But can't think of why it's wrong atm...
+    b = ast.parse(test7).body
+    p = Path(b,source=test7)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) > 0
+
+    assert set([p.state.any_int('x') for p in pg.completed]) == set([0,1,2])
+
+
 def test_pySym_stupidWhile():
     b = ast.parse(test6).body
     p = Path(b,source=test6)
@@ -139,17 +159,15 @@ def test_pySym_funcInWhileTest():
     b = ast.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
-    assert pg.explore(find=9)
+    pg.explore()
 
 
     assert len(pg.active) == 0
-    assert len(pg.completed) == 0
+    assert len(pg.completed) == 1
     assert len(pg.errored) == 0
     assert len(pg.deadended) == 6
-    assert len(pg.found) == 1
 
-    assert pg.found[0].state.isSat()
-    assert pg.found[0].state.any_int('x') == 5
+    assert pg.completed[0].state.any_int('x') == 5
 
 
 def test_pySym_simpleWhile():

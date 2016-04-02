@@ -25,9 +25,15 @@ def handle(state,element):
 
     if type(value) == ast.Call:
         ret = state.resolveObject(value)
-        # We're making an actual call, don't pop instruction yet.
-        if type(ret) is ReturnObject:
-            return [state]
+        
+        # Normalize
+        ret = [ret] if type(ret) is not list else ret
+
+        # Check for return object. Return all applicable
+        retObjs = [x.state for x in ret if type(x) is pyState.ReturnObject]
+        if len(retObjs) > 0:
+            return retObjs
+
 
     # Don't really care about the return object for now... Maybe later?
     elif type(value) == ReturnObject:

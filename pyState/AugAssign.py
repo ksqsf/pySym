@@ -137,9 +137,10 @@ def handle(state,element):
     # Normalize the input
     values = [value] if type(value) is not list else value
     
-    # Check if we're making a call and need to wait for that to finish
-    if type(values[0]) == ReturnObject:
-        return [state]
+    # Check for return object. Return all applicable
+    retObjs = [x.state for x in values if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
     # The operations to do (Add/Mul/etc)
     op = element.op    

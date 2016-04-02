@@ -74,6 +74,21 @@ k = [1,2,3]
 j = [2,2,3]
 """
 
+test12 = """
+s = pyState.String(8)
+l = ["test",s.index('a')]
+"""
+
+def test_pyObjectManager_List_StateSplit():
+    b = ast.parse(test12).body
+    p = Path(b,source=test12)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 8
+    assert set([p.state.any_list('l')[1] for p in pg.completed]) == set(range(8))
+
+
 def test_pyObjectManager_List_canBe():
     b = ast.parse(test11).body
     p = Path(b,source=test11)

@@ -103,6 +103,24 @@ l[1] += "d"
 l[1] += "E"
 """
 
+test15 = """
+s = pyState.String(8)
+x = 0
+x += s.index('x')
+"""
+
+def test_pySym_AugAssign_StateSplit():
+    b = ast.parse(test15).body
+    p = Path(b,source=test15)
+    pg = PathGroup(p)
+    pg.explore()
+
+    # There should be 10 possible states here
+    assert len(pg.completed) == 8
+    
+    assert set([p.state.any_int('x') for p in pg.completed]) == set([x for x in range(8)])
+
+
 def test_pySym_AugAssign_String_In_List():
     b = ast.parse(test14).body
     p = Path(b,source=test14)

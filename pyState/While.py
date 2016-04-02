@@ -6,40 +6,11 @@ from copy import deepcopy
 
 logger = logging.getLogger("pyState:While")
 
+def _handle(stateIf,stateElse,element,ifConstraint):
 
-def handle(state,element):
-    """
-    Attempt to handle the while element
-    """
-    
-    # While is basically a repeated If statement, we want to take both sides
-
-    stateIf = state
-    stateElse = state.copy()
-    ret_states = [stateIf,stateElse]
-
-    # Check what type of test this is    
-    if type(element.test) == ast.Compare:
-        # Try to handle the compare
-        ifConstraint = pyState.Compare.handle(state,element.test)
-        
-        # If we're waiting on resolution of a call, just return the initial state
-        if type(ifConstraint) is pyState.ReturnObject:
-            return [stateIf]
-    
-        # If we're good to go, pop the instructions
-        stateIf.path.pop(0)
-        stateElse.path.pop(0)
-
-        # Add the constraints
-        stateIf.addConstraint(ifConstraint)
-        stateElse.addConstraint(z3.Not(ifConstraint))
-
-    else:
-        err = "handle: I don't know how to handle type {0}".format(type(element.test))
-        logger.error(err)
-        raise Exception(err)
-
+    # Add the constraints
+    stateIf.addConstraint(ifConstraint)
+    stateElse.addConstraint(z3.Not(ifConstraint))
 
     # Check if statement. We'll have at least one instruction here, so treat this as a call
     # Saving off the current path so we can return to it and pick up at the next instruction
@@ -63,7 +34,46 @@ def handle(state,element):
 
     # else side should be done with the loop
     stateElse.loop = None
-        
+
     stateElse.path = element.orelse
 
-    return ret_states 
+    return [stateIf, stateElse]
+
+
+def handle(state,element):
+    """
+    Attempt to handle the while element
+    """
+    
+    # While is basically a repeated If statement, we want to take both sides
+
+    stateIf = state
+    ret = []
+
+    # Check what type of test this is    
+    if type(element.test) == ast.Compare:
+        # Try to handle the compare
+        ifConstraint = pyState.Compare.handle(stateIf,element.test)
+
+    else:
+        err = "handle: I don't know how to handle type {0}".format(type(element.test))
+        logger.error(err)
+        raise Exception(err)
+
+    # Normalize
+    ifConstraint = ifConstraint if type(ifConstraint) is list else [ifConstraint]
+
+    # See if we need to pass back a call
+    retObjs = [x.state for x in ifConstraint if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    # If we're good to go, pop the instruction
+    stateIf.path.pop(0)
+
+    # Loop through possible constraints
+    for constraint in ifConstraint:
+        
+        ret += _handle(stateIf.copy(),stateIf.copy(),element,constraint)
+
+    return ret
