@@ -413,10 +413,14 @@ class State():
         
         obj = self.resolveObject(obj)
         
-        # If this is a ReturnObject, forward it on
-        if type(obj) == ReturnObject:
-            return obj
-        
+        # Normalize
+        obj = [obj] if type(obj) is not list else obj
+    
+        # Resolve calls if we need to
+        retObjs = [x for x in obj if type(x) is pyState.ReturnObject]
+        if len(retObjs) > 0:
+            return retObjs
+
         logger.debug("Return: Returning element {0}".format(type(obj)))
         # Store it off in the objectManager
         self.objectManager.returnObjects[self.retID] = obj
@@ -788,13 +792,23 @@ class State():
             logger.debug("_resolveList: Adding {0} to tempList".format(elm))
             if type(elm) is ReturnObject:
                 elm_resolved = self.resolveObject(elm)
-                t,args = duplicateSort(elm_resolved)
-                
-                # Add this to all possible Lists
-                for var in varList:
-                    var.append(var=t,kwargs=args)
-                    if t in [Int, Real, BitVec]:
-                        self.addConstraint(var[-1].getZ3Object() == elm_resolved.getZ3Object())
+                elm_resolved = [elm_resolved] if type(elm_resolved) is not list else elm_resolved
+
+                newVarList = []
+
+                for elm in elm_resolved:
+                    t,args = duplicateSort(elm)
+    
+                    # Add this to all possible Lists
+                    for var in varList:
+                        if len(elm_resolved) > 1:
+                            var = self.recursiveCopy(var)
+
+                        var.append(var=t,kwargs=args)
+                        if t in [Int, Real, BitVec]:
+                            self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
+                        newVarList.append(var.copy())
+                varList = newVarList
 
             elif type(elm) is ast.Num:
                 elm_resolved = self.resolveObject(elm,ctx=ctx)
