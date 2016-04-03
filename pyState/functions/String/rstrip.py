@@ -6,6 +6,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
 from pyObjectManager.String import String
 import ast
+import pyState
 
 logger = logging.getLogger("pyState:SimFunction:String.rstrip")
 
@@ -22,46 +23,60 @@ def handle(state,call,chars=None,ctx=None):
     assert type(root) is String
 
     # Resolve the chars
-    chars = state.resolveObject(chars,ctx=ctx) if chars is not None else state.getVar(varName='tempRstripstr',ctx=1,varType=String,kwargs={'string': " ","increment": True})
+    charsl = state.resolveObject(chars,ctx=ctx) if chars is not None else state.getVar(varName='tempRstripstr',ctx=1,varType=String,kwargs={'string': " ","increment": True})
 
-    # According to the docs, this should be String or None
-    if type(chars) not in [String, Char]:
-        err = "handle: Invalid argument type {0}".format(type(chars))
-        logger.error(err)
-        raise Exception(err)
+    # Normalize
+    charsl = [charsl] if type(charsl) is not list else charsl
 
-    # Change input to always be a String object
-    if type(chars) is Char:
-        oldChars = chars
-        chars = state.getVar(varName='tempRstripstr',ctx=1,varType=String,kwargs={'increment': True})
-        chars.append(oldChars)
+    # Resolve calls if we need to
+    retObjs = [x for x in charsl if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    ret = []
+
+    for chars in charsl:
+
+        # According to the docs, this should be String or None
+        if type(chars) not in [String, Char]:
+            err = "handle: Invalid argument type {0}".format(type(chars))
+            logger.error(err)
+            raise Exception(err)
+
+        # Change input to always be a String object
+        if type(chars) is Char:
+            oldChars = chars
+            chars = state.getVar(varName='tempRstripstr',ctx=1,varType=String,kwargs={'increment': True})
+            chars.append(oldChars)
 
 
-    # TODO: Add symbolic width capability
-    if not chars.isStatic():
-        err = "handle: Don't know how to handle non static chars arg"
-        logger.error(err)
-        raise Exception(err)
+        # TODO: Add symbolic width capability
+        if not chars.isStatic():
+            err = "handle: Don't know how to handle non static chars arg"
+            logger.error(err)
+            raise Exception(err)
 
-    # TODO: Add symbolic string capability
-    if not root.isStatic():
-        err = "handle: Don't know how to handle symbolic string"
-        logger.error(err)
-        raise Exception(err)
+        # TODO: Add symbolic string capability
+        if not root.isStatic():
+            err = "handle: Don't know how to handle symbolic string"
+            logger.error(err)
+            raise Exception(err)
 
-    # Get new str
-    newString = state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True})
+        # Get new str
+        newString = state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True})
+        
+        # Set new str to be the same as the old str
+        newString.setTo(root)
     
-    # Set new str to be the same as the old str
-    newString.setTo(root)
-    
-    # Look char by char in reverse order to find target char
-    for c in newString[::-1]:
-        for f in chars:
-            if c.mustBe(f):
-                newString.pop()
+        # Look char by char in reverse order to find target char
+        for c in newString[::-1]:
+            for f in chars:
+                if c.mustBe(f):
+                    newString.pop()
+                    break
+            else:
                 break
-        else:
-            break
     
-    return newString.copy()
+        ret.append(newString.copy())
+
+    return ret

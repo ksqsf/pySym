@@ -23,6 +23,22 @@ z = "test".rstrip("t")
 d = "test".rstrip("st")
 """
 
+test2 = """
+s = pyState.String(8)
+x = "test1".rstrip(str(s.index('a')))
+"""
+
+def test_function_String_rstrip_statesplit():
+    b = ast.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 8
+    o = [p.state.any_str('x') for p in pg.completed]
+    o.sort()
+    assert o == ['test', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1', 'test1']
+
 
 def test_function_String_rstrip():
     b = ast.parse(test1).body
