@@ -17,11 +17,6 @@ def handle(state,call,var,ctx=None):
     """
     ctx = ctx if ctx is not None else state.ctx
     
-    # The root (i.e.: "l" in l.append())
-    #root = state.resolveObject(call.func.value,ctx=ctx)
-    
-    #assert type(root) is List
-    
     # Resolve what we're going to be appending
     varList = state.resolveObject(var,ctx=ctx)
 
