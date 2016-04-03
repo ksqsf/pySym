@@ -22,6 +22,21 @@ s2 = str(1.2)
 s3 = str([1,2,3])
 """
 
+test2 = """
+s = pyState.String(8)
+x = str(s.index('a'))
+"""
+
+def test_function_str_statesplit():
+    b = ast.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 8
+
+    set([int(p.state.any_str('x')) for p in pg.completed]) == set(range(8))
+
 
 def test_function_str():
     b = ast.parse(test1).body

@@ -63,7 +63,7 @@ def handle(state,call,sub,start=None,end=None,ctx=None):
     for i in range(0,subStr.length() - sub.length() + 1):
         # If it is possible to have this index here, add it
         if subStr[i:i+sub.length()].canBe(sub):
-            ret.append(Int('tempStrIndex',1,value=i))
+            ret.append(Int('tempStrIndex',1,value=i,state=state))
         
         # If this is the only possible place, we must stop
         if subStr[i:i+sub.length()].mustBe(sub):
