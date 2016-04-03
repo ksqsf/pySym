@@ -57,9 +57,10 @@ def _handleLeftVarInt(state,element,left):
     # normalize to list
     right = right if type(right) is list else [right]
      
-    # Resolve Call first
-    if type(right[0]) == pyState.ReturnObject:
-        return [right[0]]
+    # Resolve calls if we need to
+    retObjs = [x for x in right if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
     ret = []
 
@@ -134,9 +135,11 @@ def handle(state,element,ctx=None):
     # Normalize to a list
     left = [left] if type(left) is not list else left
 
-    # Check for return object
-    if type(left[0]) == pyState.ReturnObject:
-        return left[0]
+    # Resolve calls if we need to
+    retObjs = [x for x in left if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
 
     ret = []
 
@@ -144,6 +147,6 @@ def handle(state,element,ctx=None):
     for l in left:
     
         # TODO: Probably need to add checks or consolidate here...
-        ret += _handleLeftVarInt(state.copy(),element,l)
+        ret += _handleLeftVarInt(state,element,l)
 
     return ret

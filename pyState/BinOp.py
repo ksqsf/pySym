@@ -171,9 +171,10 @@ def handle(state,element,ctx=None):
     # Normalize to a list
     left = [left] if type(left) is not list else left
 
-    # If we need to pause to resolve something, pause
-    if type(left[0]) == pyState.ReturnObject:
-        return left[0]
+    # Resolve calls if we need to
+    retObjs = [x for x in left if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
     # Save a copy so that we don't lose it
     left = [x.copy() for x in left]
@@ -185,8 +186,10 @@ def handle(state,element,ctx=None):
     # Normalize to a list
     right = [right] if type(right) is not list else right
 
-    if type(right[0]) == pyState.ReturnObject:
-        return right[0]
+    # Resolve calls if we need to
+    retObjs = [x for x in right if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
     # Save a copy so that we don't lose it
     right = [x.copy() for x in right]

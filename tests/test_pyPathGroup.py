@@ -106,17 +106,7 @@ def test_pyPath_stepThroughProgram():
     b = ast.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
-    pg.step()
+    pg.explore()
 
     assert len(pg.active) == 0
     assert len(pg.completed) == 1

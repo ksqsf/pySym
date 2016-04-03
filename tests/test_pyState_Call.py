@@ -167,32 +167,18 @@ def test_pySym_Call_arg_StateSplit():
 def test_pySym_functionNestingThree():
     b = ast.parse(test8).body
     p = Path(b,source=test8)
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    assert p.state.isSat()
-    assert p.state.any_int('x') == 10
+    pg = PathGroup(p)
+    pg.explore()
+    assert pg.completed[0].state.any_int('x') == 10
 
 
 def test_pySym_functionNestingTwo():
     # More intense nesting
     b = ast.parse(test7).body
     p = Path(b,source=test7)
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    p = p.step()[0]
-    assert p.state.isSat()
-    assert p.state.any_int('x') == 7
+    pg = PathGroup(p)
+    pg.explore()
+    assert pg.completed[0].state.any_int('x') == 7
 
 
 def test_pySym_functionNesting():

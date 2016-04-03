@@ -14,16 +14,21 @@ def _handle(state,op,values,ifSideConstraints=None):
         if type(value) is ast.Compare:
             ifSide = pyState.Compare.handle(state,value)
 
-            # If we need to resolve a call, wait
-            if type(ifSide[0]) == pyState.ReturnObject:
-                return [ifSide[0]]
+            # Normalize
+            ifSide = [ifSide] if type(ifSide) is not list else ifSide
+
+            # Resolve calls if we need to
+            retObjs = [x for x in ifSide if type(x) is pyState.ReturnObject]
+            if len(retObjs) > 0:
+                return retObjs
+
 
             # Recursively build this
             v = values[:]
             v.pop(0)
             ret = []
             for i in ifSide:
-                ret += _handle(state.copy(),op,v,ifSideConstraints + [i])
+                ret += _handle(state,op,v,ifSideConstraints + [i])
             return ret
 
         else:
@@ -64,4 +69,4 @@ def handle(state, element):
 
     values = element.values
     
-    return _handle(state.copy(),op,values)
+    return _handle(state,op,values)

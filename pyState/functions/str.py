@@ -4,6 +4,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
 from pyObjectManager.List import List
 import logging
+import pyState
 
 logger = logging.getLogger("pyState:functions:str")
 
@@ -15,8 +16,23 @@ def handle(state,call,obj,ctx=None):
     ctx = ctx if ctx is not None else state.ctx
 
     # Resolve the object
-    obj = state.resolveObject(obj,ctx=ctx)
+    objs = state.resolveObject(obj,ctx=ctx)
     
+    # Normalize
+    objs = [objs] if type(objs) is not list else objs
+
+    # Resolve calls if we need to
+    retObjs = [x for x in objs if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    if len(objs) != 1:
+        err = "handle: Don't know how to handle state splitting"
+        logger.error(err)
+        raise Exception(err)
+
+    obj = objs.pop()
+
     if type(obj) not in [Int, Real, BitVec, List]:
         # Only know how to do str on numbers for now
         err = "handle: Don't know how to handle type {0}".format(type(obj))

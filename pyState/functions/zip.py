@@ -16,20 +16,38 @@ def handle(state,call,left,right,ctx=None):
     ctx = ctx if ctx is not None else state.ctx
 
     # Resolve the object
-    left = state.resolveObject(left,ctx=ctx)
+    lefts = state.resolveObject(left,ctx=ctx)
 
-    if type(left) is pyState.ReturnObject:
-        return left
+    # Normalize
+    lefts = [lefts] if type(lefts) is not list else lefts
+
+    # Resolve calls if we need to
+    retObjs = [x for x in lefts if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
     
     # Don't want to lose track of our vars
-    left = left.copy()
+    lefts = [left.copy() for left in lefts]
 
-    right = state.resolveObject(right,ctx=ctx)
+    rights = state.resolveObject(right,ctx=ctx)
 
-    if type(right) is pyState.ReturnObject:
-        return right
-    
-    right = right.copy()
+    # Normalize
+    rights = [rights] if type(rights) is not list else rights
+
+    # Resolve calls if we need to
+    retObjs = [x for x in rights if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    rights = [right.copy() for right in rights]
+
+    if len(lefts) > 1 or len(rights) > 1:
+        err = "handle: Don't know how to handle state splitting"
+        logger.error(err)
+        raise Exception(err)
+
+    left = lefts[0]
+    right = rights[0]
 
     # Only handling List and String objects for now
     if type(left) not in [List, String]:
@@ -41,8 +59,7 @@ def handle(state,call,left,right,ctx=None):
         err = "handle: Don't know how to handle type {0}".format(type(right))
         logger.error(err)
         raise Exception(err)
-    print(left)
-    print(right)
+
     # Create our output List
     newList = state.getVar('tmpZipList',ctx=1,varType=List)
     newList.increment()

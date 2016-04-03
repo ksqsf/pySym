@@ -108,7 +108,7 @@ def handle(state,element):
 
     # Normalize
     newIters = [newIters] if type(newIters) is not list else newIters
-    print("newIters",newIters)
+
     # Resolve calls if we need to
     retObjs = [x.state for x in newIters if type(x) is pyState.ReturnObject]
     if len(retObjs) > 0:
@@ -117,7 +117,6 @@ def handle(state,element):
     ret = []
 
     for newIter in newIters:
-        print("newIter",newIter)
         ret += _handle(state.copy(),deepcopy(element),newIter)
 
     return ret

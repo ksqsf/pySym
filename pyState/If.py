@@ -63,9 +63,10 @@ def handle(state,element):
     # Normalize
     trueConstraint = trueConstraint if type(trueConstraint) is list else [trueConstraint]
 
-    # If we're waiting on resolution of a call, just return the initial state
-    if type(trueConstraint[0]) is pyState.ReturnObject:
-        return [state]
+    # Resolve calls if we need to
+    retObjs = [x.state for x in trueConstraint if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
     # Important to copy after Constraint generation since it may have added to the state!
     stateElse = state.copy()
@@ -77,6 +78,7 @@ def handle(state,element):
     ret = []
 
     for tc in trueConstraint:
+        logger.debug("handling trueConstraint {0}".format(tc))
         ret += _handleConstraints(stateIf.copy(),stateElse.copy(),tc,element)
     
     return ret
