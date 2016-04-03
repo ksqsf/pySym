@@ -96,15 +96,45 @@ def _handleStr(state,left,right,op):
     """
     Handle BinOp for string types
     """
-    assert type(left) is String
-    assert type(right) is String
+    assert type(left) in [String, Int, BitVec]
+    assert type(right) in [String, Int, BitVec]
     
     # Because strings are just class abstractions, we can do this without touching Z3
     s = state.getVar("tempBinOpString",ctx=1,varType=String)
     s.increment()
-    s.variables = left.copy().variables + right.copy().variables
-    return [s.copy()]
 
+    ret = []
+
+    # Case: "A" + "B"
+    if (type(left) is String and type(right) is String) and type(op) is ast.Add:
+        s.variables = left.copy().variables + right.copy().variables
+        ret.append(s.copy())
+
+    elif ((set([type(left),type(right)]) == set([String,Int])) or (set([type(left),type(right)]) == set([String,BitVec]))) and type(op) is ast.Mult:
+        i = left if type(left) in [Int, BitVec] else right
+        oldStr = left if type(left) is String else right
+        
+        if not i.isStatic():
+            err = "_handleStr: Don't know how to handle symbolic mult at the moment"
+            logger.error(err)
+            raise Exception(err)
+
+        # Solidify it
+        i = i.getValue()
+        
+        # Add the variables
+        s.variables = oldStr.copy().variables * i
+        
+        # Add it to our return list
+        ret.append(s.copy())
+
+    else:
+        err = "_handleStr: Don't know how to handle {0} {1} {2}".format(type(left),op,type(right))
+        logger.error(err)
+        raise Exception(err)
+
+
+    return ret
 
 def _handleList(state,left,right,op):
     """

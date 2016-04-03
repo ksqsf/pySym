@@ -83,6 +83,21 @@ s = pyState.String(8)
 x = 1 + s.index('x')
 """
 
+test14 = """
+x = "A" * 4
+"""
+
+def test_pySym_BinOp_StringMult():
+    b = ast.parse(test14).body
+    p = Path(b,source=test14)
+    pg = PathGroup(p)
+    pg.explore()
+
+    # There should be 8 states now
+    assert len(pg.completed) == 1
+    assert pg.completed[0].state.any_str('x') == "A" * 4
+
+
 def test_pySym_BinOp_StateSplit():
     b = ast.parse(test13).body
     p = Path(b,source=test13)
