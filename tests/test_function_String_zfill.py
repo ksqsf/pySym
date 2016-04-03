@@ -23,6 +23,26 @@ z = x.zfill(3)
 d = x.zfill(10)
 """
 
+test2 = """
+s = pyState.String(8)
+x = "test"
+y = x.zfill(s.index('a'))
+"""
+
+def test_function_String_zfill_statesplit():
+    b = ast.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+
+    # Every index should be a possibility
+    assert len(pg.completed) == 8
+
+    o = [p.state.any_str('y') for p in pg.completed]
+    o.sort()
+    assert o == ['000test', '00test', '0test', 'test', 'test', 'test', 'test', 'test']
+
 
 def test_function_String_zfill_static():
     b = ast.parse(test1).body
