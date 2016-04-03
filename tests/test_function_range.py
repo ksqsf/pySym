@@ -30,6 +30,23 @@ out = 0
 l = range(12)
 """
 
+test4 = """
+s = pyState.String(8)
+x = range(s.index('a'))
+"""
+
+def test_function_range_StateSplit():
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 8
+    out = [p.state.any_list('x') for p in pg.completed]
+    out.sort()
+    assert out == [[], [0], [0, 1], [0, 1, 2], [0, 1, 2, 3], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6]]
+
+
 def test_function_range():
     b = ast.parse(test1).body
     p = Path(b,source=test1)

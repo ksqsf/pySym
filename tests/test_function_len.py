@@ -23,6 +23,20 @@ x = len(s)
 y = len(l)
 """
 
+test2 = """
+s = pyState.String(8)
+x = len("A" * s.index('a'))
+"""
+
+def test_fnuction_len_statesplit():
+    b = ast.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 8
+    assert set([p.state.any_int('x') for p in pg.completed]) == set(range(8))
+
 
 def test_function_len():
     b = ast.parse(test1).body
