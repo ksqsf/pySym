@@ -46,18 +46,39 @@ def _handleSlice(state,sub_object,sub_slice):
     # Resolve our variables for this
     lower = state.resolveObject(sub_slice.lower) if sub_slice.lower is not None else None
 
-    if type(lower) is pyState.ReturnObject:
-        return [state]
+    lower = [lower] if type(lower) is not list else lower
+
+    # Resolve calls if we need to
+    retObjs = [x.state for x in lower if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
     upper = state.resolveObject(sub_slice.upper) if sub_slice.upper is not None else None
     
-    if type(upper) is pyState.ReturnObject:
-        return [state]
+    upper = [upper] if type(upper) is not list else upper
+
+    # Resolve calls if we need to
+    retObjs = [x.state for x in upper if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
     step = state.resolveObject(sub_slice.step) if sub_slice.step is not None else None
     
-    if type(step) is pyState.ReturnObject:
-        return [state]
+    step = [step] if type(step) is not list else step
+
+    # Resolve calls if we need to
+    retObjs = [x.state for x in step if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    if len(lower) > 1 or len(upper) > 1 or len(step) > 1:
+        err = "handleIndex: Not handling state split arguments"
+        logger.error(err)
+        raise Exception(err)
+
+    lower = lower.pop()
+    upper = upper.pop()
+    step = step.pop()
 
     ##################
     # Lower Concrete #
