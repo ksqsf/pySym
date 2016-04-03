@@ -1,4 +1,5 @@
 from pyObjectManager.Int import Int
+import pyState
 
 def handle(state,call,obj,ctx=None):
     """
@@ -7,15 +8,31 @@ def handle(state,call,obj,ctx=None):
     ctx = ctx if ctx is not None else state.ctx
 
     # Resolve the object
-    obj = state.resolveObject(obj,ctx=ctx)
+    objs = state.resolveObject(obj,ctx=ctx)
+
+    # Normalize
+    objs = [objs] if type(objs) is not list else objs
+
+    # Resolve calls if we need to
+    retObjs = [x for x in objs if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    # Loop through input
+
+    ret = []
     
-    # Just calling the length function on the object..
-    l = obj.length()
+    for obj in objs:
     
-    i = state.getVar("tmpLenValue",ctx=1, varType=Int)
-    i.increment()
+        # Just calling the length function on the object..
+        l = obj.length()
     
-    # Tell Z3 about our value
-    state.addConstraint(i.getZ3Object() == l)
+        i = state.getVar("tmpLenValue",ctx=1, varType=Int)
+        i.increment()
     
-    return i.copy()
+        # Tell Z3 about our value
+        state.addConstraint(i.getZ3Object() == l)
+    
+        ret.append(i.copy())
+
+    return ret
