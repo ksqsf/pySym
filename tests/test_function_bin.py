@@ -23,6 +23,22 @@ y = bin(13)[2:]
 z = bin(s)
 """
 
+test2 = """
+s = pyState.String(8)
+x = bin(s.index('a'))
+"""
+
+def test_funcion_bin_StateSplit():
+    b = ast.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+    
+    # We should get 8 states back
+    assert len(pg.completed) == 8
+    assert set([int(p.state.any_str('x'),2) for p in pg.completed]) == set(range(8))
+
 
 def test_function_bin():
     b = ast.parse(test1).body

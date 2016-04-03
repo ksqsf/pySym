@@ -16,88 +16,102 @@ def _handleNum(state,element,value,op):
     """
 
     # Find the parent object
-    oldTarget = state.resolveObject(element.target)
-    parent = state.objectManager.getParent(oldTarget)
-    index = parent.index(oldTarget)
+    oldTargets = state.resolveObject(element.target)
 
+    # Normalize
+    oldTargets = [oldTargets] if type(oldTargets) is not list else oldTargets
 
-    # Basic sanity checks complete. For augment assigns we will always need to update the vars.
-    # Grab the old var and create a new now
-    oldTargetVar = oldTarget.getZ3Object()
+    # Resolve calls if we need to
+    retObjs = [x for x in oldTargets if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
-    # Match up the right hand side
-    oldTargetVar, valueVar = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value.getZ3Object(),op)
+    ret = []
+
+    # Loop through resolved objects
+    for oldTarget in oldTargets:
+        parent = state.objectManager.getParent(oldTarget)
+        index = parent.index(oldTarget)
     
-    if hasRealComponent(valueVar) or hasRealComponent(oldTargetVar):
-        parent[index] = Real(oldTarget.varName,ctx=state.ctx)
-        newTargetVar = parent[index].getZ3Object(increment=True)
+        # Basic sanity checks complete. For augment assigns we will always need to update the vars.
+        # Grab the old var and create a new now
+        oldTargetVar = oldTarget.getZ3Object()
 
-    elif type(valueVar) in [z3.BitVecRef,z3.BitVecNumRef]:
-        parent[index] = BitVec(oldTarget.varName,ctx=state.ctx,size=valueVar.size())
-        newTargetVar = parent[index].getZ3Object(increment=True)
+        # Match up the right hand side
+        oldTargetVar, valueVar = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value.getZ3Object(),op)
+    
+        if hasRealComponent(valueVar) or hasRealComponent(oldTargetVar):
+            parent[index] = Real(oldTarget.varName,ctx=state.ctx)
+            newTargetVar = parent[index].getZ3Object(increment=True)
 
-    else:
-        parent[index] = Int(oldTarget.varName,ctx=state.ctx)
-        newTargetVar = parent[index].getZ3Object(increment=True)
+        elif type(valueVar) in [z3.BitVecRef,z3.BitVecNumRef]:
+            parent[index] = BitVec(oldTarget.varName,ctx=state.ctx,size=valueVar.size())
+            newTargetVar = parent[index].getZ3Object(increment=True)
+    
+        else:
+            parent[index] = Int(oldTarget.varName,ctx=state.ctx)
+            newTargetVar = parent[index].getZ3Object(increment=True)
 
-    # Figure out what the op is and add constraint
-    if type(op) == ast.Add:
-        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
-            # Check for over and underflows
-            state.solver.add(pyState.z3Helpers.bvadd_safe(oldTargetVar,valueVar))
-        state.addConstraint(newTargetVar == oldTargetVar + valueVar)
+        # Figure out what the op is and add constraint
+        if type(op) == ast.Add:
+            if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+                # Check for over and underflows
+                state.solver.add(pyState.z3Helpers.bvadd_safe(oldTargetVar,valueVar))
+            state.addConstraint(newTargetVar == oldTargetVar + valueVar)
+    
+        elif type(op) == ast.Sub:
+            if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+                # Check for over and underflows
+                state.solver.add(pyState.z3Helpers.bvsub_safe(oldTargetVar,valueVar))
+            state.addConstraint(newTargetVar == oldTargetVar - valueVar)
+    
+        elif type(op) == ast.Mult:
+            if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+                # Check for over and underflows
+                state.solver.add(pyState.z3Helpers.bvmul_safe(oldTargetVar,valueVar))
+            state.addConstraint(newTargetVar == oldTargetVar * valueVar)
+    
+        elif type(op) == ast.Div:
+            if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
+                # Check for over and underflows
+                state.solver.add(pyState.z3Helpers.bvdiv_safe(oldTargetVar,valueVar))
+            state.addConstraint(newTargetVar == oldTargetVar / valueVar)
+    
+        elif type(op) == ast.Mod:
+            state.addConstraint(newTargetVar == oldTargetVar % valueVar)
+    
+        elif type(op) == ast.BitXor:
+            logger.debug("{0} = {1} ^ {2}".format(newTargetVar,oldTargetVar,valueVar))
+            state.addConstraint(newTargetVar == oldTargetVar ^ valueVar)
+    
+        elif type(op) == ast.BitOr:
+            state.addConstraint(newTargetVar == oldTargetVar | valueVar)
+    
+        elif type(op) == ast.BitAnd:
+            state.addConstraint(newTargetVar == oldTargetVar & valueVar)
+    
+        elif type(op) == ast.LShift:
+            state.addConstraint(newTargetVar == oldTargetVar << valueVar)
+    
+        elif type(op) == ast.RShift:
+            state.addConstraint(newTargetVar == oldTargetVar >> valueVar)
 
-    elif type(op) == ast.Sub:
-        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
-            # Check for over and underflows
-            state.solver.add(pyState.z3Helpers.bvsub_safe(oldTargetVar,valueVar))
-        state.addConstraint(newTargetVar == oldTargetVar - valueVar)
+        # TODO: This will fail with BitVec objects...
+        elif type(op) == ast.Pow:
+            state.addConstraint(newTargetVar == oldTargetVar ** valueVar)
 
-    elif type(op) == ast.Mult:
-        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
-            # Check for over and underflows
-            state.solver.add(pyState.z3Helpers.bvmul_safe(oldTargetVar,valueVar))
-        state.addConstraint(newTargetVar == oldTargetVar * valueVar)
+        else:
+            err = "Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)
+            logger.error(err)
+            raise Exception(err)
 
-    elif type(op) == ast.Div:
-        if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
-            # Check for over and underflows
-            state.solver.add(pyState.z3Helpers.bvdiv_safe(oldTargetVar,valueVar))
-        state.addConstraint(newTargetVar == oldTargetVar / valueVar)
-
-    elif type(op) == ast.Mod:
-        state.addConstraint(newTargetVar == oldTargetVar % valueVar)
-
-    elif type(op) == ast.BitXor:
-        logger.debug("{0} = {1} ^ {2}".format(newTargetVar,oldTargetVar,valueVar))
-        state.addConstraint(newTargetVar == oldTargetVar ^ valueVar)
-
-    elif type(op) == ast.BitOr:
-        state.addConstraint(newTargetVar == oldTargetVar | valueVar)
-
-    elif type(op) == ast.BitAnd:
-        state.addConstraint(newTargetVar == oldTargetVar & valueVar)
-
-    elif type(op) == ast.LShift:
-        state.addConstraint(newTargetVar == oldTargetVar << valueVar)
-
-    elif type(op) == ast.RShift:
-        state.addConstraint(newTargetVar == oldTargetVar >> valueVar)
-
-    # TODO: This will fail with BitVec objects...
-    elif type(op) == ast.Pow:
-        state.addConstraint(newTargetVar == oldTargetVar ** valueVar)
-
-    else:
-        err = "Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)
-        logger.error(err)
-        raise Exception(err)
+        ret.append(state)
 
     # Pop the instruction off
     state.path.pop(0)
 
     # Return the state
-    return [state]
+    return ret
 
 def _handleString(state,element,value,op):
     """
@@ -105,25 +119,41 @@ def _handleString(state,element,value,op):
     """
 
     # Find the parent object
-    oldTarget = state.resolveObject(element.target)
-    parent = state.objectManager.getParent(oldTarget)
-    index = parent.index(oldTarget)
+    oldTargets = state.resolveObject(element.target)
 
-    # Create a new string
-    newString = state.getVar("AugAssignTempString",ctx=1,varType=String)
-    newString.increment()
-    
-    # Set the new string
-    newString.variables = oldTarget.variables + value.variables
+    # Normalize
+    oldTargets = [oldTargets] if type(oldTargets) is not list else oldTargets
 
-    # Assign the new string
-    parent[index] = newString.copy()
+    # Resolve calls if we need to
+    retObjs = [x for x in oldTargets if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
 
-    # Pop the instruction off
+    ret = []
+
     state.path.pop(0)
 
+    # Loop through possible old targets
+    
+    for oldTarget in oldTargets:
+
+        parent = state.objectManager.getParent(oldTarget)
+        index = parent.index(oldTarget)
+
+        # Create a new string
+        newString = state.getVar("AugAssignTempString",ctx=1,varType=String)
+        newString.increment()
+    
+        # Set the new string
+        newString.variables = oldTarget.variables + value.variables
+
+        # Assign the new string
+        parent[index] = newString.copy()
+
+        ret.append(state.copy())
+
     # Return the state
-    return [state]
+    return ret
 
 
 def handle(state,element):
