@@ -5,6 +5,7 @@ from pyObjectManager.String import String
 from pyObjectManager.List import List
 import logging
 import pyState
+import itertools
 
 logger = logging.getLogger("pyState:functions:zip")
 
@@ -41,35 +42,34 @@ def handle(state,call,left,right,ctx=None):
 
     rights = [right.copy() for right in rights]
 
-    if len(lefts) > 1 or len(rights) > 1:
-        err = "handle: Don't know how to handle state splitting"
-        logger.error(err)
-        raise Exception(err)
+    ret = []
+    
+    # Loop through possibilities
+    for left,right in itertools.product(lefts,rights):
 
-    left = lefts[0]
-    right = rights[0]
+        # Only handling List and String objects for now
+        if type(left) not in [List, String]:
+            err = "handle: Don't know how to handle type {0}".format(type(left))
+            logger.error(err)
+            raise Exception(err)
 
-    # Only handling List and String objects for now
-    if type(left) not in [List, String]:
-        err = "handle: Don't know how to handle type {0}".format(type(left))
-        logger.error(err)
-        raise Exception(err)
+        if type(right) not in [List, String]:
+           err = "handle: Don't know how to handle type {0}".format(type(right))
+           logger.error(err)
+           raise Exception(err)
 
-    if type(right) not in [List, String]:
-        err = "handle: Don't know how to handle type {0}".format(type(right))
-        logger.error(err)
-        raise Exception(err)
+        # Create our output List
+        newList = state.getVar('tmpZipList',ctx=1,varType=List)
+        newList.increment()
 
-    # Create our output List
-    newList = state.getVar('tmpZipList',ctx=1,varType=List)
-    newList.increment()
+        # Might as well use Python's own zip function to help us
+        for (l,r) in zip(left,right):
+           # TODO: This should really be a Tuple, but I haven't implemented that yet.
+           tempList = state.getVar('tmpZipInner',ctx=1,varType=List)
+           tempList.increment()
+           tempList.variables = [l,r]
+           newList.variables.append(tempList.copy())
 
-    # Might as well use Python's own zip function to help us
-    for (l,r) in zip(left,right):
-        # TODO: This should really be a Tuple, but I haven't implemented that yet.
-        tempList = state.getVar('tmpZipInner',ctx=1,varType=List)
-        tempList.increment()
-        tempList.variables = [l,r]
-        newList.variables.append(tempList.copy())
+        ret.append(newList.copy())
 
-    return newList.copy()
+    return ret

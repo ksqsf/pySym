@@ -34,6 +34,10 @@ def handle(state,element):
         if len(retObjs) > 0:
             return retObjs
 
+        states = [x for x in ret if type(x) is pyState.State]
+        
+        if len(states) > 0:
+            return states
 
     # Don't really care about the return object for now... Maybe later?
     elif type(value) == ReturnObject:

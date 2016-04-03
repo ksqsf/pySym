@@ -6,6 +6,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
 from pyObjectManager.String import String
 import pyState
+from copy import deepcopy
 
 logger = logging.getLogger("pyState:SimFunction:List:append")
 
@@ -17,9 +18,9 @@ def handle(state,call,var,ctx=None):
     ctx = ctx if ctx is not None else state.ctx
     
     # The root (i.e.: "l" in l.append())
-    root = state.resolveObject(call.func.value,ctx=ctx)
+    #root = state.resolveObject(call.func.value,ctx=ctx)
     
-    assert type(root) is List
+    #assert type(root) is List
     
     # Resolve what we're going to be appending
     varList = state.resolveObject(var,ctx=ctx)
@@ -32,25 +33,30 @@ def handle(state,call,var,ctx=None):
     if len(retObjs) > 0:
         return retObjs
 
-    if len(varList) == 1:
-        var = varList.pop()
+    ret = []
 
-        if type(var) in [Int, Real, BitVec, Char]:
-            root.append(var)
-            state.addConstraint(root[-1].getZ3Object() == var.getZ3Object())
-        
-        elif type(var) in [List, String]:
-            root.append(state.recursiveCopy(var))
+    # Not sure how else to handle this. Probably shouldn't be popping instruction here, but...
+    state.path.pop(0)
     
-        else:
-            err = "handle: Don't know how to handle appending type {0}".format(type(var))
-            logger.error(err)
-            raise Exception(err)
+    for var in varList:
+        # Get a new State
+        s = state.copy()
+        
+        # Resolve Root
+        root = s.resolveObject(call.func.value,ctx=ctx)
 
-    else:
-            err = "handle: Don't know how to handle state splitting yet"
-            logger.error(err)
-            raise Exception(err)
+        assert type(root) is List
+
+        # Append it
+        root.append(deepcopy(var))
+        
+        # Add this to our returns
+        retObj = pyState.ReturnObject(1)
+        retObj.state = s
+
+        ret.append(retObj)
+
+    return ret
 
 
 

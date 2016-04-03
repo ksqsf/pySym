@@ -26,6 +26,9 @@ class Char:
         if increment:
             self.increment()
 
+    def __deepcopy__(self,_):
+        return self.copy()
+
 
     def copy(self):
         return Char(

@@ -35,7 +35,7 @@ class List:
             state = self.state if hasattr(self,"state") else None
         )
 
-    def __deepcopy__(self,blerg):
+    def __deepcopy__(self,_):
         return self.copy()
 
     def setState(self,state):
