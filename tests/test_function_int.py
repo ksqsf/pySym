@@ -26,6 +26,20 @@ test2 = """
 q = int("12","10")
 """
 
+test3 = """
+s = pyState.String(8)
+x = int(s.index('a'))
+"""
+
+def test_function_int_statesplit():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 8
+    assert set([p.state.any_int('x') for p in pg.completed]) == set(range(8))
+
 
 def test_function_int():
     b = ast.parse(test1).body
