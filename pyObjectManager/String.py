@@ -29,7 +29,7 @@ class String:
 
 
         if string is not None:
-            self.setTo(string)
+            self.setTo(string,clear=True)
 
         # Add generic characters to this string
         if length is not None:
@@ -84,22 +84,33 @@ class String:
         """
         self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state))
 
-    def setTo(self,var):
+    def setTo(self,var,clear=None):
         """
         Sets this String object to be equal/copy of another. Type can be str or String.
+        clear = Boolean if this variable should be cleared before setting (default False)
         """
         assert type(var) in [String, str]
         
-        self.variables = []
+        clear = False if clear is None else clear
+        
+        if clear:
+            self.variables = []
 
-        # For now, just add as many characters as there was originally
-        for val in var:
-            self._addChar()
-            if type(val) is str:
-                self.state.addConstraint(self[-1].getZ3Object() == ord(val))
-            else:
-                self.state.addConstraint(self[-1].getZ3Object() == val.getZ3Object())
-            
+            # For now, just add as many characters as there was originally
+            for val in var:
+                self._addChar()
+                if type(val) is str:
+                    self.state.addConstraint(self[-1].getZ3Object() == ord(val))
+                else:
+                    self.state.addConstraint(self[-1].getZ3Object() == val.getZ3Object())
+        
+        else:
+            # Only set as much as we can.
+            for (val,c) in zip(var,self):
+                if type(val) is str:
+                    self.state.addConstraint(c.getZ3Object() == ord(val))
+                else:
+                    self.state.addConstraint(c.getZ3Object() == val.getZ3Object())
 
 
     def _isSame(self,length=None,**args):
@@ -247,6 +258,7 @@ class String:
         before this is called to ensure the value is not symbolic
         """
         return self.state.any_str(self)
+
 
 # Circular importing problem. Don't hate :-)
 from pyObjectManager.Int import Int

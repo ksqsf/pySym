@@ -40,7 +40,7 @@ def handle(state,call,obj,ctx=None):
             val = obj.getValue()
             ret = state.getVar("tmpStrVal",ctx=1,varType=String)
             ret.increment()
-            ret.setTo(bin(val))
+            ret.setTo(bin(val),clear=True)
     
         # TODO: Deal with symbolic values (returning list of possibilities)
         else:

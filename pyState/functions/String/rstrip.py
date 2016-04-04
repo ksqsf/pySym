@@ -58,7 +58,7 @@ def handle(state,call,chars=None,ctx=None):
         newString = state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True}).copy()
         
         # Set new str to be the same as the old str
-        newString.setTo(root)
+        newString.setTo(root,clear=True)
 
         # Look char by char in reverse order to find target char
         for c in range(newString.length()-1,-1,-1):#[::-1]:

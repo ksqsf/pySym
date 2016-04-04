@@ -57,7 +57,7 @@ def handle(state,call,width,ctx=None):
         width = width.getValue()
 
         # zfill will not truncate
-        newString.setTo(root)
+        newString.setTo(root,clear=True)
     
         # If we're already at our length, just return
         if newString.length() >= width:

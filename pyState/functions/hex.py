@@ -42,7 +42,7 @@ def handle(state,call,obj,ctx=None):
         if obj.isStatic():
             ret = state.getVar("tmpHexVal",ctx=1,varType=String)
             ret.increment()
-            ret.setTo(hex(obj.getValue()))
+            ret.setTo(hex(obj.getValue()),clear=True)
 
         # TODO: Deal with symbolic values (returning list of possibilities)
         else:

@@ -41,7 +41,7 @@ def handle(state,call,obj,ctx=None):
             ret = state.getVar("tmpStrVal",ctx=1,varType=String)
             ret.increment()
             # Utilize pyObjectManager class methods
-            ret.setTo(obj.__str__())
+            ret.setTo(obj.__str__(),clear=True)
 
         # TODO: Deal with symbolic values (returning list of possibilities)
         else:

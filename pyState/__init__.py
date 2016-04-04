@@ -283,7 +283,7 @@ class State():
             newString = self.getVar(varName,ctx=ctx,varType=String)
             newString.increment()
             newString = newString.copy()
-            newString.setTo(var)
+            newString.setTo(var,clear=True)
             
             return newString
             
