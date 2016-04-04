@@ -18,7 +18,7 @@ def handle(state,call,chars=None,ctx=None):
     ctx = ctx if ctx is not None else state.ctx
 
     # The root (i.e.: "s" in s.rstrip())
-    root = state.resolveObject(call.func.value,ctx=ctx)
+    root = state.resolveObject(call.func.value,ctx=ctx).copy()
 
     assert type(root) is String
 
@@ -34,7 +34,7 @@ def handle(state,call,chars=None,ctx=None):
         return retObjs
 
     ret = []
-
+    
     for chars in charsl:
 
         # According to the docs, this should be String or None
@@ -50,33 +50,42 @@ def handle(state,call,chars=None,ctx=None):
             chars.append(oldChars)
 
 
-        # TODO: Add symbolic width capability
-        if not chars.isStatic():
-            err = "handle: Don't know how to handle non static chars arg"
-            logger.error(err)
-            raise Exception(err)
-
-        # TODO: Add symbolic string capability
-        if not root.isStatic():
-            err = "handle: Don't know how to handle symbolic string"
-            logger.error(err)
-            raise Exception(err)
-
         # Get new str
-        newString = state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True})
+        newString = state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True}).copy()
         
         # Set new str to be the same as the old str
         newString.setTo(root)
-    
+
         # Look char by char in reverse order to find target char
-        for c in newString[::-1]:
-            for f in chars:
+        for c in range(newString.length()-1,-1,-1):#[::-1]:
+            c = newString[c]
+            for f in range(chars.length()):
+                f = chars[f]
+                # If we must be, pop and move on
                 if c.mustBe(f):
                     newString.pop()
+                    break
+                # If we CAN be, take both options at once
+                elif c.canBe(f):
+                    ret.append(newString.copy())
+                    ret[-1].setState(state.copy())
+                    ret[-1].state.addConstraint(f.getZ3Object() != c.getZ3Object())
+                    #print("Appending: ",ret[-1])
+                    #ret.append(state.recursiveCopy(newString))
+                    newString.pop()
+                    # Create a new state
+                    state = state.copy()
+                    newString.setState(state)
+                    chars.setState(state)
+                    # Now that we CAN be, we actually MUST be for the sake of this loop
+                    state.addConstraint(f.getZ3Object() == c.getZ3Object())
+                    #print("Creating: ",newString)
+                    #f.setTo(c)
                     break
             else:
                 break
     
         ret.append(newString.copy())
-
+        #ret[-1].setState(state.copy())
+    
     return ret

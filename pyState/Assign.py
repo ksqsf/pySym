@@ -13,13 +13,16 @@ from pyObjectManager.String import String
 logger = logging.getLogger("pyState:Assign")
 
 
-def _handleAssignNum(state,target,value):
+def _handleAssignNum(target,value):
     """
     Handle assigning a number to a variable (i.e.: x = 1)
     Update local variable dict and return
     value should already be resolved via state.resolveObject (meaning it is now an expression)
     """
-    
+
+    # Implicitly taking value's state
+    state = value.state.copy()
+
     logger.debug("_handleAssignNum: Handling {0} = {1}".format(type(target),type(value)))
     
     if type(value) is Real:
@@ -35,15 +38,17 @@ def _handleAssignNum(state,target,value):
     index = parent.index(x)
     parent[index] = value
 
-    #state.addConstraint(x.getZ3Object(increment=True) == value.getZ3Object())
+    state.path.pop(0)
 
     # Return the state
     return [state]
 
 
-def _handleAssignList(state,target,listObject):
+def _handleAssignList(target,listObject):
     assert type(target) is ast.Name
     assert type(listObject) is List 
+
+    state = listObject.state.copy()
 
     # Resolve the object
     target = state.resolveObject(target,varType=List)
@@ -53,11 +58,15 @@ def _handleAssignList(state,target,listObject):
     # Set the new list
     parent[index] = listObject.copy()
 
+    state.path.pop(0)
+
     return [state]
 
-def _handleAssignString(state,target,stringObject):
+def _handleAssignString(target,stringObject):
     assert type(target) is ast.Name
     assert type(stringObject) is String
+
+    state = stringObject.state.copy()
 
     # Resolve the object
     target = state.resolveObject(target,varType=String)
@@ -66,6 +75,8 @@ def _handleAssignString(state,target,stringObject):
 
     # Set the new list
     parent[index] = stringObject.copy()
+    
+    state.path.pop(0)
 
     return [state]
 
@@ -99,30 +110,20 @@ def handle(state,element):
     retObjs = [x.state for x in values if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
-    #if type(values[0]) == ReturnObject:
-    #    #return [state]
-    #    return [values[0].state]
-
-    # No return object, time to pop instruction
-    state.path.pop(0) if len(state.path) > 0 else None
 
     ret = []
     
-    # Change value into a list if it isn't already
-    if type(values) is not list:
-        values = [values]
-
     # For every possible assign value, get the state
     for value in values:
 
         if type(value) in [Int, Real, BitVec]:
-            ret += _handleAssignNum(state.copy(),target,value)
+            ret += _handleAssignNum(target,value)
     
         elif type(value) is List:
-            ret += _handleAssignList(state.copy(),target,value)
+            ret += _handleAssignList(target,value)
     
         elif type(value) is String:
-            ret += _handleAssignString(state.copy(),target,value)
+            ret += _handleAssignString(target,value)
     
         else:
             err = "Don't know how to assign type {0}".format(type(value))

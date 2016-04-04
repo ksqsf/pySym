@@ -28,6 +28,47 @@ s = pyState.String(8)
 x = "test1".rstrip(str(s.index('a')))
 """
 
+test3 = """
+s = pyState.String(2)
+x = "testt"
+x = x.rstrip(s)
+"""
+
+test4 = """
+s = pyState.String(8)
+x = s.rstrip("x")
+"""
+
+def test_function_String_rstrip_symbolicStrip():
+    b = ast.parse(test3).body
+    p = Path(b,source=test3)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 3
+    o = [p.state.any_str('x') for p in pg.completed]
+    o.sort()
+    # 3 cases. 1) both chars miss, 2) one char hit's "t" and the other misses. 3) one hits
+    # "t" and the other hits "s"
+    assert o == ['te', 'tes', 'testt']
+
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 9
+
+    # TODO: This is a brittle match..
+    o = [p.state.any_str('s') for p in pg.completed]
+    o.sort()
+    assert not o[0].endswith("x")
+    for x in range(1,8):
+        assert o[x].endswith("x"*x)
+    #['\x00\x00\x00\x00\x00\x00\x00\x00', '\x00\x00\x00\x00\x00\x00\x00x', '\x00\x00\x00\x00\x00\x00xx', '\x00\x00\x00\x00\x00xxx', '\x00\x00\x00\x00xxxx', '\x00\x00\x00xxxxx', '\x00\x00xxxxxx', '\x00xxxxxxx', 'xxxxxxxx']
+
+
+
 def test_function_String_rstrip_statesplit():
     b = ast.parse(test2).body
     p = Path(b,source=test2)

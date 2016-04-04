@@ -118,7 +118,7 @@ class Char:
             return False
         
         # If we can be, determine if this is the only option
-        if len(self.state.any_n_int(self,2)) == 1:
+        if len(self.state.any_n_int(self,2)) == 1 and len(self.state.any_n_int(var,2)) == 1:
             return True
         
         # Looks like we're only one option

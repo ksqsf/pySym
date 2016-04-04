@@ -65,15 +65,18 @@ class String:
 
     def increment(self):
         self.count += 1
-        length = self.length()
+        #length = self.length()
         # reset variable list if we're incrementing our count
-        self.variables = []
+        #self.variables = []
 
         # Add generic characters to this string
-        if length is not None:
-            for x in range(length):
-                self._addChar()
+        #if length is not None:
+        #    for x in range(length):
+        #        self._addChar()
 
+        # increment all the chars
+        for c in self:
+            c.increment()
     
     def _addChar(self):
         """
@@ -174,8 +177,7 @@ class String:
         # If we can possible be this value, see if we MUST be this value
         # Loop through all our characters and see if they have more than one possibility
         for c in self:
-            # If this has more than one option, return False
-            if len(self.state.any_n_int(c,2)) == 2:
+            if len(self.state.any_n_int(c,2)) != 1:
                 return False
 
         # Looks like we've got a match...
