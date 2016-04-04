@@ -195,54 +195,51 @@ def handle(state,element,ctx=None):
     assert type(state) == pyState.State
     assert type(element) == ast.BinOp
 
+    logger.debug("handle: Resolving left {0}".format(element.left))
+    
     # Try resolving the parts
     left = state.resolveObject(element.left,parent=element,ctx=ctx)
-
-    # Normalize to a list
-    left = [left] if type(left) is not list else left
 
     # Resolve calls if we need to
     retObjs = [x for x in left if type(x) is pyState.ReturnObject]
     if len(retObjs) > 0:
+        logger.debug("handle: Returning retObjs {0}".format(retObjs))
         return retObjs
 
     # Save a copy so that we don't lose it
     left = [x.copy() for x in left]
 
     #logger.debug("BinOp: BinOp Left = {0}".format(type(left)))
-
-    right = state.resolveObject(element.right,parent=element,ctx=ctx)
-
-    # Normalize to a list
-    right = [right] if type(right) is not list else right
+    right = {}
+    
+    # Enumate all possible states
+    for s in set([x.state for x in left]):
+        logger.debug("handle: Resolving right {0}".format(element.right))
+        right[s] = [x for x in s.resolveObject(element.right,parent=element,ctx=ctx)]
 
     # Resolve calls if we need to
-    retObjs = [x for x in right if type(x) is pyState.ReturnObject]
+    retObjs = [y for x in right.values() for y in x if type(y) is pyState.ReturnObject]
     if len(retObjs) > 0:
+        logger.debug("handle: Returning retObjs {0}".format(retObjs))
         return retObjs
-
-    # Save a copy so that we don't lose it
-    right = [x.copy() for x in right]
-
     #logger.debug("BinOp: BinOp Right = {0}".format(type(right)))
 
     op = element.op
     ret = []
-
+    
     # Loop through all possible combinations
     for l in left:
-
-        for r in right:
-
+        # Don't want to duplicate states. Thus the dictionary
+        for r in right[l.state]:
             if type(l) is List or type(r) is List:
-                ret += _handleList(state,l,r,op)
+                ret += _handleList(r.state,l,r,op)
         
             elif type(l) is String or type(r) is String:
-                ret += _handleStr(state,l,r,op)
+                ret += _handleStr(r.state,l,r,op)
         
             # TODO: Assuming like types here... Maybe check both left and right?
             elif type(l) in [Int, Real, BitVec]:
-                ret += _handleNum(state,l,r,op)
+                ret += _handleNum(r.state,l,r,op)
     
             else:
                 err = "BinOP: Don't know how to handle variable type {0}".format(type(l))

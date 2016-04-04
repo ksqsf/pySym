@@ -18,4 +18,4 @@ def handle(state,call,length=ast.Num(Z3_MAX_STRING_LENGTH),ctx=None):
     string = state.getVar('pyStateStringTemp',ctx=1,varType=String,kwargs={'length': length})
     string.increment()
 
-    return string.copy()
+    return [string.copy()]

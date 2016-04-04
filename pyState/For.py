@@ -77,20 +77,26 @@ def _handle(state,element,newIter):
 
     # Create the target var
     t, kwargs = pyState.duplicateSort(elm)
-    target = state.resolveObject(target,varType=t,kwargs=kwargs)
-    target.increment()
+    targets = state.resolveObject(target,varType=t,kwargs=kwargs)
+    #target.increment()
+    ret = []    
 
-    if type(target) in [Int, Real, BitVec, Char]:
-        # Copy the constraint
-        state.addConstraint(target.getZ3Object() == elm.getZ3Object())
+    for target in targets:
 
-    else:
-        err = "handle: I don't know how to handle target type {0}".format(type(target))
-        logger.error(err)
-        raise Exception(err)
+        target.increment()
+    
+        if type(target) in [Int, Real, BitVec, Char]:
+            # Copy the constraint
+            target.state.addConstraint(target.getZ3Object() == elm.getZ3Object())
 
-    return [state]
+        else:
+            err = "handle: I don't know how to handle target type {0}".format(type(target))
+            logger.error(err)
+            raise Exception(err)
 
+        ret.append(target.state)
+
+    return ret
 
 def handle(state,element):
     """

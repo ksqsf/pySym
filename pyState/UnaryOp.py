@@ -26,36 +26,45 @@ def handle(state,element,ctx=None):
     assert type(element) == ast.UnaryOp
 
     op = element.op
-    target = state.resolveObject(element.operand)
+    targets = state.resolveObject(element.operand)
+
+    ret = []    
+
+    for target in targets:
+
+        # Use the target's state
+        state = target.state
+
+        if type(target) not in [Int, Real, BitVec]:
+            err = "handle: unable to resolve UnaryOp target type '{0}'".format(type(target))
+            logger.error(err)
+            raise Exception(err)
     
-    if type(target) not in [Int, Real, BitVec]:
-        err = "handle: unable to resolve UnaryOp target type '{0}'".format(type(target))
-        logger.error(err)
-        raise Exception(err)
+        # Get a new variable
+        t,args = pyState.duplicateSort(target)
+        newVar = state.getVar("tempUnaryOp",varType=t,kwargs=args)
+        newVar.increment()
     
-    # Get a new variable
-    t,args = pyState.duplicateSort(target)
-    newVar = state.getVar("tempUnaryOp",varType=t,kwargs=args)
-    newVar.increment()
-    
-    if type(op) == ast.USub:
-        state.addConstraint(newVar.getZ3Object() == -target.getZ3Object())
+        if type(op) == ast.USub:
+            state.addConstraint(newVar.getZ3Object() == -target.getZ3Object())
 
-    elif type(op) == ast.UAdd:
-        state.addConstraint(newVar.getZ3Object() == target.getZ3Object())
+        elif type(op) == ast.UAdd:
+            state.addConstraint(newVar.getZ3Object() == target.getZ3Object())
 
-    elif type(op) == ast.Not:
-        state.addConstraint(newVar.getZ3Object() == z3.Not(target.getZ3Object()))
+        elif type(op) == ast.Not:
+            state.addConstraint(newVar.getZ3Object() == z3.Not(target.getZ3Object()))
 
-    elif type(op) == ast.Invert:
-        err = "handle: Invert not implemented yet"
-        logger.error(err)
-        raise Exception(err)
+        elif type(op) == ast.Invert:
+            err = "handle: Invert not implemented yet"
+            logger.error(err)
+            raise Exception(err)
 
-    else:
-        # We really shouldn't get here...
-        err = "handle: {0} not implemented yet".format(type(op))
-        logger.error(err)
-        raise Exception(err)
+        else:
+            # We really shouldn't get here...
+            err = "handle: {0} not implemented yet".format(type(op))
+            logger.error(err)
+            raise Exception(err)
 
-    return newVar.copy()
+        ret.append(newVar.copy())
+
+    return ret

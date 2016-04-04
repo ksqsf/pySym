@@ -19,14 +19,14 @@ def handle(state,call,width,ctx=None):
 
     # The root (i.e.: "s" in s.zfill())
     root = state.resolveObject(call.func.value,ctx=ctx)
+    
+    assert len(root) == 1
+    root = root.pop()
 
     assert type(root) is String
 
     # Resolve the width
     widths = state.resolveObject(width,ctx=ctx)
-
-    # Normalize
-    widths = [widths] if type(widths) is not list else widths
 
     # Resolve calls if we need to
     retObjs = [x for x in widths if type(x) is pyState.ReturnObject]

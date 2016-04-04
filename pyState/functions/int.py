@@ -18,9 +18,6 @@ def handle(state,call,obj,base=10,ctx=None):
     # Resolve the object
     objs = state.resolveObject(obj,ctx=ctx)
 
-    # Normalize
-    objs = [objs] if type(objs) is not list else objs
-
     # Resolve calls if we need to
     retObjs = [x for x in objs if type(x) is pyState.ReturnObject]
     if len(retObjs) > 0:
@@ -43,7 +40,11 @@ def handle(state,call,obj,base=10,ctx=None):
             raise Exception(err)
 
         # Resolve base
-        base = base if type(base) is int else state.resolveObject(base,ctx=ctx)
+        base = [base] if type(base) is int else obj.state.resolveObject(base,ctx=ctx)
+
+        # TODO: Deal with extra states later...
+        assert len(base) == 1
+        base = base.pop()
 
         # Only dealing with concrete values for now.
         if obj.isStatic() and (type(base) is int or base.isStatic()):

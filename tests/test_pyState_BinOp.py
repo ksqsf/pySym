@@ -87,13 +87,32 @@ test14 = """
 x = "A" * 4
 """
 
+test15 = """
+s = pyState.String(8)
+x = s.rstrip("x") * 2
+"""
+
+def test_pySym_BinOp_StatePropagation():
+    b = ast.parse(test15).body
+    p = Path(b,source=test15)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 9
+
+    # Check that the x value (output) is correct
+    assert set([len(p.state.any_str('x')) for p in pg.completed]) == set([x*2 for x in range(9)])
+
+    # Check that the back-propogation of the s values are also accurate
+    assert set([len(p.state.any_str('s')) - len(p.state.any_str('s').rstrip("x")) for p in pg.completed]) == set(range(9))
+
+
 def test_pySym_BinOp_StringMult():
     b = ast.parse(test14).body
     p = Path(b,source=test14)
     pg = PathGroup(p)
     pg.explore()
 
-    # There should be 8 states now
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_str('x') == "A" * 4
 

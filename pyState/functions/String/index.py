@@ -19,18 +19,24 @@ def handle(state,call,sub,start=None,end=None,ctx=None):
     # The root (i.e.: "s" in s.index())
     root = state.resolveObject(call.func.value,ctx=ctx)
 
+    assert len(root) == 1
+
+    root = root.pop()
+
     assert type(root) is String
 
     # Resolve the vars
-    sub = state.resolveObject(sub,ctx=ctx)
+    subs = state.resolveObject(sub,ctx=ctx)
 
-    # If we're indexing a Char, just change it into a String
-    if type(sub) is Char:
-        c = sub
-        sub = String("tempIndex",1,state=state)
-        sub.variables.append(c)
+    for sub in subs:
+        # If we're indexing a Char, just change it into a String
+        if type(sub) is Char:
+            c = sub
+            sub = String("tempIndex",1,state=sub.state)
+            sub.variables.append(c)
 
-    assert type(sub) is String
+    
+    assert min([type(sub) is String for sub in subs]) == True
 
     start = state.resolveObject(start,ctx=ctx) if start is not None else None
     end = state.resolveObject(end,ctx=ctx) if end is not None else None

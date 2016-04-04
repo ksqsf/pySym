@@ -143,6 +143,6 @@ def handle(state,element,ctx=None):
     # Call our new function.
     state.Call(ast.parse("blergy({0})".format(','.join([x for x in allInputVars]))).body[0].value,func=fun,retObj=retObj)
 
-    return retObj
+    return [retObj]
 
 

@@ -34,14 +34,22 @@ def _handleAssignNum(target,value):
     else:
         x = state.resolveObject(target,varType=Int)
 
-    parent = state.objectManager.getParent(x)
-    index = parent.index(x)
-    parent[index] = value
+    ret = []
 
-    state.path.pop(0)
+    for x2 in x:
 
-    # Return the state
-    return [state]
+        parent = state.objectManager.getParent(x2)
+        index = parent.index(x2)
+        parent[index] = value
+        
+        x2.state = x2.state.copy()
+
+        x2.state.path.pop(0)
+
+        # Return the state
+        ret += [x2.state]
+    
+    return ret
 
 
 def _handleAssignList(target,listObject):
@@ -51,16 +59,25 @@ def _handleAssignList(target,listObject):
     state = listObject.state.copy()
 
     # Resolve the object
-    target = state.resolveObject(target,varType=List)
-    parent = state.objectManager.getParent(target)
-    index = parent.index(target)
+    targets = state.resolveObject(target,varType=List)
 
-    # Set the new list
-    parent[index] = listObject.copy()
+    ret = []
 
-    state.path.pop(0)
+    for target in targets:
 
-    return [state]
+        parent = state.objectManager.getParent(target)
+        index = parent.index(target)
+
+        # Set the new list
+        parent[index] = listObject.copy()
+
+        target.state = target.state.copy()
+
+        target.state.path.pop(0)
+
+        ret += [target.state]
+
+    return ret
 
 def _handleAssignString(target,stringObject):
     assert type(target) is ast.Name
@@ -69,16 +86,25 @@ def _handleAssignString(target,stringObject):
     state = stringObject.state.copy()
 
     # Resolve the object
-    target = state.resolveObject(target,varType=String)
-    parent = state.objectManager.getParent(target)
-    index = parent.index(target)
+    targets = state.resolveObject(target,varType=String)
 
-    # Set the new list
-    parent[index] = stringObject.copy()
+    ret = []
+
+    for target in targets:
+
+        parent = state.objectManager.getParent(target)
+        index = parent.index(target)
+
+        # Set the new list
+        parent[index] = stringObject.copy()
+
+        target.state = target.state.copy()
+
+        target.state.path.pop(0)
+
+        ret += [target.state]
     
-    state.path.pop(0)
-
-    return [state]
+    return ret
 
 
 def handle(state,element):
@@ -99,7 +125,7 @@ def handle(state,element):
 
     # Clear up the naming
     target = targets[0]
-
+    
     # Resolve the value
     values = state.resolveObject(value)
 

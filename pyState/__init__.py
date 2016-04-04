@@ -26,15 +26,15 @@ logger = logging.getLogger("State")
 
 # Create small class for keeping track of return values
 class ReturnObject:
-    def __init__(self,retID):
+    def __init__(self,retID,state=None):
         self.retID = retID
-        self.state = None
+        self.state = state
     
     def __deepcopy__(self,_):
         return ReturnObject(self.retID)
     
     def copy(self):
-        return ReturnObject(self.retID)
+        return ReturnObject(self.retID,self.state)
 
 # I feel bad coding this but I can't find a better way atm.
 def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
@@ -410,34 +410,21 @@ class State():
             Nothing for now
         """
         obj = retElement.value
-        
+
         obj = self.resolveObject(obj)
         
         # Normalize
-        obj = [obj] if type(obj) is not list else obj
+        #obj = [obj] if type(obj) is not list else obj
     
         # Resolve calls if we need to
         retObjs = [x for x in obj if type(x) is pyState.ReturnObject]
         if len(retObjs) > 0:
             return retObjs
 
-        logger.debug("Return: Returning element {0}".format(type(obj)))
+        logger.debug("Return: Returning element {1} = {0}".format(obj,self.retID))
         # Store it off in the objectManager
         self.objectManager.returnObjects[self.retID] = obj
-        """ 
-        if type(obj) in [Int, Real, BitVec]:
-            obj = obj.getZ3Object()
         
-        # Check for int vs real
-        if hasRealComponent(obj):
-            retVar = self.getVar('ret{0}'.format(self.retID),varType=Real,ctx=1).getZ3Object(increment=True)
-        
-        else:
-            retVar = self.getVar('ret{0}'.format(self.retID),varType=Int,ctx=1).getZ3Object(increment=True)
-        
-        # Add the constraint
-        self.addConstraint(retVar == obj)
-        """
 
         # Remove the remaining instructions in this function
         self.path = []
@@ -493,9 +480,11 @@ class State():
         
         # If there are arguments, fill them in
         for i in range(len(call.args)):
-            #caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
-            #caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
+            caller_arg = [caller_arg] if type(caller_arg) is not list else caller_arg
+            # Resolution should have already happened by pyState.Call.Handle
+            assert len(caller_arg) == 1
+            caller_arg = caller_arg.pop()
             varType, kwargs = duplicateSort(caller_arg)
             # We don't want static variables...
             kwargs.pop("value",None) if kwargs is not None else None
@@ -503,7 +492,6 @@ class State():
             #parent = self.objectManager.getParent(dest_arg)
             #index = parent.index(dest_arg)
             self.objectManager.variables[self.ctx][func.args.args[i].arg] = self.recursiveCopy(caller_arg,varName=func.args.args[i].arg)
-            #self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
             logger.debug("Call: Setting argument {0} = {1}".format(type(self.objectManager.variables[self.ctx][func.args.args[i].arg]),type(caller_arg)))
         
         # Grab any unset vars
@@ -518,6 +506,9 @@ class State():
                 raise Exception(err)
             # NOTE: Assuming only one resolve from this due to Call.py handling the resolutions..
             caller_arg = self.resolveObject(call.keywords[i].value,ctx=oldCtx)
+            caller_arg = [caller_arg] if type(caller_arg) is not list else caller_arg
+            assert len(caller_arg) == 1
+            caller_arg = caller_arg.pop()
             #caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
             # We don't want static variables...
@@ -533,6 +524,9 @@ class State():
         for arg in unsetArgs:
             argIndex = func.args.args.index(arg) - (len(func.args.args) - len(func.args.defaults))
             caller_arg = self.resolveObject(func.args.defaults[argIndex],ctx=oldCtx)
+            caller_arg = [caller_arg] if type(caller_arg) is not list else caller_arg
+            assert len(caller_arg) == 1
+            caller_arg = caller_arg.pop()
             #caller_arg = caller_arg.getZ3Object() if type(caller_arg) in [Int, Real, BitVec] else caller_arg
             varType, kwargs = duplicateSort(caller_arg)
             # We don't want static variables...
@@ -678,6 +672,10 @@ class State():
         elif type(call.func) == ast.Attribute:
             try:
                 funcName = self.resolveObject(call.func.value,ctx=ctx)
+                # Not sure when there would be more than 1 here...
+                assert len(funcName) == 1
+
+                funcName = funcName.pop()
                 
                 # If we're making a call, return it
                 if type(funcName) is ReturnObject:
@@ -689,21 +687,6 @@ class State():
                 print(call.func.value)
                 funcName = call.func.value.id + "." + call.func.attr
 
-            # If this is a variable, this is an attribute of the varType
-            """
-            #funcName = self.getVar(call.func.value.id,softFail=True)
-            funcName = self.resolveObject(call.func.value)
-            
-            # If we're making a call, return it
-            if type(funcName) is ReturnObject:
-                return funcName
-            
-            if funcName is None:
-                funcName = call.func.value.id + "." + call.func.attr
-            else:
-                funcName = funcName.__class__.__name__ + "." + call.func.attr
-            """
-            
         else:
                 err = "resolveCall: unknown call-type object '{0}'".format(type(call))
                 logger.error(err)
@@ -856,9 +839,10 @@ class State():
 
             elif type(elm) is ast.Str:
                 elm_resolved = self.resolveObject(elm)
-                # Append to every List
-                for var in varList:
-                    var.append(elm_resolved.copy())
+                for elm in elm_resolved:
+                    # Append to every List
+                    for var in varList:
+                        var.append(elm.copy())
                 
 
             elif type(elm) in [ast.Name, ast.BinOp]:
@@ -907,7 +891,7 @@ class State():
                     return retObjs
 
                 newVarList = []
-                
+
                 # Loop through each return element
                 for elm in elm_resolved:
 
@@ -959,13 +943,13 @@ class State():
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
-            return self.getVar(obj.id,ctx=ctx,varType=varType,kwargs=kwargs)
+            return [self.getVar(obj.id,ctx=ctx,varType=varType,kwargs=kwargs)]
         
         elif t == ast.Num:
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))
             # Resolve this to an objectManager class
             t,args = duplicateSort(obj)
-            return t('tmp',ctx=ctx,state=self,**args if args is not None else {})
+            return [t('tmp',ctx=ctx,state=self,**args if args is not None else {})]
             # Return real val or int val
             #return z3.RealVal(obj.n) if type(obj.n) == float else z3.IntVal(obj.n)
         
@@ -976,7 +960,7 @@ class State():
         elif t == ast.Str:
             logger.debug("resolveObject: Resolving object type str: {0}".format(obj.s))
             #return self.getVar('tmp',ctx=1,varType=String,kwargs={'string':obj.s})
-            return self._resolveString(obj,ctx=ctx)
+            return [self._resolveString(obj,ctx=ctx)]
         
         elif t == ast.BinOp:
             logger.debug("resolveObject: Resolving object type BinOp")
@@ -988,7 +972,11 @@ class State():
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
-            return self.objectManager.returnObjects[obj.retID]
+            rets = self.objectManager.returnObjects[obj.retID]
+            # make sure the state is sync'd
+            for ret in rets:
+                ret.state = self
+            return rets
 
         elif t == ast.ListComp:
             logger.debug("resolveObject: Resolving ListComprehension")
@@ -1004,6 +992,7 @@ class State():
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:
+
             # Let's see if this is a real or sim call
             func = self.resolveCall(obj,ctx=ctx)
             
@@ -1014,17 +1003,10 @@ class State():
 
             # If we get here, we're a normal symbolic function
             else:
-                # Create our return object (temporary ID to be filled in by the Call handle)
-                #retObj = ReturnObject(1)
-
-                # Update state, change call to ReturnObject so we can resolve next time
-                #assert replaceObjectWithObject(self.path[0],obj,retObj)
-                
                 # Change our state, record the return object
-                return Call.handle(self,obj)
+                o = Call.handle(self,obj)
+                return o
             
-                # Return the ReturnObject back to caller to inform them of the pending call
-                #return retObj
 
         elif t == ast.UnaryOp:
             # TODO: Not sure if there will be symbolic UnaryOp objects... This wouldn't work for those.

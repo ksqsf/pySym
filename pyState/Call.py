@@ -88,15 +88,15 @@ def handle(state,element,retObj=None):
             s = state.copy()
 
             # Create our return object (temporary ID to be filled in by the Call handle)
-            retObj = pyState.ReturnObject(1)
+            retObj = pyState.ReturnObject(1,s)
 
             # Update state, change call to ReturnObject so we can resolve next time
             assert pyState.replaceObjectWithObject(s.path[0],element,retObj)
 
-            # Ensure everything has a state
+            # Ensure everything has a correct state
             [a.setState(s) for a in elm.args]
             [a.value.setState(s) for a in keyword]
-
+            [print("b",b) for a in state.objectManager.returnObjects.values() for b in a if b.state == state]
 
             # Call
             ret += [s.Call(elm,retObj=retObj)]

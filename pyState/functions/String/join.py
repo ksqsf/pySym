@@ -20,6 +20,9 @@ def handle(state,call,elem,ctx=None):
     # The root (i.e.: "s" in s.join())
     root = state.resolveObject(call.func.value,ctx=ctx)
 
+    assert len(root) == 1
+    root = root.pop()
+
     assert type(root) is String
 
     # Resolve the elem

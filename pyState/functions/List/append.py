@@ -20,9 +20,6 @@ def handle(state,call,var,ctx=None):
     # Resolve what we're going to be appending
     varList = state.resolveObject(var,ctx=ctx)
 
-    # Normalize
-    varList = varList if type(varList) is list else [varList]
-
     # If we're waiting on a symbolic call, return
     retObjs = [x for x in varList if type(x) is pyState.ReturnObject]
     if len(retObjs) > 0:
@@ -31,14 +28,20 @@ def handle(state,call,var,ctx=None):
     ret = []
 
     # Not sure how else to handle this. Probably shouldn't be popping instruction here, but...
-    state.path.pop(0)
+    #state.path.pop(0)
     
     for var in varList:
         # Get a new State
-        s = state.copy()
+        #s = state.copy()
+        s = var.state.copy()
         
+        s.path.pop(0)
+
         # Resolve Root
         root = s.resolveObject(call.func.value,ctx=ctx)
+
+        assert len(root) == 1
+        root = root.pop()
 
         assert type(root) is List
 

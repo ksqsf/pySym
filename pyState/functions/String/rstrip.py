@@ -20,6 +20,10 @@ def handle(state,call,chars=None,ctx=None):
     # The root (i.e.: "s" in s.rstrip())
     root = state.resolveObject(call.func.value,ctx=ctx).copy()
 
+    assert len(root) == 1
+
+    root = root.pop()
+
     assert type(root) is String
 
     # Resolve the chars
