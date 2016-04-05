@@ -167,7 +167,7 @@ Example:
 # Lists
 * methods
  * append (Fully Implemented)
- * clear (Not Implemented)
+ * clear (Fully Implemented)
  * copy (Not Implemented)
  * count (Not Implemented)
  * extend (Not Implemented)
