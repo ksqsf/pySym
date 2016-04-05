@@ -5,7 +5,11 @@ Python Symbolic Execution
 [![Coverage Status](https://coveralls.io/repos/github/Owlz/pySym/badge.svg?branch=HEAD)](https://coveralls.io/github/Owlz/pySym?branch=HEAD)
 
 # Disclaimer
-This is just for me to mess around with symbolic execution of python scripts. Likely not going to work/be broken so probably not something you care to play with.
+While I'm still using this as a test ground to learn, the script itself has at least gotten somewhat useful. Feel free to let me know if you find things that aren't right. For now, it will do very basic things. For loops, while loops, List Comprehensions, arithmetic, booleans, etc. If you start wondering into a lot of built-in commands or methods, you probably will not have success.
+
+For more information on what is and isn't implemented, check out [WhatIsImplemented.md]
+
+For examples of what is possible, probably the best resource right now is the unit tests. I'll post more detailed examples later.
 
 # Install
 Basic installation requires installing z3 with python bindings. It's recommended to install this into a python virtualenv to keep things a bit more clean.

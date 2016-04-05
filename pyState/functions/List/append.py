@@ -27,12 +27,7 @@ def handle(state,call,var,ctx=None):
 
     ret = []
 
-    # Not sure how else to handle this. Probably shouldn't be popping instruction here, but...
-    #state.path.pop(0)
-    
     for var in varList:
-        # Get a new State
-        #s = state.copy()
         s = var.state.copy()
         
         s.path.pop(0)
