@@ -109,6 +109,25 @@ x = 0
 x += s.index('x')
 """
 
+test16 = """
+s = pyState.String(2)
+x = "_"
+x += "testt".rstrip(s)
+"""
+
+def test_pySym_AugAssign_StateTracking():
+    b = ast.parse(test16).body
+    p = Path(b,source=test16)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 5
+   
+    o = [p.state.any_str('x') for p in pg.completed] 
+    o.sort()
+    assert o == ['_te', '_te', '_tes', '_tes', '_testt']
+
+
 def test_pySym_AugAssign_StateSplit():
     b = ast.parse(test15).body
     p = Path(b,source=test15)
