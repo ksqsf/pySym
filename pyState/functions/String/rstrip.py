@@ -10,6 +10,43 @@ import pyState
 
 logger = logging.getLogger("pyState:SimFunction:String.rstrip")
 
+def _rstrip(state,newString,chars):
+
+    # Look char by char in reverse order to find target char
+    for c in range(newString.length()-1,-1,-1):#[::-1]:
+        c = newString[c]
+        for f in range(chars.length()):
+            f = chars[f]
+            # If we must be, pop and move on
+            if c.mustBe(f):
+                newString.pop()
+                break
+            # If we CAN be, take both options at once
+            elif c.canBe(f):
+                state_notEqual = state.copy()
+                newString_notEqual = newString.copy()
+                newString_notEqual.setState(state_notEqual)
+                chars_notEqual = chars.copy()
+                chars_notEqual.setState(state_notEqual)
+                state_notEqual.addConstraint(f.getZ3Object() != c.getZ3Object())
+                
+                # Equal side
+                newString.pop()
+                state_eq = state.copy()
+                newString_eq = newString.copy()
+                newString_eq.setState(state_eq)
+                chars_eq = chars.copy()
+                chars_eq.setState(state_eq)
+                state_eq.addConstraint(f.getZ3Object() == c.getZ3Object())
+
+                # Take both
+                return _rstrip(state_notEqual,newString_notEqual,chars_notEqual) + _rstrip(state_eq,newString_eq,chars_eq)
+        else:
+            break
+
+    return [newString.copy()]
+    
+
 
 def handle(state,call,chars=None,ctx=None):
     """
@@ -60,36 +97,7 @@ def handle(state,call,chars=None,ctx=None):
         # Set new str to be the same as the old str
         newString.setTo(root,clear=True)
 
-        # Look char by char in reverse order to find target char
-        for c in range(newString.length()-1,-1,-1):#[::-1]:
-            c = newString[c]
-            for f in range(chars.length()):
-                f = chars[f]
-                # If we must be, pop and move on
-                if c.mustBe(f):
-                    newString.pop()
-                    break
-                # If we CAN be, take both options at once
-                elif c.canBe(f):
-                    ret.append(newString.copy())
-                    ret[-1].setState(state.copy())
-                    ret[-1].state.addConstraint(f.getZ3Object() != c.getZ3Object())
-                    #print("Appending: ",ret[-1])
-                    #ret.append(state.recursiveCopy(newString))
-                    newString.pop()
-                    # Create a new state
-                    state = state.copy()
-                    newString.setState(state)
-                    chars.setState(state)
-                    # Now that we CAN be, we actually MUST be for the sake of this loop
-                    state.addConstraint(f.getZ3Object() == c.getZ3Object())
-                    #print("Creating: ",newString)
-                    #f.setTo(c)
-                    break
-            else:
-                break
-    
-        ret.append(newString.copy())
-        #ret[-1].setState(state.copy())
-    
+        # Perform the strip
+        ret += _rstrip(state,newString,chars)
+
     return ret

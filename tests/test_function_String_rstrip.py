@@ -45,6 +45,22 @@ s2 = pyState.String(1)
 x = ''.join([x for x in s.rstrip(s2)])
 """
 
+test6 = """
+x = "test".rstrip(pyState.String(1) + "t")
+"""
+
+def test_function_String_rstrip_partiallySymbolic():
+    b = ast.parse(test6).body
+    p = Path(b,source=test6)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 3
+    o = [p.state.any_str('x') for p in pg.completed]
+    o.sort()
+    assert o == ['te', 'tes', 'tes']
+
+
 def test_function_String_rstrip_Char():
     b = ast.parse(test5).body
     p = Path(b,source=test5)
@@ -61,12 +77,12 @@ def test_function_String_rstrip_symbolicStrip():
     pg = PathGroup(p)
 
     pg.explore()
-    assert len(pg.completed) == 3
+    assert len(pg.completed) == 5
     o = [p.state.any_str('x') for p in pg.completed]
     o.sort()
     # 3 cases. 1) both chars miss, 2) one char hit's "t" and the other misses. 3) one hits
     # "t" and the other hits "s"
-    assert o == ['te', 'tes', 'testt']
+    assert o == ['te', 'te', 'tes', 'tes', 'testt']
 
     b = ast.parse(test4).body
     p = Path(b,source=test4)
