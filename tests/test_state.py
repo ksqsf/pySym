@@ -37,6 +37,24 @@ s = pyState.String(8)
 x = s.index('a')
 """
 
+test9 = """
+s = pyState.String(2)
+x = "testt".rstrip(s)[-1]
+"""
+
+def test_assign_statetrack():
+    b = ast.parse(test9).body
+    p = Path(b,source=test9)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 5
+    o = [p.state.any_str('x') for p in pg.completed]
+    o.sort()
+    assert o == ['e', 'e', 's', 's', 't']
+
+
 def test_assign_stateSplit():
     b = ast.parse(test8).body
     p = Path(b,source=test8)

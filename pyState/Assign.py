@@ -9,6 +9,7 @@ from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 from pyObjectManager.String import String
+from pyObjectManager.Char import Char
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -80,10 +81,15 @@ def _handleAssignList(target,listObject):
     return ret
 
 def _handleAssignString(target,stringObject):
-    assert type(target) is ast.Name
-    assert type(stringObject) is String
+    assert type(stringObject) in [String, Char]
 
     state = stringObject.state.copy()
+
+    if type(stringObject) is Char:
+        c = stringObject
+        stringObject = state.getVar('tmpString',varType=String)
+        stringObject.increment()
+        stringObject.variables = [c]
 
     # Resolve the object
     targets = state.resolveObject(target,varType=String)
@@ -148,7 +154,7 @@ def handle(state,element):
         elif type(value) is List:
             ret += _handleAssignList(target,value)
     
-        elif type(value) is String:
+        elif type(value) in [String, Char]:
             ret += _handleAssignString(target,value)
     
         else:
