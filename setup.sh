@@ -35,6 +35,7 @@ pip3 install -U pytest
 pip3 install python-coveralls
 pip3 install coverage
 pip3 install pytest-cov
+pip3 install pytest-xdist
 
 pushd .
 cd ~/opt

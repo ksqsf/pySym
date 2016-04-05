@@ -674,10 +674,9 @@ class State():
                 retObjs = [x for x in funcName if type(x) is ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
-
-                # Not sure when there would be more than 1 here...
-                assert len(funcName) == 1
-
+                
+                # NOTE: I'm assuming that if there are state splits, they will all be the same type
+                # for instance, all String, all Char, all List, etc.
                 funcName = funcName[0]
                 
                 funcName = funcName.__class__.__name__ + "." + call.func.attr

@@ -133,6 +133,29 @@ def test():
 x = test().rstrip("t").rstrip("s")
 """
 
+test13 = """
+def test():
+    return "testabcd"
+
+s1 = pyState.String(1)
+s2 = pyState.String(1)
+
+x = test().rstrip(s1).rstrip(s2)
+"""
+
+def test_pySym_Chained_AttrCall_Symbolic():
+    b = ast.parse(test13).body
+    p = Path(b,source=test13)
+    pg = PathGroup(p)
+
+    pg.explore()
+
+    assert len(pg.completed) == 4
+    o = [p.state.any_str('x') for p in pg.completed]
+    o.sort()
+    assert o == ['testab', 'testabc', 'testabc', 'testabcd']
+
+
 def test_pySym_Chained_AttrCall():
     b = ast.parse(test12).body
     p = Path(b,source=test12)
