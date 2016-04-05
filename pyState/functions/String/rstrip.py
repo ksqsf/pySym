@@ -53,7 +53,7 @@ def handle(state,call,chars=None,ctx=None):
     Simulate Python's rstrip string method
     """
     ctx = ctx if ctx is not None else state.ctx
-
+    
     # The root (i.e.: "s" in s.rstrip())
     root = state.resolveObject(call.func.value,ctx=ctx).copy()
 

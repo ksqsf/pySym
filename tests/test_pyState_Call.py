@@ -126,6 +126,25 @@ def test():
 x = test()
 """
 
+test12 = """
+def test():
+    return "test"
+
+x = test().rstrip("t").rstrip("s")
+"""
+
+def test_pySym_Chained_AttrCall():
+    b = ast.parse(test12).body
+    p = Path(b,source=test12)
+    pg = PathGroup(p)
+
+    pg.explore()
+
+    assert len(pg.completed) == 1
+
+    assert pg.completed[0].state.any_str('x') == "te"
+
+
 def test_pySym_Return_StateSplit():
     b = ast.parse(test11).body
     p = Path(b,source=test11)

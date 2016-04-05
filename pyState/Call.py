@@ -71,6 +71,9 @@ def handle(state,element,retObj=None):
     argElements = list(_resolveArgs(state,element))
     keywordElements = list(_resolveKeywords(state,deepcopy(element)))
     ret = [] 
+
+    # Yeah, this is a hack. But when we're soft matching, this number can help us identify the right thing.
+    element.col_offset = 31337
     
     # For each possible combination of args
     for arg in argElements:
@@ -96,17 +99,9 @@ def handle(state,element,retObj=None):
             # Ensure everything has a correct state
             [a.setState(s) for a in elm.args]
             [a.value.setState(s) for a in keyword]
-            [print("b",b) for a in state.objectManager.returnObjects.values() for b in a if b.state == state]
 
             # Call
             ret += [s.Call(elm,retObj=retObj)]
     
     return ret
     
-    """
-
-    else:
-        err = "Expr: Don't know how to handle expr type {0} at line {1} col {2}".format(type(expr),expr.lineno,expr.col_offset)
-        logger.error(err)
-        raise Exception(err)
-    """

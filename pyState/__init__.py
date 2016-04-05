@@ -413,9 +413,6 @@ class State():
 
         obj = self.resolveObject(obj)
         
-        # Normalize
-        #obj = [obj] if type(obj) is not list else obj
-    
         # Resolve calls if we need to
         retObjs = [x for x in obj if type(x) is pyState.ReturnObject]
         if len(retObjs) > 0:
@@ -681,7 +678,7 @@ class State():
                 # Not sure when there would be more than 1 here...
                 assert len(funcName) == 1
 
-                funcName = funcName.pop()
+                funcName = funcName[0]
                 
                 funcName = funcName.__class__.__name__ + "." + call.func.attr
 
