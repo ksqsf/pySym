@@ -442,7 +442,8 @@ class State():
             ReturnObject the describes this functions return var
         """
         assert type(call) == ast.Call
-        logger.debug("Call: Setting up for Call to {0}".format(call.func.id))
+
+        logger.debug("Call: Setting up for Call to {0}".format(call.func.id if type(call.func) is ast.Name else call.func.attr ))
         
         # Resolve the call
         func = self.resolveCall(call) if func is None else func
@@ -672,19 +673,19 @@ class State():
         elif type(call.func) == ast.Attribute:
             try:
                 funcName = self.resolveObject(call.func.value,ctx=ctx)
+
+                retObjs = [x for x in funcName if type(x) is ReturnObject]
+                if len(retObjs) > 0:
+                    return retObjs
+
                 # Not sure when there would be more than 1 here...
                 assert len(funcName) == 1
 
                 funcName = funcName.pop()
                 
-                # If we're making a call, return it
-                if type(funcName) is ReturnObject:
-                    return funcName
-                
                 funcName = funcName.__class__.__name__ + "." + call.func.attr
 
             except:
-                print(call.func.value)
                 funcName = call.func.value.id + "." + call.func.attr
 
         else:
@@ -723,10 +724,6 @@ class State():
         # Get a temporary variable created
         newString = self.getVar('tmpResolveString',ctx=ctx,varType=String,kwargs={'string':stringObject.s})
         
-        # Populate the Z3 with restrictions
-        for i in range(len(stringObject.s)):
-            # TODO: Not sure this will work all the time.. Might have encoding errors..
-            self.addConstraint(newString[i].getZ3Object() == ord(stringObject.s[i]))
         return newString
 
     def _resolveList(self,listObject,ctx=None,i=0):
@@ -995,6 +992,10 @@ class State():
 
             # Let's see if this is a real or sim call
             func = self.resolveCall(obj,ctx=ctx)
+
+            # I think this will only hapen if we're resolving a call in a call
+            if type(func) is list:
+                return func
             
             # If this is a simFunction
             if type(func) is ModuleType:
