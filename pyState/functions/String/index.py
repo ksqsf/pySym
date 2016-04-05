@@ -34,6 +34,7 @@ def handle(state,call,sub,start=None,end=None,ctx=None):
             c = sub
             sub = String("tempIndex",1,state=sub.state)
             sub.variables.append(c)
+            subs[subs.index(c)] = sub
 
     
     assert min([type(sub) is String for sub in subs]) == True

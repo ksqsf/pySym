@@ -39,6 +39,22 @@ s = pyState.String(8)
 x = s.rstrip("x")
 """
 
+test5 = """
+s = "mee"
+s2 = pyState.String(1)
+x = ''.join([x for x in s.rstrip(s2)])
+"""
+
+def test_function_String_rstrip_Char():
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 2
+    assert set([p.state.any_str('x') for p in pg.completed]) == {"m","mee"}
+
+
 def test_function_String_rstrip_symbolicStrip():
     b = ast.parse(test3).body
     p = Path(b,source=test3)

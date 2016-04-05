@@ -53,6 +53,8 @@ def handle(state,call,elem,ctx=None):
         for item in elem:
             if type(item) is String:
                 newString.variables += item.variables + root.variables
+            elif type(item) is Char:
+                newString.variables += [item.variable] + root.variables
             else:
                 err = "handle: Don't know how to handle type {0}".format(type(item))
                 logger.error(err)
