@@ -84,6 +84,7 @@ def _handleNum(state,left,right,op):
         # Now that we have a clean variable to return, add constraints and return it
         logger.debug("Adding constraint {0} == {1}".format(retVar.getZ3Object(),ret))
         state.addConstraint(retVar.getZ3Object() == ret)
+        print([x for x in state.solver.assertions()])
         return [retVar.copy()]
 
     else:

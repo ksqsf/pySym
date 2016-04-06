@@ -274,8 +274,8 @@ class State():
             for elm in var:
                 ret = self.recursiveCopy(elm,varName=varName)
                 newList.append(ret)
-                if type(ret) in [Int, Real, BitVec]:
-                    self.addConstraint(newList[-1].getZ3Object() == ret.getZ3Object())
+                #if type(ret) in [Int, Real, BitVec]:
+                #    self.addConstraint(newList[-1].getZ3Object() == ret.getZ3Object())
 
             return newList
 

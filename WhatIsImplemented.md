@@ -91,7 +91,8 @@ Example:
 * tuple (Not Implemented)
 * type (Not Implemented)
 * vars (Not Implemented)
-* zip (Fully Implemented)
+* zip (Partially Implemented)
+ * zip(list1,list2) works. 3 or more lists doesn't work at the moment
 * __import__ (Not Implemented)
 
 
