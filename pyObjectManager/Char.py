@@ -15,10 +15,11 @@ class Char:
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
 
+        self.size = 16
         self.count = 0 if count is None else count
         self.varName = varName
         self.ctx = ctx
-        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=16) if variable is None else variable
+        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size) if variable is None else variable
 
         if state is not None:
             self.setState(state)
@@ -74,11 +75,12 @@ class Char:
         assert type(state) == pyState.State
 
         self.state = state
+        self.variable.setState(state)
 
     def increment(self):
         self.count += 1
         # reset variable list if we're incrementing our count
-        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=16)
+        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size)
     
     def _isSame(self,**args):
         """

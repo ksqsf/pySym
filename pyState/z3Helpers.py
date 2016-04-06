@@ -6,6 +6,10 @@ import z3
 import ast
 import pyState
 import logging
+from pyObjectManager.BitVec import BitVec
+from pyObjectManager.Real import Real
+from pyObjectManager.Int import Int
+from pyObjectManager.Char import Char
 
 logger = logging.getLogger("pyState:z3Helpers")
 
@@ -81,56 +85,76 @@ def mk_var(name,vsort):
 def z3_matchLeftAndRight(left,right,op):
     """
     Input:
-        left = z3 object
-        right = z3 object
+        left = pyObjectManager Object (i.e.: Int)
+        right = pyObjectManager Object (i.e.: Int)
         op = ast operation that will be performed
     Action:
         Appropriately cast the two variables so that they can be used in an expression
         Main problem is between Int type and BitVec type
     Returns:
-        (left,right) where both vars should be able to be used together
+        (left,right) as z3 vars where both vars should be able to be used together
     """
     lType = type(left)
     rType = type(right)
 
+    # If it's char, just grab the BitVec object
+    if lType is Char:
+        left = left.variable
+        lType = type(left)
+    if rType is Char:
+        right = right.variable
+        rType = type(right)
+
     logger.debug("z3_matchLeftAndRight: Called to match {0} and {1}".format(type(left),type(right)))
     needBitVec = True if type(op) in [ast.BitXor, ast.BitAnd, ast.BitOr, ast.LShift, ast.RShift] else False
     # TODO: If the two sizes are different, we'll have problems down the road.
-    bitVecSize = max([c.size() for c in [b for b in [left,right] if type(b) in [z3.BitVecRef, z3.BitVecNumRef]]],default=Z3_DEFAULT_BITVEC_SIZE)
+    bitVecSize = max([c.size for c in [b for b in [left,right] if type(b) is BitVec]],default=Z3_DEFAULT_BITVEC_SIZE)
 
     #####################################
     # Case: Both are already BitVectors #
     #####################################
     # Check length. Extend if needed.
-    if type(left) in [z3.BitVecRef, z3.BitVecNumRef] and type(right) in [z3.BitVecRef, z3.BitVecNumRef]:
-        logger.debug("z3_matchLeftAndRight: Matching BitVecLength @ {0} (left={1},right={2})".format(bitVecSize,left.size(),right.size()))
-        if left.size() < right.size():
+    if type(left) is BitVec and type(right) is BitVec:
+        logger.debug("z3_matchLeftAndRight: Matching BitVecLength @ {0} (left={1},right={2})".format(bitVecSize,left.size,right.size))
+        if left.size < right.size:
             # Sign extend left's value to match
-            left = z3.SignExt(right.size()-left.size(),left)
-        elif right.size() > left.size():
-            right = z3.SignExt(left.size()-right.size(),right)
+            left = z3.SignExt(right.size-left.size,left.getZ3Object())
+            right = right.getZ3Object()
+        elif right.size > left.size:
+            right = z3.SignExt(left.size-right.size,right.getZ3Object())
+            left = left.getZ3Object()
         
+        # Sync-up the output variables
+        left = left.getZ3Object() if type(left) in [Int, Real, BitVec] else left
+        right = right.getZ3Object() if type(right) in [Int, Real, BitVec] else right
+
+        logger.debug("z3_matchLeftAndRight: Returning {0} and {1}".format(type(left),type(right)))
+
         return left,right
 
     #####################################
     # Case: One is BitVec and one isn't #
     #####################################
     # For now only handling casting of int to BV. Not other way around.
-    if (lType in [z3.BitVecNumRef, z3.BitVecRef] and rType in [z3.ArithRef,z3.IntNumRef]) or (rType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
+    if (lType is BitVec and rType is Int) or (rType is Int and needBitVec):
         # If we need to convert to BitVec and it is a constant, not variable, do so more directly
-        if rType is z3.IntNumRef and right.is_int():
-            right = z3.BitVecVal(right.as_long(),bitVecSize)
+        if right.isStatic():
+            right = z3.BitVecVal(right.getValue(),bitVecSize)
         # Otherwise cast it. Not optimal, but oh well.
         else:
-            right = z3_int_to_bv(right,size=bitVecSize)
+            right = z3_int_to_bv(right.getZ3Object(),size=bitVecSize)
 
-    if (rType in [z3.BitVecNumRef, z3.BitVecRef] and lType in [z3.ArithRef,z3.IntNumRef]) or (lType in [z3.ArithRef,z3.IntNumRef] and needBitVec):
-        if lType is z3.IntNumRef and left.is_int():
-            left = z3.BitVecVal(left.as_long(),bitVecSize)
+    if (rType is BitVec and lType is Int) or (lType is Int and needBitVec):
+        if left.isStatic():
+            left = z3.BitVecVal(left.getValue(),bitVecSize)
         else:
-            left = z3_int_to_bv(left,size=bitVecSize)
-    
+            left = z3_int_to_bv(left.getZ3Object(),size=bitVecSize)
+        
+    # Sync-up the output variables
+    left = left.getZ3Object() if type(left) in [Int, Real, BitVec] else left
+    right = right.getZ3Object() if type(right) in [Int, Real, BitVec] else right
+
     logger.debug("z3_matchLeftAndRight: Returning {0} and {1}".format(type(left),type(right)))
 
-    return (left,right)
+    return left,right
 

@@ -28,11 +28,13 @@ def _handleLeftVarInt(state,element,left):
 
     # Resolve the z3 object
     if type(left) in [Int, Real, BitVec, Char]:
-        left = left.getZ3Object()
+        pass
+        #left = left.getZ3Object()
     
     # If this is a String, let's hope it's only one char...
     elif type(left) is String and left.length() == 1:
-        left = left[0].getZ3Object()
+        #left = left[0].getZ3Object()
+        left = left[0]
     
     else:
         err = "_handleLeftVar: Don't know how to handle type '{0}'".format(type(left))
@@ -68,11 +70,12 @@ def _handleLeftVarInt(state,element,left):
     for r in right:
 
         if type(r) in [Int, Real, BitVec, Char]:
-            r = r.getZ3Object()
+            pass #r = r.getZ3Object()
 
         # If this is a String, let's hope it's only one char...
         elif type(r) is String and r.length() == 1:
-            r = r[0].getZ3Object()
+            r = r[0]
+            #r = r[0].getZ3Object()
 
         else:
             err = "_handleLeftVar: Don't know how to handle type '{0}'".format(type(r))
@@ -82,7 +85,7 @@ def _handleLeftVarInt(state,element,left):
 
         # Adjust the types if needed
         l,r = pyState.z3Helpers.z3_matchLeftAndRight(left,r,ops)
-
+        
         logger.debug("_handleLeftVar: Comparing {0} (type: {2}) and {1} (type: {3})".format(l,r,type(l),type(r)))
     
         # Assume success. Add constraints
@@ -139,7 +142,6 @@ def handle(state,element,ctx=None):
     retObjs = [x for x in left if type(x) is pyState.ReturnObject]
     if len(retObjs) > 0:
         return retObjs
-
 
     ret = []
 

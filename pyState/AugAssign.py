@@ -35,10 +35,10 @@ def _handleNum(state,element,value,op):
     
         # Basic sanity checks complete. For augment assigns we will always need to update the vars.
         # Grab the old var and create a new now
-        oldTargetVar = oldTarget.getZ3Object()
+        #oldTargetVar = oldTarget.getZ3Object()
 
         # Match up the right hand side
-        oldTargetVar, valueVar = z3Helpers.z3_matchLeftAndRight(oldTargetVar,value.getZ3Object(),op)
+        oldTargetVar, valueVar = z3Helpers.z3_matchLeftAndRight(oldTarget,value,op)
     
         if hasRealComponent(valueVar) or hasRealComponent(oldTargetVar):
             parent[index] = Real(oldTarget.varName,ctx=state.ctx)

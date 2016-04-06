@@ -13,7 +13,7 @@ logger = logging.getLogger("pyState:BinOp")
 
 def _handleNum(state,left,right,op):
     # Match our object types
-    leftZ3Object,rightZ3Object = pyState.z3Helpers.z3_matchLeftAndRight(left.getZ3Object(),right.getZ3Object(),op)
+    leftZ3Object,rightZ3Object = pyState.z3Helpers.z3_matchLeftAndRight(left,right,op)
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
@@ -84,7 +84,7 @@ def _handleNum(state,left,right,op):
         # Now that we have a clean variable to return, add constraints and return it
         logger.debug("Adding constraint {0} == {1}".format(retVar.getZ3Object(),ret))
         state.addConstraint(retVar.getZ3Object() == ret)
-        print([x for x in state.solver.assertions()])
+        #print([x for x in state.solver.assertions()])
         return [retVar.copy()]
 
     else:
