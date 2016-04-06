@@ -3,6 +3,7 @@ Python Symbolic Execution
 
 [ ![Codeship Status for Owlz/pySym](https://codeship.com/projects/691a2930-c591-0133-c81b-4e8753dd3f97/status?branch=master)](https://codeship.com/projects/138556)
 [![Coverage Status](https://coveralls.io/repos/github/Owlz/pySym/badge.svg?branch=HEAD)](https://coveralls.io/github/Owlz/pySym?branch=HEAD)
+[![Documentation Status](https://readthedocs.org/projects/pysym/badge/?version=latest)](http://pysym.readthedocs.org/en/latest/?badge=latest)
 
 # Disclaimer
 While I'm still using this as a test ground to learn, the script itself has at least gotten somewhat useful. Feel free to let me know if you find things that aren't right. For now, it will do very basic things. For loops, while loops, List Comprehensions, arithmetic, booleans, etc. If you start wondering into a lot of built-in commands or methods, you probably will not have success.
