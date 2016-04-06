@@ -48,6 +48,24 @@ class List:
         for var in self.variables:
             var.setState(state)
 
+    def setTo(self,otherList,clear=False):
+        """
+        Sets this list to another of type List
+        (optional) clear = Should we clear the current variables and set, or set the current variables in place retaining their constraints?
+        """
+        assert type(otherList) is List
+        
+        if clear:
+            # Increment will also clear out the variables
+            self.increment()
+            
+            # Just copy it over
+            for elm in otherList:
+                self.variables.append(elm.copy())        
+        
+        else:
+            raise Exception("Not implemented")
+
 
     def increment(self):
         self.count += 1

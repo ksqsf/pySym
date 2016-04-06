@@ -89,6 +89,9 @@ def _handle(state,element,newIter):
             # Copy the constraint
             target.state.addConstraint(target.getZ3Object() == elm.getZ3Object())
 
+        elif type(target) in [String, List]:
+            target.setTo(elm,clear=True)
+
         else:
             err = "handle: I don't know how to handle target type {0}".format(type(target))
             logger.error(err)

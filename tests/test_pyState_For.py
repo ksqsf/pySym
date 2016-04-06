@@ -45,6 +45,26 @@ for x in q[:2]:
         break
 """
 
+test5 = """
+a = 0
+b = 0
+for x in zip([1,8],[2,3]):
+    a += x[0]
+    b += x[1]
+"""
+
+def test_pySym_For_ListReturn():
+    b = ast.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    
+    assert pg.completed[0].state.any_int('a') == 9 
+    assert pg.completed[0].state.any_int('b') == 5
+
+
 def test_pySym_variableSlice():
     b = ast.parse(test4).body
     p = Path(b,source=test4)
