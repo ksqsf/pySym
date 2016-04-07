@@ -29,7 +29,7 @@ def handle(state,element,ctx=None):
     targets = state.resolveObject(element.operand)
 
     ret = []    
-
+    
     for target in targets:
 
         # Use the target's state

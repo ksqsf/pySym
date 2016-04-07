@@ -113,6 +113,44 @@ class Real:
         """
         return str(self.state.any_real(self))
 
+    def mustBe(self,var):
+        """
+        Test if this Real must be equal to another variable
+        Returns True or False
+        """
+        if not self.canBe(var):
+            return False
+
+        # So we can be, now must we?
+        if len(self.state.any_n_real(self,2)) == 1:
+            return True
+
+        return False
+
+
+    def canBe(self,var):
+        """
+        Test if this Real can be equal to the given variable
+        Returns True or False
+        """
+        # TODO: Maybe want canBe to include Integers?
+        if type(var) not in [Real, float]:
+            return False
+
+        # Ask the solver
+        s = self.state.copy()
+
+        if type(var) is Real:
+            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+        else:
+            s.addConstraint(self.getZ3Object() == var)
+
+        if s.isSat():
+            return True
+
+        return False
+
+
 
 # Circular importing problem. Don't hate :-)
 from pyObjectManager.Int import Int

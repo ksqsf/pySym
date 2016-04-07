@@ -57,8 +57,16 @@ def handle(state,element):
     elif type(element.test) == ast.BoolOp:
         trueConstraint = pyState.BoolOp.handle(state, element.test)
     
+    #elif type(element.test) == ast.UnaryOp:
+    #    trueConstraint = pyState.UnaryOp.handle(state, element.test)
+    #    # This returns pyObjectManager objects, need to resolve the
+    #    trueConstraint = [[x for x in constraint.state.assertions()][-1] for constraint in trueConstraint]
+
     else:
-        logger.error("handle: I don't know how to handle type {0}".format(type(element.test)))
+        err = "handle: I don't know how to handle type {0}".format(type(element.test))
+        logger.error(err)
+        raise Exception(err)
+
 
     # Normalize
     trueConstraint = trueConstraint if type(trueConstraint) is list else [trueConstraint]
