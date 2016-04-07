@@ -39,7 +39,7 @@ def _handleAssignNum(target,value):
 
     for x2 in x:
 
-        parent = state.objectManager.getParent(x2)
+        parent = x2.state.objectManager.getParent(x2)
         index = parent.index(x2)
         parent[index] = value
         

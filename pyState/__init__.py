@@ -207,7 +207,8 @@ class State():
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
-        self.solver = z3.Solver() if solver is None else solver
+        #self.solver = z3.Solver() if solver is None else solver
+        self.solver = z3.Then("simplify","solve-eqs","smt").solver() if solver is None else solver
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
@@ -1207,7 +1208,8 @@ class State():
                 break
 
             out.append(myInt)
-            s.addConstraint(varZ3Object != myInt)
+            #s.addConstraint(varZ3Object != myInt)
+            s.addConstraint(varZ3Object != s.solver.model().eval(varZ3Object))
 
         return out
 
@@ -1437,10 +1439,14 @@ class State():
             return None
 
         # Check the type of the value
-        if type(value) not in [z3.IntNumRef,z3.RatNumRef]:
+        if type(value) not in [z3.IntNumRef,z3.RatNumRef,z3.AlgebraicNumRef]:
             err = "any_real: var '{0}' not of type int or real, of type '{1}'".format(var,type(value))
             logger.error(err)
             raise Exception(err) 
+
+        if type(value) is z3.AlgebraicNumRef:
+            # Defaulting to precision of 10 for now
+            return float(value.as_decimal(10).replace('?',''))
 
         # Made it! Return it as a real/float
         return float(eval(value.as_string()))
@@ -1453,7 +1459,8 @@ class State():
         """
 
         # Copy the solver state
-        solverCopy = z3.Solver()
+        #solverCopy = z3.Solver()
+        solverCopy = z3.Then("simplify","solve-eqs","smt").solver()
         solverCopy.add(self.solver.assertions())
         
         newState = State(

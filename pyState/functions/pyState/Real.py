@@ -1,6 +1,7 @@
 import z3
 import ast
 from pyObjectManager.Real import Real
+import pyState.z3Helpers
 
 def handle(state,call,value=None,ctx=None):
     """
@@ -11,16 +12,23 @@ def handle(state,call,value=None,ctx=None):
 
     myReal = state.resolveObject(ast.Name('tempReal',0),ctx=ctx,varType=Real)
    
-    ret = myReal
+    ret = []
+
+    for r in myReal:
  
-    if value is not None:
-        ret = []
-        for r in myReal:
+        if value is not None:
             state = r.state
             value = state.resolveObject(value,ctx=ctx)
+
             for v in value:
-                r.setTo(v)
-                ret.append(r.copy())
+                realObj,valueObj = pyState.z3Helpers.z3_matchLeftAndRight(r,v,ast.Add)
+                #r.setTo(v)
                 r.increment()
+                state.addConstraint(r.getZ3Object() == valueObj)
+                ret.append(r.copy())
+
+        else:
+            r.increment()
+            ret.append(r.copy())
 
     return ret

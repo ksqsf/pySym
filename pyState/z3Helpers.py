@@ -150,6 +150,52 @@ def z3_matchLeftAndRight(left,right,op):
         else:
             left = z3_int_to_bv(left.getZ3Object(),size=bitVecSize)
         
+    ################################
+    # Case: One is Int one is Real #
+    ################################
+    # So long as this isn't modular arithmetic, let's change to Real things
+    if lType is Real and rType is Int and type(op) is not ast.Mod:
+        if right.isStatic():
+            right = z3.RealVal(right.getValue())
+        else:
+            # TODO: Z3 is really bad at handling these...
+            right = z3.ToReal(right.getZ3Object())
+
+    if rType is Real and lType is Int and type(op) is not ast.Mod:
+        if left.isStatic():
+            left = z3.RealVal(left.getValue())
+        else:
+            # TODO: Z3 is really bad at handling these...
+            left = z3.ToReal(left.getZ3Object())
+
+
+    ############################################
+    # Case: One is Int one is Real for ast.Mod #
+    ############################################
+    # So long as this isn't modular arithmetic, let's change to Real things
+    if lType is Real and rType is Int and type(op) is ast.Mod:
+        if left.isStatic():
+            leftVal = left.getValue()
+            left = z3.IntVal(leftVal)
+            if int(leftVal) != leftVal:
+                logger.warn("Truncating value for Modular Arithmetic. That may or may not be what was intended!")
+
+        else:
+            # TODO: Z3 is really bad at handling these...
+            left = z3.ToInt(left.getZ3Object())
+
+    if rType is Real and lType is Int and type(op) is ast.Mod:
+        if right.isStatic():
+            rightVal = right.getValue()
+            right = z3.IntVal(rightVal)
+            if int(rightVal) != rightVal:
+                logger.warn("Truncating value for Modular Arithmetic. That may or may not be what was intended!")
+
+        else:
+            # TODO: Z3 is really bad at handling these...
+            right = z3.ToInt(right.getZ3Object())
+
+    
     # Sync-up the output variables
     left = left.getZ3Object() if type(left) in [Int, Real, BitVec] else left
     right = right.getZ3Object() if type(right) in [Int, Real, BitVec] else right
