@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installing pySym &mdash; pySym 1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="author" title="About these documents"
+              href="about.html"/>
+    <link rel="top" title="pySym 1 documentation" href="index.html"/>
+        <link rel="prev" title="About pySym" href="about.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pySym
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About pySym</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Installing pySym</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setup-sh">setup.sh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-install">Manual Install</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-dependencies">Install Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-up-your-virtual-environment">Set up your Virtual Environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-python-packages">Install Python Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-microsoft-z3-with-python-bindings">Install Microsoft Z3 with Python Bindings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">pySym</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Installing pySym</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/installation.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="installing-pysym">
+<h1>Installing pySym<a class="headerlink" href="#installing-pysym" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="setup-sh">
+<h2>setup.sh<a class="headerlink" href="#setup-sh" title="Permalink to this headline">¶</a></h2>
+<p>If you run on Ubuntu (or derivative) this will probably work for you. It
+completely automates the setup process that is outlined below. Usage is as
+follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>bash$ ./setup.sh
+</pre></div>
+</div>
+<p>That&#8217;s it. You&#8217;re all setup. Note that if you want to remove <code class="docutils literal"><span class="pre">pySym</span></code> that was
+installed this way, you can use the <code class="docutils literal"><span class="pre">uninstall.sh</span></code> script to do so.</p>
+</div>
+<div class="section" id="manual-install">
+<h2>Manual Install<a class="headerlink" href="#manual-install" title="Permalink to this headline">¶</a></h2>
+<p>If the auto install doesn&#8217;t work for some reason, the following manual steps
+can be taken to install.</p>
+<div class="section" id="install-dependencies">
+<h3>Install Dependencies<a class="headerlink" href="#install-dependencies" title="Permalink to this headline">¶</a></h3>
+<p>Dependencides for <code class="docutils literal"><span class="pre">pySym</span></code> include:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">virtualenv</span></code> (Python&#8217;s virtual environment)</li>
+<li><code class="docutils literal"><span class="pre">gcc</span></code></li>
+<li><code class="docutils literal"><span class="pre">make</span></code></li>
+<li><code class="docutils literal"><span class="pre">python3</span></code></li>
+<li><code class="docutils literal"><span class="pre">git</span></code></li>
+</ul>
+<p>For Ubuntu, the following line works for me:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>$ sudo apt-get update
+$ sudo apt-get install -y make gcc g++ virtualenv virtualenvwrapper python3 git
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">virtualenvwrapper</span></code> is recommended to make switching between environments
+easier, but it&#8217;s not required.</p>
+</div>
+<div class="section" id="set-up-your-virtual-environment">
+<h3>Set up your Virtual Environment<a class="headerlink" href="#set-up-your-virtual-environment" title="Permalink to this headline">¶</a></h3>
+<p>It&#8217;s not necessary to create a virtual environment, but it&#8217;s good practice and
+keeps things clean. Perform the following steps to set up a virtual environment
+named pySym:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>$ mkdir -p ${HOME}/.virtualenvs/pySym
+$ virtualenv -p $(which python3) ${HOME}/.virtualenvs/pySym
+</pre></div>
+</div>
+<p>Now you should activate it so that you can work inside it. If you have
+virtualenvwrappers installed, you can do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>$ workon pySym
+</pre></div>
+</div>
+<p>If you don&#8217;t have that installed, or for whatever reason it isn&#8217;t working, you
+can source the virtualenv directly to activate your environment:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>$ source &quot;${HOME}/.virtualenvs/pySym/bin/activate&quot;
+</pre></div>
+</div>
+<p>You should see &#8220;(pySym)&#8221; next to your command prompt to indicate the
+environment is activated properly.</p>
+</div>
+<div class="section" id="install-python-packages">
+<h3>Install Python Packages<a class="headerlink" href="#install-python-packages" title="Permalink to this headline">¶</a></h3>
+<p>With your virtual environment activated, install the Python dependencies. From
+the root of the repository, do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>(pySym)$ pip install -r requirements.txt
+</pre></div>
+</div>
+<p>The following are optional packages for running the py.test unit tests. If
+you&#8217;re not planning on running the tests you can omit these:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>(pySym)$ pip3 install pytest
+(pySym)$ pip3 install python-coveralls
+(pySym)$ pip3 install coverage
+(pySym)$ pip3 install pytest-cov
+(pySym)$ pip3 install pytest-xdist
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-microsoft-z3-with-python-bindings">
+<h3>Install Microsoft Z3 with Python Bindings<a class="headerlink" href="#install-microsoft-z3-with-python-bindings" title="Permalink to this headline">¶</a></h3>
+<p>Time to install Microsoft&#8217;s Z3. This step will take a while to compile
+everything, so be patient. First thing, create the working directory and git
+clone the z3 tool:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>(pySym)$ mkdir -p ${HOME}/opt/pySymZ3
+(pySym)$ cd ${HOME}/opt
+(pySym)$ git clone https://github.com/Z3Prover/z3.git pySymZ3
+(pySym)$ cd pySymZ3
+</pre></div>
+</div>
+<p>Perform the build and install. As noted, this could take a while:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>(pySym)$ python scripts/mk_make.py --python
+(pySym)$ cd build
+(pySym)$ make
+(pySym)$ make install
+</pre></div>
+</div>
+<p>Performing these steps while having your Python virtual environment activated
+will cause the install to be performed into that environment. This also means
+that you do not need root priviledges for any of this install.</p>
+<p>You are now ready to use <code class="docutils literal"><span class="pre">pySym</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="about.html" class="btn btn-neutral" title="About pySym" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Michael Bann.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -5,7 +5,7 @@
 
 if [[ "$OS" = "linux" ]] && [[ "$DistroBasedOn" = "debian" ]]; then
     sudo apt-get update
-    sudo apt-get install -y make gcc g++
+    sudo apt-get install -y make gcc g++ virtualenv virtualenvwrapper python3
 else
     echo "Don't know prereqs for your distro. You should help me!"
 fi
