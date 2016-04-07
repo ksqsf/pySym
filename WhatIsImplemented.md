@@ -26,7 +26,7 @@ Example:
 
 
 # Built-in
-* abs (Not Implemented)
+* abs (Fully Implemented)
 * all (Not Implemented)
 * any (Not Implemented)
 * ascii (Not Implemented)
