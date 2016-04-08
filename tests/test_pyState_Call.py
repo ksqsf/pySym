@@ -143,6 +143,28 @@ s2 = pyState.String(1)
 x = test().rstrip(s1).rstrip(s2)
 """
 
+test14 = """
+def test():
+    for x in range(10):
+        if x % 2 == 0:
+            return 0
+    return 1
+
+x = test()
+"""
+
+def test_pySym_Return_Inside_Loop():
+    b = ast.parse(test14).body
+    p = Path(b,source=test14)
+    pg = PathGroup(p)
+
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    
+    assert pg.completed[0].state.any_int('x') == 0
+
+
 def test_pySym_Chained_AttrCall_Symbolic():
     b = ast.parse(test13).body
     p = Path(b,source=test13)
