@@ -56,7 +56,7 @@ def handle(state,call,a,b=None,c=None,ctx=None):
 
         if type(a) not in [int,type(None)]:
             if a.isStatic():
-                a = a.value
+                a = a.getValue()
 
             # Check if it's a variable that only has one possibility
             elif type(a) in [Int, BitVec] and len(state.any_n_int(a,2)) == 1:
@@ -71,17 +71,15 @@ def handle(state,call,a,b=None,c=None,ctx=None):
         ##############
         # b Concrete #
         ##############
-
         if type(b) not in [int,type(None)]:
             if b.isStatic():
-                b = b.value
+                b = b.getValue()
 
             # Check if it's a variable that only has one possibility
             elif type(b) in [Int, BitVec] and len(state.any_n_int(b,2)) == 1:
                 b = state.any_int(b)
     
             else:
-                print(b.state.solver)
                 err = "handle: Don't know how to handle symbolic integers at the moment"
                 logger.error(err)
                 raise Exception(err)
@@ -93,7 +91,7 @@ def handle(state,call,a,b=None,c=None,ctx=None):
     
         if type(c) not in [int,type(None)]:
             if c.isStatic():
-                c = c.value
+                c = c.getValue()
     
             # Check if it's a variable that only has one possibility
             elif type(c) in [Int, BitVec] and len(state.any_n_int(c,2)) == 1:
@@ -108,7 +106,7 @@ def handle(state,call,a,b=None,c=None,ctx=None):
         # Create the return List object
         out = state.getVar("range",ctx=1,varType=List)
         out.increment()
-        
+    
         if b == None:
             rangeOut = range(a)
     

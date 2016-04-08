@@ -31,15 +31,19 @@ def handle(state,element):
     if len(retObjs) > 0:
         return retObjs
 
+    # Asserting 1 thing to return for now
+    assert len(ret) == 1
+    obj = ret[0]
 
-    # Good to go, pop back down
-    state.popCallStack()
+    state = obj.state if obj is not None else state
+
+    # Pop callstacks until we change context
+    leavingCtx = state.ctx
+    
+    # Pop until we've left
+    while leavingCtx == state.ctx:
+
+        state.popCallStack()
 
     return [state]
     
-    """
-    else:
-        err = "Expr: Don't know how to handle expr type {0} at line {1} col {2}".format(type(expr),expr.lineno,expr.col_offset)
-        logger.error(err)
-        raise Exception(err)
-    """

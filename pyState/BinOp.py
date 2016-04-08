@@ -38,7 +38,6 @@ def _handleNum(state,left,right,op):
         ret = leftZ3Object / rightZ3Object
 
     elif type(op) == ast.Mod:
-        print(type(leftZ3Object),type(rightZ3Object))
         ret = leftZ3Object % rightZ3Object
 
     elif type(op) == ast.BitXor:
