@@ -1208,7 +1208,6 @@ class State():
                 break
 
             out.append(myInt)
-            #s.addConstraint(varZ3Object != myInt)
             s.addConstraint(varZ3Object != s.solver.model().eval(varZ3Object))
 
         return out

@@ -1,8 +1,12 @@
 from copy import deepcopy
 from pyObjectManager.List import List
 from pyObjectManager.Int import Int
+from pyObjectManager.BitVec import BitVec
 import itertools
 import pyState
+import logging
+
+logger = logging.getLogger("pyState:functions:range")
 
 def handle(state,call,a,b=None,c=None,ctx=None):
     """
@@ -77,6 +81,7 @@ def handle(state,call,a,b=None,c=None,ctx=None):
                 b = state.any_int(b)
     
             else:
+                print(b.state.solver)
                 err = "handle: Don't know how to handle symbolic integers at the moment"
                 logger.error(err)
                 raise Exception(err)
