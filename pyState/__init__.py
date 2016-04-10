@@ -1452,8 +1452,9 @@ class State():
         #solverCopy.add(self.solver.assertions())
 
 
-        solverCopy = self.solver.translate(z3.Context())
+        #solverCopy = self.solver.translate(z3.Context())
         #print(solverCopy)
+        solverCopy = self.solver.translate(self.solver.ctx)
         
         newState = State(
             solver=solverCopy,
