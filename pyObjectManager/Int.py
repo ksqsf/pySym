@@ -60,7 +60,7 @@ class Int:
             self.increment()
 
         if self.value is None:
-            return z3.Int("{0}{1}@{2}".format(self.count,self.varName,self.ctx))
+            return z3.Int("{0}{1}@{2}".format(self.count,self.varName,self.ctx),ctx=self.state.solver.ctx)
         
         return z3.IntVal(self.value)
 

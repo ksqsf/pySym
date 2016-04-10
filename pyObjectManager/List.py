@@ -162,17 +162,17 @@ class List:
 
         if type(value) is Int:
             logger.debug("__setitem__: setting Int")
-            self.variables[key] = Int('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count)
+            self.variables[key] = Int('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count,state=self.state)
             self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
         elif type(value) is Real:
             logger.debug("__setitem__: setting Real")
-            self.variables[key] = Real('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count)
+            self.variables[key] = Real('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count,state=self.state)
             self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
         elif type(value) is BitVec:
             logger.debug("__setitem__: setting BitVec")
-            self.variables[key] = BitVec('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count,size=value.size)
+            self.variables[key] = BitVec('{2}{0}[{1}]'.format(self.varName,key,self.count),ctx=self.ctx,count=count,size=value.size,state=self.state)
             self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
         elif type(value) in [List, String]:

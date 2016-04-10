@@ -117,27 +117,29 @@ def test_pyObjectManager_List_setitem():
     
     l = pg.completed[0].state.getVar('l')
 
+    s = pg.completed[0].state
+
     # Base check
     assert l[1].count == 0
     assert type(l[1]) == Real
 
     # Assign an Int
-    l[1] = Int(varName='x',ctx=0)
+    l[1] = Int(varName='x',ctx=0,state=s)
     assert l[1].count == 1
     assert type(l[1]) == Int
 
     # Assign back to Real
-    l[1] = Real(varName='x',ctx=0)
+    l[1] = Real(varName='x',ctx=0,state=s)
     assert l[1].count == 2
     assert type(l[1]) == Real
     
     # Assign to BitVec
-    l[1] = BitVec(varName='x',ctx=0,size=32)
+    l[1] = BitVec(varName='x',ctx=0,size=32,state=s)
     assert l[1].count == 3
     assert type(l[1]) == BitVec
     
     # Assign List
-    l[1] = List(varName='x',ctx=0)
+    l[1] = List(varName='x',ctx=0,state=s)
     #assert l[1].count == 4
     assert type(l[1]) == List
 

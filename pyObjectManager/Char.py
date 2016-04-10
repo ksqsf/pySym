@@ -80,7 +80,7 @@ class Char:
     def increment(self):
         self.count += 1
         # reset variable list if we're incrementing our count
-        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size)
+        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size,state=self.state)
     
     def _isSame(self,**args):
         """

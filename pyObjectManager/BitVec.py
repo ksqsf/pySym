@@ -58,7 +58,7 @@ class BitVec:
         if increment:
             self.increment()
         
-        return z3.BitVec("{0}{1}@{2}".format(self.count,self.varName,self.ctx),self.size)
+        return z3.BitVec("{0}{1}@{2}".format(self.count,self.varName,self.ctx),self.size,ctx=self.state.solver.ctx)
     
     def _isSame(self,size):
         """

@@ -62,6 +62,10 @@ def handle(state,call,obj,base=10,ctx=None):
 
         # TODO: Deal with symbolic values (returning list of possibilities)
         else:
+            print("any",state.any_n_real(obj,10))
+            print(state.solver)
+            print(obj.getZ3Object())
+            print(state.solver.check())
             err = "handle: Don't know how to handle symbolic ints for now"
             logger.error(err)
             raise Exception(err)

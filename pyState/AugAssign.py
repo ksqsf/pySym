@@ -41,15 +41,15 @@ def _handleNum(state,element,value,op):
         oldTargetVar, valueVar = z3Helpers.z3_matchLeftAndRight(oldTarget,value,op)
     
         if hasRealComponent(valueVar) or hasRealComponent(oldTargetVar):
-            parent[index] = Real(oldTarget.varName,ctx=state.ctx)
+            parent[index] = Real(oldTarget.varName,ctx=state.ctx,state=state)
             newTargetVar = parent[index].getZ3Object(increment=True)
 
         elif type(valueVar) in [z3.BitVecRef,z3.BitVecNumRef]:
-            parent[index] = BitVec(oldTarget.varName,ctx=state.ctx,size=valueVar.size())
+            parent[index] = BitVec(oldTarget.varName,ctx=state.ctx,size=valueVar.size(),state=state)
             newTargetVar = parent[index].getZ3Object(increment=True)
     
         else:
-            parent[index] = Int(oldTarget.varName,ctx=state.ctx)
+            parent[index] = Int(oldTarget.varName,ctx=state.ctx,state=state)
             newTargetVar = parent[index].getZ3Object(increment=True)
 
         # Figure out what the op is and add constraint

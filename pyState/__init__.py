@@ -185,19 +185,6 @@ class State():
     Defines the state of execution at any given point.
     """
 
-    """
-    localVars and globalVars are dicts containing variables and their constraint expressions
-    
-    localVars = {
-        <contextID> : {
-            'x': {
-                'varType': "z3.IntSort()", # Eval string to re-create the object's type on the fly. This is because z3 kept on crashing everything :-(
-                'count': 0 # This helps us keep track of Static Single Assignment forms
-            }
-        }
-    }
-    """
-    
     def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
@@ -208,7 +195,8 @@ class State():
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
         #self.solver = z3.Solver() if solver is None else solver
-        self.solver = z3.Then("simplify","solve-eqs","smt").solver() if solver is None else solver
+        #self.solver = z3.Then("simplify","solve-eqs","smt").solver() if solver is None else solver
+        self.solver = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver() if solver is None else solver
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
@@ -1040,7 +1028,7 @@ class State():
         self.solver.add(constraint)
         
         # Using iterative engine
-        self.solver.push()
+        #self.solver.push()
         
 
     def isSat(self):
@@ -1459,8 +1447,13 @@ class State():
 
         # Copy the solver state
         #solverCopy = z3.Solver()
-        solverCopy = z3.Then("simplify","solve-eqs","smt").solver()
+        #solverCopy = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver()
+        solverCopy = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","nlsat"),ctx=z3.Context()).solver()
         solverCopy.add(self.solver.assertions())
+
+
+        #solverCopy = self.solver.translate(z3.Context())
+        #print(solverCopy)
         
         newState = State(
             solver=solverCopy,

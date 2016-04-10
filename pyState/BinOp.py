@@ -57,7 +57,17 @@ def _handleNum(state,left,right,op):
 
     # TODO: This one will fail if we use BitVecs.. Maybe think about check/convert?
     elif type(op) == ast.Pow:
-        ret = leftZ3Object ** rightZ3Object
+        # Z3 has some problems with forms of x ** 0.5, let's try to change it for Z3...
+        if type(rightZ3Object) is z3.RatNumRef and rightZ3Object.numerator().as_long() == 1 and rightZ3Object.denominator().as_long() > 1:
+            tmp = state.getVar("tempRootVar",ctx=1,varType=Real)
+            # Rewrite as x ** 2 == y form
+            state.addConstraint(tmp.getZ3Object(increment=True) ** float(rightZ3Object.denominator().as_long()) == leftZ3Object)
+            # Because we're dealing with square, let's make sure it's positive
+            state.addConstraint(tmp.getZ3Object() >= 0)
+            ret = tmp.getZ3Object()
+        else:
+            ret = leftZ3Object ** rightZ3Object
+        #ret = leftZ3Object ** rightZ3Object
 
     else:
         err = "BinOP: Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)
