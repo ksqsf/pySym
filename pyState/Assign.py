@@ -39,9 +39,14 @@ def _handleAssignNum(target,value):
 
     for x2 in x:
 
+        print("value",value.state.ctx)
+        print("x2",x2.state.ctx)
+
         parent = x2.state.objectManager.getParent(x2)
         index = parent.index(x2)
         parent[index] = value
+
+        print("test")
         
         x2.state = x2.state.copy()
 

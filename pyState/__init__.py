@@ -1448,11 +1448,11 @@ class State():
         # Copy the solver state
         #solverCopy = z3.Solver()
         #solverCopy = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver()
-        solverCopy = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","nlsat"),ctx=z3.Context()).solver()
-        solverCopy.add(self.solver.assertions())
+        #solverCopy = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","nlsat"),ctx=z3.Context()).solver()
+        #solverCopy.add(self.solver.assertions())
 
 
-        #solverCopy = self.solver.translate(z3.Context())
+        solverCopy = self.solver.translate(z3.Context())
         #print(solverCopy)
         
         newState = State(
