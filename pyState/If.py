@@ -57,6 +57,11 @@ def handle(state,element):
     elif type(element.test) == ast.BoolOp:
         trueConstraint = pyState.BoolOp.handle(state, element.test)
     
+
+    elif type(element.test) == ast.Call:
+        trueConstraint = state.resolveObject(element.test)
+
+
     #elif type(element.test) == ast.UnaryOp:
     #    trueConstraint = pyState.UnaryOp.handle(state, element.test)
     #    # This returns pyObjectManager objects, need to resolve the

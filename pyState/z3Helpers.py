@@ -16,6 +16,13 @@ logger = logging.getLogger("pyState:z3Helpers")
 Z3_DEFAULT_BITVEC_SIZE = 64
 Z3_MAX_STRING_LENGTH = 256
 
+def isInt(x):
+    """
+    Performs isInt inside equations, not before. Wraps Z3 C API calls
+    """
+    return z3.BoolRef(z3.Z3_mk_is_int(x.ctx_ref(),x.as_ast()))
+
+
 #############################
 # Watch for BitVec Overflow #
 #############################
@@ -180,9 +187,11 @@ def z3_matchLeftAndRight(left,right,op):
             if int(leftVal) != leftVal:
                 logger.warn("Truncating value for Modular Arithmetic. That may or may not be what was intended!")
 
-        else:
-            # TODO: Z3 is really bad at handling these...
-            left = z3.ToInt(left.getZ3Object())
+        # See if we can swing this the other direction
+        elif right.isStatic():
+            rightVal = right.getValue()
+            right = z3.RealVal(rightVal)
+            
 
     if rType is Real and lType is Int and type(op) is ast.Mod:
         if right.isStatic():
@@ -191,10 +200,9 @@ def z3_matchLeftAndRight(left,right,op):
             if int(rightVal) != rightVal:
                 logger.warn("Truncating value for Modular Arithmetic. That may or may not be what was intended!")
 
+        # See if we can swing this the other direction
         else:
-            # TODO: Z3 is really bad at handling these...
-            right = z3.ToInt(right.getZ3Object())
-
+            left = z3.RealVal(left.getValue())
     
     # Sync-up the output variables
     left = left.getZ3Object() if type(left) in [Int, Real, BitVec] else left

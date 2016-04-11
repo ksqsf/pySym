@@ -8,6 +8,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
 from pyObjectManager.List import List
 from copy import deepcopy
+import pyState.z3Helpers
 
 logger = logging.getLogger("pyState:BinOp")
 
@@ -38,7 +39,35 @@ def _handleNum(state,left,right,op):
         ret = leftZ3Object / rightZ3Object
 
     elif type(op) == ast.Mod:
-        ret = leftZ3Object % rightZ3Object
+        # Z3 doesn't have native support for Real type modular arithmetic
+        if z3.is_real(leftZ3Object):
+            constraint = []
+            if z3.is_real(rightZ3Object):
+                mod = z3.Function('mod', z3.RealSort(),z3.RealSort(), z3.RealSort())
+                quot = z3.Function('quot', z3.RealSort(),z3.RealSort(), z3.RealSort())
+                constraint += [pyState.z3Helpers.isInt(rightZ3Object)]
+            else:
+                mod = z3.Function('mod', z3.RealSort(),z3.IntSort(), z3.RealSort())
+                quot = z3.Function('quot', z3.RealSort(),z3.IntSort(), z3.RealSort())
+            constraint.append(0 <= mod(leftZ3Object,rightZ3Object))
+            constraint.append(mod(leftZ3Object,rightZ3Object) < rightZ3Object)
+            constraint.append(rightZ3Object * quot(leftZ3Object,rightZ3Object) + mod(leftZ3Object,rightZ3Object) == leftZ3Object)
+            constraint.append(pyState.z3Helpers.isInt(quot(leftZ3Object,rightZ3Object)))
+            constraint.append(pyState.z3Helpers.isInt(leftZ3Object))
+            constraint.append(leftZ3Object >= 0)
+            state.addConstraint(z3.And(constraint))
+            """
+            state.addConstraint(0 <= mod(leftZ3Object,rightZ3Object))
+            state.addConstraint(mod(leftZ3Object,rightZ3Object) < rightZ3Object)
+            state.addConstraint(rightZ3Object * quot(leftZ3Object,rightZ3Object) + mod(leftZ3Object,rightZ3Object) == leftZ3Object)
+            state.addConstraint(pyState.z3Helpers.isInt(quot(leftZ3Object,rightZ3Object)))
+            state.addConstraint(pyState.z3Helpers.isInt(leftZ3Object))
+            state.addConstraint(leftZ3Object >= 0)
+            """
+            ret = mod(leftZ3Object,rightZ3Object)
+
+        else:
+            ret = leftZ3Object % rightZ3Object
 
     elif type(op) == ast.BitXor:
         ret = leftZ3Object ^ rightZ3Object

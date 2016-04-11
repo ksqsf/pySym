@@ -196,7 +196,8 @@ class State():
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
         #self.solver = z3.Solver() if solver is None else solver
         #self.solver = z3.Then("simplify","solve-eqs","smt").solver() if solver is None else solver
-        self.solver = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver() if solver is None else solver
+        #self.solver = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver() if solver is None else solver
+        self.solver = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver() if solver is None else solver
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar

@@ -16,3 +16,5 @@ Getting Started
    about
    installation
    quickstart
+   examples
+   what_is_implemented
