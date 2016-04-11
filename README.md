@@ -12,6 +12,9 @@ For more information on what is and isn't implemented, check out WhatIsImplement
 
 For examples of what is possible, probably the best resource right now is the unit tests. I'll post more detailed examples later.
 
+# Docs
+Please see my ReadTheDocs for the most updated documentation: http://pysym.readthedocs.org/en/latest
+
 # Install
 Basic installation requires installing z3 with python bindings. It's recommended to install this into a python virtualenv to keep things a bit more clean.
 
