@@ -114,8 +114,25 @@ def _handleAssignString(target,stringObject):
 
 
 def handle(state,element):
-    """
-    Attempt to handle the assign element
+    """Attempt to handle the Python Assign element
+    
+    Parameters
+    ----------
+    element : ast.Assign
+        element from source to be handled
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast.
+
+    
+    This function handles calls to Assign. It is not meant to be called
+    manually via a user.
+
+
+    Example of ast.Assign is: x = 1
     """
     # Targets are what is being set
     targets = element.targets

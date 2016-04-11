@@ -3,7 +3,7 @@ About pySym
 ========================
 
 Introduction to ``pySym``
-========================
+==========================
 
 ``pySym`` is a python application that utilizes the Microsoft Z3 Theorem
 Prover to solve it's constraints. The goal for this application is to

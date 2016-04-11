@@ -157,10 +157,27 @@ def _handleString(state,element,value,op):
 
 
 def handle(state,element):
+    """Attempt to handle the Python AugAssign element
+    
+    Parameters
+    ----------
+    element : ast.AugAssign
+        element from source to be handled
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast.
+
+    
+    This function handles calls to AugAssign. It is not meant to be called
+    manually via a user.
+
+
+    Example of ast.Assign is: x += 1
     """
-    Attempt to handle the AugAssign element
-    Example of this: x += 1
-    """
+
     # Value is what to set them to
     value = state.resolveObject(element.value)
     

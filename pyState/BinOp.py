@@ -220,16 +220,28 @@ def _handleList(state,left,right,op):
 
 
 def handle(state,element,ctx=None):
+    """Attempt to handle the Python BinOp element
+    
+    Parameters
+    ----------
+    element : ast.BinOp
+        element from source to be handled
+    ctx : int, optional
+        context to resolve BinOp in if not current
+
+    Returns
+    -------
+    list
+        list contains pyObjectManager variables (Int/Real/etc)
+
+    
+    This function handles calls to BinOp. It is not meant to be called
+    manually via a user.
+
+
+    Example of ast.BinOp is: x + 1
     """
-    Input:
-        state = State object
-        element = ast.BinOp element to parse
-        (optional) ctx = context to resolve BinOp in if not current
-    Action:
-        Parse out the element with respect to the state
-    Returns:
-        pyObjectManager object representing this BinOp
-    """
+
     ctx = state.ctx if ctx is None else ctx
     
     assert type(state) == pyState.State
