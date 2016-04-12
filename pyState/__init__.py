@@ -49,15 +49,62 @@ class ReturnObject:
         return ReturnObject(self.retID)
     
     def copy(self):
+        """Copies ReturnObject into an identical instance
+        
+        Returns
+        -------
+        pyState.ReturnObject
+            ReturnObject with the same ID and State as the previous one
+        """
+
         return ReturnObject(self.retID,self.state)
 
 # I feel bad coding this but I can't find a better way atm.
 def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
-    """
-    Find instance of fromObj in haystack and replace with toObj
-    Terrible hack here, but this is used to ensure we know which function return is ours
-    Also now matches against lineno, col_offset and type. This will likely fail on polymorphic python code
-    Returns True on success and False on fail
+    """Generic search routine to replace an arbitrary object with another
+
+    Parameters
+    ----------
+    haystack : any
+        Where to search
+    fromObj : any
+        What to replace
+    toObj : any
+        What to replace with
+    parent : any, optional
+        (depreciated) What the parent object is. This option will be removed.
+
+
+    Returns
+    --------
+    bool
+        True/False if the object was successfully replaced.
+
+
+    Find instance of fromObj in haystack and replace with toObj. This is used
+    to ensure we know which function return is ours. Also now matches against
+    lineno, col_offset and type. This will likely fail on polymorphic python code
+
+    Example
+    -------
+    Replace the ast.Compare object with a Return object::
+
+        In [1]: import ast
+
+        In [2]: import pyState
+
+        In [3]: ret = pyState.ReturnObject(5)
+
+        In [4]: s = ast.parse("if 5 > 2:\\n\\tpass").body[0]
+
+        In [5]: print(s.test)
+        <_ast.Compare object at 0x7f563acb1b70>
+
+        In [6]: assert pyState.replaceObjectWithObject(s,s.test,ret)
+
+        In [7]: print(s.test)
+        <pyState.ReturnObject object at 0x7f563b4c1048>
+
     """
     parent = haystack if parent is None else parent
     
@@ -184,13 +231,40 @@ def get_all(f,rs=[]):
         return z3util.vset(rs,str)
 
 def hasRealComponent(expr):
-    """
-    Input:
-        expr = expression object
-    Action:
-        Checks if expression contains a real/non-int value or variable
-    Returns:
+    """Checks for Real component to a z3 expression
+    
+    Parameters
+    ----------
+    expr : z3 expression object
+
+
+    Returns
+    --------
+    bool
         True if it has real componenet, False otherwise
+        
+
+    Checks if expression contains a real/non-int value or variable. This is
+    genereally used in determining proper variable type to create. Z3 will cast
+    Int to Real if you don't select the right type, which add extra complexity
+    to the solving.
+
+
+    Example
+    -------
+    Confirm that a Z3 expression has a Real component::
+
+        In [1]: import z3
+
+        In [2]: import pyState
+
+        In [3]: r = z3.Real('r')
+
+        In [4]: i = z3.Int('i')
+
+        In [5]: pyState.hasRealComponent(r + i == 5)
+        Out[5]: True
+
     """
     return max([False if type(x) not in [z3.ArithRef, z3.RatNumRef] else x.is_real() for x in get_all(expr)])
 
