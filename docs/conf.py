@@ -18,6 +18,23 @@ import os
 
 sys.path.append('../')
 
+#####
+# Taking a detour here to grab Z3
+#####
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if on_rtd:
+
+    import subprocess
+    # Download Z3
+    subprocess.check_output("wget \"https://github.com/Z3Prover/bin/blob/master/releases/z3-4.4.1-x64-ubuntu-14.04.zip?raw=true\"",shell=True)
+    # Unzip Z3
+    subprocess.check_output("unzip z3*",shell=True)
+    # Append the path
+    sys.path.append('z3-4.4.1-x64-ubuntu-14.04/bin/')
+
+
 # Need to import this so that we don't get cicular importing
 import pyState
 
@@ -118,7 +135,7 @@ todo_include_todos = False
 # -- Options for HTML output ----------------------------------------------
 
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+#on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if not on_rtd:  # only import and set the theme if we're building docs locally
     import sphinx_rtd_theme
