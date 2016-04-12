@@ -10,16 +10,34 @@ from copy import deepcopy
 logger = logging.getLogger("pyState:UnaryOp")
 
 def handle(state,element,ctx=None):
+    """Attempt to handle the Python UnaryOp element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.UnaryOp
+        element from source to be handled
+    ctx : int , optional
+        Context to resolve this UnaryOp in (default is current context)
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+    
+    This function handles calls to ast.UnaryOp. It is not meant to be
+    called manually via a user.
+
+
+    Example
+    -------
+    Example of ast.UnaryOp is: not True
     """
-    Input:
-        state = State object
-        element = ast.UnaryOp element to parse
-        (optional) ctx = context to resolve UnaryOp in if not current
-    Action:
-        Parse out the element with respect to the state
-    Returns:
-        pyObjectManager object representing this UnaryOp
-    """
+
     ctx = state.ctx if ctx is None else ctx
     
     assert type(state) == pyState.State

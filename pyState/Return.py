@@ -6,15 +6,33 @@ import pyState
 logger = logging.getLogger("pyState:Return")
 
 def handle(state,element):
+    """Attempt to handle the Python Return element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.Return
+        element from source to be handled
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+    
+    This function handles calls to ast.Return. It is not meant to be
+    called manually via a user. Under the hood, it resolves the return element,
+    sets the ReturnObject, and updates the state.
+
+
+    Example
+    -------
+    Example of ast.Return is: return x
     """
-    Input:
-        state = State object
-        element = ast.Return element to parse
-    Action:
-        Sets return variable as applicable
-    Returns:
-        Nothing for now
-    """
+
     
     assert type(state) == pyState.State
     assert type(element) == ast.Return

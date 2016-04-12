@@ -14,9 +14,35 @@ logger = logging.getLogger("pyState:GeneratorExp")
 
 
 def handle(state,element,ctx=None):
+    """Attempt to handle the Python GeneratorExp element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.GeneratorExp
+        element from source to be handled
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+
+    This function handles calls to ast.GeneratorExp. It is not meant to be
+    called manually via a user. Under the hood, it converts the generator
+    expression into a list comprehension and calls the handler for list
+    comprehension.
+
+
+    Example
+    -------
+    Example of ast.GeneratorExp is: x for x in [1,2,3] (note it's not inside
+    List Comprehension brackets)
     """
-    For now, we're just changing GeneratorExp into a list comprehension.
-    """
+
     assert type(element) is ast.GeneratorExp
 
     ctx = state.ctx if ctx is None else ctx

@@ -52,15 +52,29 @@ def _handle(state,op,values,ifSideConstraints=None):
 
 
 def handle(state, element):
-    """
-    Handle the Compare elements (such as <,>,==,etc)
-    BoolOp is "x == 1 and y == 2" type commands
-    Input:
-        state = state object
-    Action:
-        Generate appropriate constraint objects
-    Return:
-        Return the constraint objects for ifSide or ReturnObject
+    """Attempt to handle the Python BoolOp element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.BoolOp
+        element from source to be handled
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast.
+
+    
+    This function handles calls to BoolOp. It is not meant to be called
+    manually via a user.
+
+
+    Example
+    -------
+    Example of ast.BoolOp is: x == 1 and y == 2
     """
 
     assert type(element) == ast.BoolOp

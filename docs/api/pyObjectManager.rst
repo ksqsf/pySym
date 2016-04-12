@@ -1,4 +1,4 @@
-pyObjectManager package
+pyObjectManager
 =======================
 
 Submodules

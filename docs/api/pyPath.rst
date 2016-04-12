@@ -1,4 +1,4 @@
-pyPath module
+pyPath
 =============
 
 .. automodule:: pyPath

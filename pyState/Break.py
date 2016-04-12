@@ -6,16 +6,31 @@ import pyState
 logger = logging.getLogger("pyState:Break")
 
 def handle(state,element):
-    """
-    Input:
-        state = State object
-        element = ast.Break element to parse
-    Action:
-        Pops off CallStack, effectively Breaking out of it's current function.
-    Returns:
-        Nothing for now
-    """
+    """Attempt to handle the Python Break element
     
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.Break
+        element from source to be handled
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through handling this ast.
+    
+
+    This function handles calls to Break. It is not meant to be called
+    manually via a user. Under the hood, it simply pops off the call stack
+    until a loop change is seen (i.e.: we've left the for loop)
+
+
+    Example
+    -------
+    Example of ast.Break is: break
+    """
+
     assert type(state) == pyState.State
     assert type(element) == ast.Break
 

@@ -12,9 +12,11 @@ Getting Started
 
 .. toctree::
    :maxdepth: 2
+   :glob:
 
    about
    installation
    quickstart
    examples
    what_is_implemented
+   api/index

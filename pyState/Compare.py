@@ -116,15 +116,36 @@ def _handleLeftVarInt(state,element,left):
     
 
 def handle(state,element,ctx=None):
+    """Attempt to handle the Python Compare element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.Compare
+        element from source to be handled
+    ctx : int, optional
+        `ctx` is an optional input to specify a context to be used
+        when resolving this ast object
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. -- or -- list contains True constraints derived from
+        input ast element as z3 elements.
+    
+
+    This function handles calls to ast.Compare. It is not meant to be called
+    manually via a user.
+
+
+    Example
+    -------
+    Example of ast.Compare is: 1 < 2
     """
-    Handle the Compare element (such as <,>,==,etc)
-    Input:
-        state = state object
-    Action:
-        Create constraint expression for both True and False state objects
-    Return:
-        The corresponding z3 constraints as a tuple (true constraints ,false constraints), or (ReturnObject, None) if waiting for a Call
-    """
+
     assert type(element) == ast.Compare
     
     ctx = ctx if ctx is not None else state.ctx

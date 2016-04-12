@@ -171,17 +171,34 @@ def _handleSlice(state,sub_object,sub_slice):
 
 
 def handle(state,element,ctx=None):
+    """Attempt to handle the Python Subscript element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.Subscript
+        element from source to be handled
+    ctx : int , optional
+        Context to resolve this Subscript in (default is current context)
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+    
+    This function handles calls to ast.Subscript. It is not meant to be
+    called manually via a user.
+
+
+    Example
+    -------
+    Example of ast.Subscript is: x[5] = 2
     """
-    Input:
-        state = State object
-        element = ast.Subscript element to parse
-        (optional) ctx = context to resolve subscript in if not current
-    Action:
-        Parse out the subscript. Return element type expected. If this is an
-        index, that means the element itself. If it's a range, that means a list
-    Returns:
-        Subscript resolved element (optionally as (element, parent))
-    """
+
     ctx = state.ctx if ctx is None else ctx
     
     assert type(state) == pyState.State

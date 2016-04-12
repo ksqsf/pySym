@@ -41,9 +41,32 @@ def _handle(stateIf,stateElse,element,ifConstraint):
 
 
 def handle(state,element):
+    """Attempt to handle the Python While element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.While
+        element from source to be handled
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+    
+    This function handles calls to ast.While. It is not meant to be
+    called manually via a user.
+
+
+    Example
+    -------
+    Example of ast.While is: while x < 10:
     """
-    Attempt to handle the while element
-    """
+
     
     # While is basically a repeated If statement, we want to take both sides
 

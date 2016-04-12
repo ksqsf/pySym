@@ -102,9 +102,32 @@ def _handle(state,element,newIter):
     return ret
 
 def handle(state,element):
+    """Attempt to handle the Python For element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.For
+        element from source to be handled
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+
+    This function handles calls to ast.For. It is not meant to be called
+    manually via a user.
+
+
+    Example
+    -------
+    Example of ast.For is: for x in [1,2,3]
     """
-    Attempt to handle the For element
-    """
+
     assert type(element) is ast.For
 
     

@@ -54,17 +54,37 @@ def _resolveKeywords(state,element):
     return itertools.product(*ret)
 
 def handle(state,element,retObj=None):
-    """
-    Input:
-        state = State object
-        element = ast.Call element to parse
-        (optional) retObj = ReturnObject to have it's ID filled in
-    Action:
-        Performs call
-    Returns:
-        Next instruction block for path object
-    """
+    """Attempt to handle the Python Call element
     
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.Call
+        element from source to be handled
+    retObj : pyState.ReturnObject, optional
+        `retObj` is an optional input to specify a ReturnObject to be used
+        ahead of time.
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast.
+    
+
+    This function handles calls to ast.Call. It is not meant to be called
+    manually via a user. A call will cause a context switch, populate
+    variables, and set other internals. Upon return, the state will be inside the
+    function.
+
+
+    Example
+    -------
+    Example of ast.Call is: test()
+    """
+
     assert type(state) == pyState.State
     assert type(element) == ast.Call
 

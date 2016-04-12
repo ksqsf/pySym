@@ -27,6 +27,21 @@ logger = logging.getLogger("State")
 # Create small class for keeping track of return values
 class ReturnObject:
     def __init__(self,retID,state=None):
+        """Initialize a pyState.ReturnObject instance
+    
+        Parameters
+        ----------
+        retID : int
+            Identification value for this ReturnObject
+        state : pyState.State, optional
+            State to associate this ReturnObject with
+
+
+        Returns
+        -------
+        pyState.ReturnObject
+    
+        """
         self.retID = retID
         self.state = state
     
@@ -903,6 +918,7 @@ class State():
             obj = Some ast object (i.e.: ast.Name, ast.Num, etc)
                 special object "PYSYM_TYPE_RETVAL" (int) will resolve the
                 last return value
+
             (optional) parent = parent node of obj. This is needed for resolving calls
             (optional) ctx = Context other than current to resolve in
             (optional) varType = Type of the var to resolve. Needed if resolving a var that doesn't exist yet
@@ -914,6 +930,7 @@ class State():
                 ast.Num == int (i.e.: 6)
                 ast.Name == pyObjectManager object (Int, Real, BitVec, etc)
                 ast.BinOp == z3 expression of BinOp (i.e.: x + y)
+
         """
         ctx = self.ctx if ctx is None else ctx
         t = type(obj)

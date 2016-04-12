@@ -41,9 +41,33 @@ def _handleConstraints(stateIf,stateElse,trueConstraint,element):
 
 
 def handle(state,element):
+    """Attempt to handle the Python If element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.If
+        element from source to be handled
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+    
+    This function handles calls to ast.If. It is not meant to be
+    called manually via a user. Under the hood, it resolves the conitional
+    arguments, splits it's state, and takes both possibilities as the same time.
+
+
+    Example
+    -------
+    Example of ast.If is: if x > 5:
     """
-    Attempt to handle the if element
-    """
+
     
     # On If statements we want to take both options
 

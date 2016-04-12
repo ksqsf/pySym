@@ -7,16 +7,33 @@ from . import Call, ReturnObject
 logger = logging.getLogger("pyState:Expr")
 
 def handle(state,element):
-    """
-    Input:
-        state = State object
-        element = ast.Expr element to parse
-    Action:
-        Figure out what to do with this...
-    Returns:
-        Nothing?
-    """
+    """Attempt to handle the Python Expr element
     
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.Expr
+        element from source to be handled
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+
+    This function handles calls to ast.Expr. It is not meant to be called
+    manually via a user.
+
+
+    Example
+    -------
+    Example of ast.Expr is: test() (Note no assignment for call. This makes it
+    an expression)
+    """
+
     assert type(state) == pyState.State
     assert type(element) == ast.Expr
 

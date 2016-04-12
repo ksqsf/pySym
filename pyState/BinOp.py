@@ -224,6 +224,8 @@ def handle(state,element,ctx=None):
     
     Parameters
     ----------
+    state : pyState.State
+        pyState.State object to handle this element under
     element : ast.BinOp
         element from source to be handled
     ctx : int, optional
@@ -239,6 +241,8 @@ def handle(state,element,ctx=None):
     manually via a user.
 
 
+    Example
+    -------
     Example of ast.BinOp is: x + 1
     """
 

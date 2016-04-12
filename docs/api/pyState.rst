@@ -1,17 +1,15 @@
-pyState package
+pyState
 ===============
 
 Subpackages
 -----------
 
 .. toctree::
+    :glob:
 
-    pyState.functions
+    pyState/pyState.functions
 
-Submodules
-----------
-
-pyState.Assign module
+pyState.Assign
 ---------------------
 
 .. automodule:: pyState.Assign
@@ -19,7 +17,8 @@ pyState.Assign module
     :undoc-members:
     :show-inheritance:
 
-pyState.AugAssign module
+
+pyState.AugAssign 
 ------------------------
 
 .. automodule:: pyState.AugAssign
@@ -27,7 +26,7 @@ pyState.AugAssign module
     :undoc-members:
     :show-inheritance:
 
-pyState.BinOp module
+pyState.BinOp 
 --------------------
 
 .. automodule:: pyState.BinOp
@@ -35,7 +34,7 @@ pyState.BinOp module
     :undoc-members:
     :show-inheritance:
 
-pyState.BoolOp module
+pyState.BoolOp
 ---------------------
 
 .. automodule:: pyState.BoolOp
@@ -43,7 +42,7 @@ pyState.BoolOp module
     :undoc-members:
     :show-inheritance:
 
-pyState.Break module
+pyState.Break 
 --------------------
 
 .. automodule:: pyState.Break
@@ -51,7 +50,7 @@ pyState.Break module
     :undoc-members:
     :show-inheritance:
 
-pyState.Call module
+pyState.Call 
 -------------------
 
 .. automodule:: pyState.Call
@@ -59,7 +58,7 @@ pyState.Call module
     :undoc-members:
     :show-inheritance:
 
-pyState.Compare module
+pyState.Compare 
 ----------------------
 
 .. automodule:: pyState.Compare
@@ -67,7 +66,7 @@ pyState.Compare module
     :undoc-members:
     :show-inheritance:
 
-pyState.Expr module
+pyState.Expr 
 -------------------
 
 .. automodule:: pyState.Expr
@@ -75,7 +74,7 @@ pyState.Expr module
     :undoc-members:
     :show-inheritance:
 
-pyState.For module
+pyState.For 
 ------------------
 
 .. automodule:: pyState.For
@@ -83,7 +82,7 @@ pyState.For module
     :undoc-members:
     :show-inheritance:
 
-pyState.FunctionDef module
+pyState.FunctionDef 
 --------------------------
 
 .. automodule:: pyState.FunctionDef
@@ -91,7 +90,7 @@ pyState.FunctionDef module
     :undoc-members:
     :show-inheritance:
 
-pyState.GeneratorExp module
+pyState.GeneratorExp 
 ---------------------------
 
 .. automodule:: pyState.GeneratorExp
@@ -99,7 +98,7 @@ pyState.GeneratorExp module
     :undoc-members:
     :show-inheritance:
 
-pyState.If module
+pyState.If 
 -----------------
 
 .. automodule:: pyState.If
@@ -107,7 +106,7 @@ pyState.If module
     :undoc-members:
     :show-inheritance:
 
-pyState.ListComp module
+pyState.ListComp 
 -----------------------
 
 .. automodule:: pyState.ListComp
@@ -115,7 +114,7 @@ pyState.ListComp module
     :undoc-members:
     :show-inheritance:
 
-pyState.Pass module
+pyState.Pass 
 -------------------
 
 .. automodule:: pyState.Pass
@@ -123,7 +122,7 @@ pyState.Pass module
     :undoc-members:
     :show-inheritance:
 
-pyState.Return module
+pyState.Return 
 ---------------------
 
 .. automodule:: pyState.Return
@@ -131,7 +130,7 @@ pyState.Return module
     :undoc-members:
     :show-inheritance:
 
-pyState.Subscript module
+pyState.Subscript 
 ------------------------
 
 .. automodule:: pyState.Subscript
@@ -139,7 +138,7 @@ pyState.Subscript module
     :undoc-members:
     :show-inheritance:
 
-pyState.UnaryOp module
+pyState.UnaryOp 
 ----------------------
 
 .. automodule:: pyState.UnaryOp
@@ -147,7 +146,7 @@ pyState.UnaryOp module
     :undoc-members:
     :show-inheritance:
 
-pyState.While module
+pyState.While 
 --------------------
 
 .. automodule:: pyState.While
@@ -155,7 +154,7 @@ pyState.While module
     :undoc-members:
     :show-inheritance:
 
-pyState.z3Helpers module
+pyState.z3Helpers 
 ------------------------
 
 .. automodule:: pyState.z3Helpers

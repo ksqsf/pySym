@@ -70,9 +70,33 @@ def _findAllGeneratedVariables(haystack):
 
 
 def handle(state,element,ctx=None):
+    """Attempt to handle the Python ListComp element
+    
+    Parameters
+    ----------
+    state : pyState.State
+        pyState.State object to handle this element under
+    element : ast.ListComp
+        element from source to be handled
+
+
+    Returns
+    -------
+    list
+        list contains state objects either generated or discovered through
+        handling this ast. 
+    
+    
+    This function handles calls to ast.ListComp. It is not meant to be
+    called manually via a user. Under the hood, it re-writes the ast into an
+    equivalent functional form, then calls that function symbolically.
+
+
+    Example
+    -------
+    Example of ast.ListComp is: [x for x in range(10)]
     """
-    Treating ListComprehension as a function call. Using ast to re-write list comprehension into function, then calling it
-    """
+
     assert type(element) is ast.ListComp    
 
     ctx = state.ctx if ctx is None else ctx

@@ -118,6 +118,8 @@ def handle(state,element):
     
     Parameters
     ----------
+    state : pyState.State
+        pyState.State object to handle this element under
     element : ast.Assign
         element from source to be handled
 
@@ -132,6 +134,8 @@ def handle(state,element):
     manually via a user.
 
 
+    Example
+    -------
     Example of ast.Assign is: x = 1
     """
     # Targets are what is being set
