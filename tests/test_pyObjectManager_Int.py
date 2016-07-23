@@ -29,6 +29,29 @@ test3 = """
 x = 12
 """
 
+test4 = """
+l = [pyState.Int(), pyState.Int()]
+if l[0] != l[1]:
+    pass
+if l[0] == l[1]:
+    pass
+
+pass
+"""
+
+def test_pyObjectManager_Int_MultipleObj():
+    b = ast.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+
+    pg.explore(find=4)
+    assert len(pg.found) == 1
+
+    pg = PathGroup(p)
+    pg.explore(find=6)
+
+    assert len(pg.found) == 1
+
 def test_pyObjectManager_Int_strPrint():
     b = ast.parse(test3).body
     p = Path(b,source=test3)

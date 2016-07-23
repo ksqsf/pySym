@@ -11,4 +11,8 @@ def handle(state,call,ctx=None):
 
     myInt = state.resolveObject(ast.Name('temp',0),ctx=1,varType=Int)
 
-    return myInt
+    # Everything is moved around as lists...
+    for i in myInt:
+        i.increment()
+
+    return myInt.copy()
