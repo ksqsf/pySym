@@ -86,7 +86,9 @@ class Ctx:
         if type(value) is Int:
             logger.debug("__setitem__: setting Int")
             self.variables[key] = Int('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
-            self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
+            # Don't add a constraint if it's the same thing!
+            if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
+                self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
         elif type(value) is Real:
             logger.debug("__setitem__: setting Real")

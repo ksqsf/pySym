@@ -32,7 +32,7 @@ def _findAllInputVariables(haystack):
         if haystack.args is not None:
             for arg in haystack.args:
                 ret += _findAllInputVariables(arg)
-        if haystack.kwargs is not None:
+        if hasattr(haystack,"kwargs") and haystack.kwargs is not None:
             for arg in haystack.kwargs:
                 ret += _findAllInputVariables(arg)
         if type(haystack.func) is not ast.Name:
