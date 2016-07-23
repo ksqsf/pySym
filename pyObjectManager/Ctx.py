@@ -93,12 +93,16 @@ class Ctx:
         elif type(value) is Real:
             logger.debug("__setitem__: setting Real")
             self.variables[key] = Real('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
-            self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
+            # Don't add a constraint if it's the same thing!
+            if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
+                self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
         elif type(value) is BitVec:
             logger.debug("__setitem__: setting BitVec")
             self.variables[key] = BitVec('{0}'.format(key),ctx=self.ctx,count=count,size=value.size,state=self.state)
-            self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
+            # Don't add a constraint if it's the same thing!
+            if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
+                self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
         elif type(value) in [List, String]:
             logger.debug("__setitem__: setting {0}".format(type(value)))
@@ -109,7 +113,9 @@ class Ctx:
         elif type(value) is Char:
             logger.debug("__setitem__: setting Char")
             self.variables[key] = Char('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
-            self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
+            # Don't add a constraint if it's the same thing!
+            if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
+                self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
 
         else:
             err = "__setitem__: Don't know how to set object '{0}'".format(value)
