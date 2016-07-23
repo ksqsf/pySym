@@ -12,6 +12,8 @@ import itertools
 
 logger = logging.getLogger("pyState:Subscript")
 
+import Config
+
 def _handleIndex(state,sub_object,sub_slice):
 
     if type(sub_object) not in [List, String]:
@@ -38,14 +40,36 @@ def _handleIndex(state,sub_object,sub_slice):
         # Example: array[1] -- 1 is static, or x = 1; array[x] -- x can only have 1 value
         if sub_index.isStatic():
             index = sub_index.getValue()
+            ret.append(sub_object[index])
 
         # Truly symbolic index. Example: array[x] where x can be multiple values at that point
         else:
-            err = "handle: Don't know how to handle symbolic slice integers at the moment"
-            logger.error(err)
-            raise Exception(err)
+            logger.debug("Symbolic index into list of size {0}. Global max is {1}".format(sub_object.length(),Config.PYSYM_MAX_SYM_LIST_SPLIT))
+            
+            # Split off up to our max allowed
+            added = 0
 
-        ret.append(sub_object[index])
+            # TODO: This might get TOO big... Large input arrays could crush pySym..
+            
+            # Instead of asking for valid values, walk the index of the list and see if our symbolic input can be that
+            for i in range(sub_object.length()):
+                # Can this symbolic value be this index?
+                if sub_index.canBe(i):
+                    # Add it, increment our count
+                    ret.append(sub_object[i])
+                    added += 1
+
+                    # Check if we need to be done
+                    if added == Config.PYSYM_MAX_SYM_LIST_SPLIT:
+                        # Not the end of the world, but likely means that we're missing cases
+                        logger.warn("Symbolic index into list of size {0}. Global max split of {1} reached. Coverage likely incomplete. Consider upping Config.PYSYM_MAX_SYM_LIST_SPLIT if you need to.")
+                        break
+
+
+            #err = "handle: Don't know how to handle symbolic slice integers at the moment"
+            #logger.error(err)
+            #raise Exception(err)
+
 
     return ret
 

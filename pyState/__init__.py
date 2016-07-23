@@ -1229,6 +1229,9 @@ class State():
         Return:
             Discovered n values or [] if none found
         """
+        # TODO: Optimize this... When slicing lists and needing, say, 256 values, this gets VERY slow... Silly..
+
+
         # Grab appropriate ctx
         ctx = ctx if ctx is not None else self.ctx
 

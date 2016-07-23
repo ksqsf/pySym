@@ -79,6 +79,25 @@ l = [1,[2,3],4]
 x = l[0:2][1][1]
 """
 
+test12 = """
+l = [1,2,3,4,5]
+i = pyState.Int()
+x = l[i]
+"""
+
+def test_pyState_symbolic_index():
+    b = ast.parse(test12).body
+    p = Path(b,source=test12)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    
+    # Should split into 5 paths
+    assert len(pg.completed) == 5
+    
+    assert sorted([p.state.getVar('x').getValue() for p in pg.completed]) == [1,2,3,4,5]
+
+
 def test_pyState_nestedSlice():
     b = ast.parse(test11).body
     p = Path(b,source=test11)
