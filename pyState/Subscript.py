@@ -35,13 +35,11 @@ def _handleIndex(state,sub_object,sub_slice):
 
     for sub_index in sub_indexs:
 
+        # Example: array[1] -- 1 is static, or x = 1; array[x] -- x can only have 1 value
         if sub_index.isStatic():
             index = sub_index.getValue()
 
-        # Check if it's a variable that only has one possibility
-        elif type(sub_index) in [Int, BitVec] and len(state.any_n_int(sub_index,2)) == 1:
-            index = state.any_int(sub_index)
-
+        # Truly symbolic index. Example: array[x] where x can be multiple values at that point
         else:
             err = "handle: Don't know how to handle symbolic slice integers at the moment"
             logger.error(err)
