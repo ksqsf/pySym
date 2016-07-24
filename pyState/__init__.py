@@ -9,6 +9,7 @@ import importlib
 from types import ModuleType
 import ntpath
 import pyState.z3Helpers
+import pickle
 from pyObjectManager import ObjectManager
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
@@ -394,28 +395,6 @@ class State():
         # Looks like we're done with the program
         return None
     
-    def popCallStack(self):
-        """
-        Input:
-            Nothing
-        Action:
-            Pops from the call stack to the run stack. Adds call to completed state
-        Returns:
-            True if pop succeeded, False if there was nothing left to pop
-        """
-
-        # Check if we have somewhere to return to
-        if len(self.callStack) == 0:
-            return False
-
-        # Pop the callStack back on to the run queue
-        cs = self.callStack.pop()
-        self.path = cs["path"]
-        self.ctx = cs["ctx"]
-        self.retID = cs["retID"]
-        self.loop = cs["loop"]
-        
-        return True
 
     def step(self):
         """
@@ -450,7 +429,7 @@ class State():
         if len(state.path) == 0:
             # If we're in a loop, time to re-evaluate it
             if state.loop:
-                state.path = [deepcopy(state.loop)]
+                state.path = [copy(state.loop)]
             # If we're not in a loop, try to pop up one on the stack
             elif not state.popCallStack():
                 return []
@@ -642,7 +621,7 @@ class State():
         ##################
         # Save CallStack #
         ##################
-        cs = deepcopy(self.path)
+        cs = copy(self.path)
         if len(cs) > 0:
             self.pushCallStack(path=cs,ctx=oldCtx,retID=oldRetID,loop=oldLoop)
         
@@ -652,6 +631,10 @@ class State():
         
         # Return our ReturnObject
         return retObj
+
+    ####################
+    # Call Stack Stuff #
+    ####################
 
     def pushCallStack(self,path=None,ctx=None,retID=None,loop=None):
         """
@@ -665,6 +648,55 @@ class State():
             'retID': retID if retID is not None else self.retID,
             'loop': loop if loop is not None else self.loop,
         })
+
+    def popCallStack(self):
+        """
+        Input:
+            Nothing
+        Action:
+            Pops from the call stack to the run stack. Adds call to completed state
+        Returns:
+            True if pop succeeded, False if there was nothing left to pop
+        """
+
+        # Check if we have somewhere to return to
+        if len(self.callStack) == 0:
+            return False
+
+        # Pop the callStack back on to the run queue
+        cs = self.callStack.pop()
+        self.path = cs["path"]
+        self.ctx = cs["ctx"]
+        self.retID = cs["retID"]
+        self.loop = cs["loop"]
+        
+        return True
+
+    def copyCallStack(self):
+        """
+        Make a copy of the call stack, avoiding deepcopy
+        Returns a copy of the current call stack
+        """
+        # TODO: Maybe make CallStack an Object/Class??
+
+        ret = []
+
+        # Loop through, copying each call stack
+        for c in self.callStack:
+            ret.append({
+                'path': copy(c['path']),
+                'ctx': c['ctx'],
+                'retID': c['retID'],
+                'loop': copy(c['loop'])
+            })
+
+        return ret
+        
+
+    ########################
+    # End Call Stack Stuff #
+    ########################
+        
 
     def _init_simFunctions(self):
         """
@@ -1569,8 +1601,8 @@ class State():
             functions=self.functions,
             simFunctions=self.simFunctions,
             retVar=self.retVar,
-            callStack=deepcopy(self.callStack),
-            path=deepcopy(self.path),
+            callStack=self.copyCallStack(),
+            path=[copy(x) for x in self.path],
             backtrace=deepcopy(self.backtrace),
             retID=copy(self.retID),
             loop=copy(self.loop),
