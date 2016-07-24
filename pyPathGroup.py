@@ -1,3 +1,5 @@
+
+from multiprocessing import Pool
 from pyPath import Path
 
 class PathGroup:
@@ -93,33 +95,34 @@ class PathGroup:
 
 
     def step(self):
-        """
-        Step all active paths one step.
-        """
+            """
+            Step all active paths one step.
+            """
+        #with Pool(processes=1) as pool:
         
-        for currentPath in self.active:
-            # It's possible this throws an exception on us
-            try:
-                paths_ret = currentPath.step()
-                # Pop it off the block
-                self.unstash(path=currentPath,from_stash="active")
+            for currentPath in self.active:
+                # It's possible this throws an exception on us
+                try:
+                    paths_ret = currentPath.step()
+                    # Pop it off the block
+                    self.unstash(path=currentPath,from_stash="active")
 
-            except Exception as e:
-                currentPath.error = str(e)
-                self.unstash(path=currentPath,from_stash="active",to_stash="errored")
-                continue
+                except Exception as e:
+                    currentPath.error = str(e)
+                    self.unstash(path=currentPath,from_stash="active",to_stash="errored")
+                    continue
 
-            # If an empty list is returned, this path must be done
-            if len(paths_ret) == 0:
-                self.unstash(path=currentPath,to_stash="completed")
-                continue
+                # If an empty list is returned, this path must be done
+                if len(paths_ret) == 0:
+                    self.unstash(path=currentPath,to_stash="completed")
+                    continue
             
-            # We have some return path
-            else:
-                for returnedPath in paths_ret:
-                    # Make sure the returned path is possible
-                    if not returnedPath.state.isSat():
-                        self.unstash(path=returnedPath,to_stash="deadended")
-                    else:
-                        # We found our next step in the path
-                        self.unstash(path=returnedPath,to_stash="active")
+                # We have some return path
+                else:
+                    for returnedPath in paths_ret:
+                        # Make sure the returned path is possible
+                        if not returnedPath.state.isSat():
+                            self.unstash(path=returnedPath,to_stash="deadended")
+                        else:
+                            # We found our next step in the path
+                            self.unstash(path=returnedPath,to_stash="active")

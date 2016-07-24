@@ -419,8 +419,10 @@ class State():
         """
         # Adding sanity checks since we are not supposed to change during execution
         h = hash(self)
-        
-        logger.debug("step:\n\tpath = {0}\n\tcallStack = {1}\n\tctx = {2}\n\tretID = {3}\n\tsolver = {4}\n\tloop = {5}\n".format(self.path,self.callStack,self.ctx,self.retID,self.solver,self.loop))
+
+        # Optimize logger calls...
+        if logger.getEffectiveLevel() == logging.DEBUG:
+            logger.debug("step:\n\tpath = {0}\n\tcallStack = {1}\n\tctx = {2}\n\tretID = {3}\n\tsolver = {4}\n\tloop = {5}\n".format(self.path,self.callStack,self.ctx,self.retID,self.solver,self.loop))
 
         # More cleanly resolve instructions
         # TODO: Move this somewhere else... Moving it to the top of State introduced "include hell" :-(

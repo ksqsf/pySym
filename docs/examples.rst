@@ -14,7 +14,7 @@ to do just that.
     import logging
     logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     from pyPath import Path
-    import ast
+    import ast_parser
     import Colorer
     from pyPathGroup import PathGroup
 
@@ -44,7 +44,7 @@ to do just that.
     x = [x for x in range(50) if isprime(x) == 1]
     """
 
-    b = ast.parse(source).body
+    b = ast_parser.parse(source).body
     p = Path(b,source=source)
     pg = PathGroup(p,discardFailures=True)
 
