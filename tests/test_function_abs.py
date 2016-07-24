@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -28,7 +28,7 @@ e = abs(z)
 """
 
 def test_funcion_abs():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 

@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pytest
@@ -32,7 +32,7 @@ for x in q:
 """
 
 def test_pySym_breakFor():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     
@@ -44,7 +44,7 @@ def test_pySym_breakFor():
 
 
 def test_pySym_breakWhile():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     

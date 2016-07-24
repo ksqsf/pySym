@@ -2,15 +2,12 @@ import logging
 import z3
 import ast
 import pyState.Compare
-from copy import deepcopy, copy
+from copy import copy
 import pickle
 
 logger = logging.getLogger("pyState:While")
 
 def _handle(stateIf,stateElse,element,ifConstraint):
-    # TODO: The deepcopy calls here are necessary because I'm dorking with AST objects and their copy method isn't sufficient.
-    # TODO: Need to write my own copy method for these modified AST objects!
-
     # Add the constraints
     if type(ifConstraint) is not bool or ifConstraint != True:
         stateIf.addConstraint(ifConstraint)
@@ -19,7 +16,7 @@ def _handle(stateIf,stateElse,element,ifConstraint):
 
     # Check if statement. We'll have at least one instruction here, so treat this as a call
     # Saving off the current path so we can return to it and pick up at the next instruction
-    cs = deepcopy(stateIf.path)
+    cs = copy(stateIf.path)
     # Only push our stack if it's not empty
     if len(cs) > 0:
         stateIf.pushCallStack(path=cs)
@@ -28,12 +25,12 @@ def _handle(stateIf,stateElse,element,ifConstraint):
     stateIf.path = element.body
 
     # If state should get a copy of the loop we're now in
-    stateIf.loop = deepcopy(element)
+    stateIf.loop = copy(element)
 
     # Update the else's path
     # Check if there is an else path we need to take
     #if len(element.orelse) > 0:
-    cs = deepcopy(stateElse.path)
+    cs = copy(stateElse.path)
     if len(cs) > 0:
         stateElse.pushCallStack(path=cs)
 

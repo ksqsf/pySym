@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pytest
@@ -116,7 +116,7 @@ x += "testt".rstrip(s)
 """
 
 def test_pySym_AugAssign_StateTracking():
-    b = ast.parse(test16).body
+    b = ast_parse.parse(test16).body
     p = Path(b,source=test16)
     pg = PathGroup(p)
     pg.explore()
@@ -129,7 +129,7 @@ def test_pySym_AugAssign_StateTracking():
 
 
 def test_pySym_AugAssign_StateSplit():
-    b = ast.parse(test15).body
+    b = ast_parse.parse(test15).body
     p = Path(b,source=test15)
     pg = PathGroup(p)
     pg.explore()
@@ -141,7 +141,7 @@ def test_pySym_AugAssign_StateSplit():
 
 
 def test_pySym_AugAssign_String_In_List():
-    b = ast.parse(test14).body
+    b = ast_parse.parse(test14).body
     p = Path(b,source=test14)
     pg = PathGroup(p)
     pg.explore()
@@ -153,7 +153,7 @@ def test_pySym_AugAssign_String_In_List():
 
 
 def test_pySym_AugAssign_MultipleStates():
-    b = ast.parse(test13).body
+    b = ast_parse.parse(test13).body
     p = Path(b,source=test13)
     pg = PathGroup(p)
     pg.explore()
@@ -170,7 +170,7 @@ def test_pySym_AugAssign_MultipleStates():
 
 
 def test_pySym_AugAssign_Subscript():
-    b = ast.parse(test9).body
+    b = ast_parse.parse(test9).body
     p = Path(b,source=test9)
     pg = PathGroup(p)
     pg.explore()
@@ -178,7 +178,7 @@ def test_pySym_AugAssign_Subscript():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1,7.7,3]
 
-    b = ast.parse(test10).body
+    b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
     pg = PathGroup(p)
     pg.explore()
@@ -186,7 +186,7 @@ def test_pySym_AugAssign_Subscript():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1, 127, 3]
 
-    b = ast.parse(test11).body
+    b = ast_parse.parse(test11).body
     p = Path(b,source=test11)
     pg = PathGroup(p)
     pg.explore()
@@ -194,7 +194,7 @@ def test_pySym_AugAssign_Subscript():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1, 4, 3]
 
-    b = ast.parse(test12).body
+    b = ast_parse.parse(test12).body
     p = Path(b,source=test12)
     pg = PathGroup(p)
     pg.explore()
@@ -204,7 +204,7 @@ def test_pySym_AugAssign_Subscript():
 
 
 def test_pySym_AugAssign_Mod():
-    b = ast.parse(test8).body
+    b = ast_parse.parse(test8).body
     p = Path(b,source=test8)
     pg = PathGroup(p)
     pg.explore()
@@ -217,7 +217,7 @@ def test_pySym_AugAssign_Mod():
 
 
 def test_pySym_AugAssign_Pow():
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
     pg.explore()
@@ -234,7 +234,7 @@ def test_pySym_AugAssign_SafeBitVec():
     #######
     # Add #
     #######
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
     pg.explore()
@@ -245,7 +245,7 @@ def test_pySym_AugAssign_SafeBitVec():
     #######
     # Mul #
     #######
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
     pg.explore()
@@ -256,7 +256,7 @@ def test_pySym_AugAssign_SafeBitVec():
     #######
     # Sub #
     #######
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
     pg.explore()
@@ -266,7 +266,7 @@ def test_pySym_AugAssign_SafeBitVec():
 
 
 def test_pySym_AugAssign_BitStuff():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
     pg.explore()
@@ -279,7 +279,7 @@ def test_pySym_AugAssign_MixedTypes():
     #######
     # Add #
     #######
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     # Step through program
     p = p.step()[0]
@@ -297,7 +297,7 @@ def test_pySym_AugAssign():
     #######
     # Add #
     #######
-    b = ast.parse(test1.format("+=")).body
+    b = ast_parse.parse(test1.format("+=")).body
     p = Path(b,source=test1.format("+="))
     # Step through program
     p = p.step()[0]
@@ -311,7 +311,7 @@ def test_pySym_AugAssign():
     ############
     # Subtract #
     ############
-    b = ast.parse(test1.format("-=")).body
+    b = ast_parse.parse(test1.format("-=")).body
     p = Path(b,source=test1.format("-="))
     # Step through program
     p = p.step()[0]
@@ -325,7 +325,7 @@ def test_pySym_AugAssign():
     ############
     # Multiply #
     ############
-    b = ast.parse(test1.format("*=")).body
+    b = ast_parse.parse(test1.format("*=")).body
     p = Path(b,source=test1.format("*="))
     # Step through program
     p = p.step()[0]
@@ -339,7 +339,7 @@ def test_pySym_AugAssign():
     ##########
     # Divide #
     ##########
-    b = ast.parse(test1.format("/=")).body
+    b = ast_parse.parse(test1.format("/=")).body
     p = Path(b,source=test1.format("/="))
     # Step through program
     p = p.step()[0]
@@ -353,7 +353,7 @@ def test_pySym_AugAssign():
     ##########
     # Modulo #
     ##########
-    b = ast.parse(test1.format("%=")).body
+    b = ast_parse.parse(test1.format("%=")).body
     p = Path(b,source=test1.format("%="))
     # Step through program
     p = p.step()[0]

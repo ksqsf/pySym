@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -31,7 +31,7 @@ l9 = zip([1,2,3],"abc")
 
 
 def test_function_zip():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 

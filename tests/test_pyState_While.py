@@ -7,38 +7,13 @@ import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
 import pytest
 from copy import copy
 
-"""
-# This doesn't work lol
-def astCopy(self):
-    new = self.__class__()
-
-    newDict = {}
-
-    for var in self.__dict__:
-        val = self.__dict__[var]
-
-        if type(val) is list:
-            newDict[var] = [copy(x) for x in val]
-
-        elif type(val) is dict:
-            newDict[var] = {x: copy(val[x]) for x in val}
-
-        else:
-            newDict[var] = copy(val)
-
-    new.__dict__ = newDict
-    return new
-
-for t in ['If','While','Compare']:
-    getattr(ast,t).__copy__ = astCopy
-"""
 
 test1 = """
 x = 0
@@ -135,7 +110,7 @@ while x < s.index('a'):
 
 def test_pySym_While_StateSplit():
     # TODO: I'm not 100% sure this is right.. But can't think of why it's wrong atm...
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
 
@@ -146,7 +121,7 @@ def test_pySym_While_StateSplit():
 
 
 def test_pySym_stupidWhile():
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
     
@@ -158,7 +133,7 @@ def test_pySym_stupidWhile():
 
 
 def test_pySym_complicated():
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
     
@@ -166,14 +141,14 @@ def test_pySym_complicated():
     assert pg.found[0].state.any_int('z') == 26
 
 def test_pySym_nestedWhile():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
     assert pg.explore(find=14)
     assert pg.found[0].state.any_int('z') == 45
 
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
     assert pg.explore(find=14)
@@ -182,7 +157,7 @@ def test_pySym_nestedWhile():
 
 
 def test_pySym_funcInWhileTest():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     pg.explore()
@@ -197,7 +172,7 @@ def test_pySym_funcInWhileTest():
 
 
 def test_pySym_simpleWhile():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     assert pg.explore(find=6)

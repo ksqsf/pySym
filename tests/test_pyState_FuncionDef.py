@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pytest
@@ -17,7 +17,7 @@ def test2(a,b,c):
 
 
 def test_pySym_FuncionDef():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     # Step through program
     p = p.step()[0]

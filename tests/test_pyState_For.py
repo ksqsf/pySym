@@ -7,7 +7,7 @@ import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -54,7 +54,7 @@ for x in zip([1,8],[2,3]):
 """
 
 def test_pySym_For_ListReturn():
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
 
@@ -66,7 +66,7 @@ def test_pySym_For_ListReturn():
 
 
 def test_pySym_variableSlice():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -76,7 +76,7 @@ def test_pySym_variableSlice():
 
 
 def test_pySym_variableFor():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
     
@@ -87,7 +87,7 @@ def test_pySym_variableFor():
 
 
 def test_pySym_nestedFor():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     
@@ -97,7 +97,7 @@ def test_pySym_nestedFor():
 
 
 def test_pySym_stupidFor():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     

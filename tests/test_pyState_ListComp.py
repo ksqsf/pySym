@@ -7,7 +7,7 @@ import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -47,7 +47,7 @@ l = [str(i) for i in range(10)]
 """
 
 def test_pyState_ListComp_MoreFunctions():
-    b = ast.parse(test8).body
+    b = ast_parse.parse(test8).body
     p = Path(b,source=test8)
     pg = PathGroup(p)
 
@@ -57,7 +57,7 @@ def test_pyState_ListComp_MoreFunctions():
 
 
 def test_pyState_ListComp_StringCmp():
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
 
@@ -67,7 +67,7 @@ def test_pyState_ListComp_StringCmp():
 
 
 def test_pyState_ListComp_outputModifier():
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
 
@@ -77,7 +77,7 @@ def test_pyState_ListComp_outputModifier():
 
 
 def test_pyState_ListComp_MultipleFor_ReturnList():
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
 
@@ -87,7 +87,7 @@ def test_pyState_ListComp_MultipleFor_ReturnList():
 
 
 def test_pyState_ListComp_MultipleFor():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -100,7 +100,7 @@ def test_pyState_ListComp_MultipleFor():
 
 
 def test_pyState_ListComp_BoolComp():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
@@ -110,7 +110,7 @@ def test_pyState_ListComp_BoolComp():
 
 
 def test_pyState_ListComp_If():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
 
@@ -120,7 +120,7 @@ def test_pyState_ListComp_If():
 
 
 def test_pyState_ListComp_Simple():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 

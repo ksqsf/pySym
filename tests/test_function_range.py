@@ -7,7 +7,7 @@ import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -36,7 +36,7 @@ x = range(s.index('a'))
 """
 
 def test_function_range_StateSplit():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -48,7 +48,7 @@ def test_function_range_StateSplit():
 
 
 def test_function_range():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 
@@ -56,7 +56,7 @@ def test_function_range():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_int('out') == 150
 
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
 
@@ -64,7 +64,7 @@ def test_function_range():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [4, 5, 6, 7, 8, 9]
 
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 

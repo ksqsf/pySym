@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pyState.Compare
@@ -46,7 +46,7 @@ if s[2] == 't':
 """
 
 def test_pySym_Compare_Symbolic_String():
-    b = ast.parse(compare4).body
+    b = ast_parse.parse(compare4).body
     p = Path(b,source=compare4)
     pg = PathGroup(p)
 
@@ -61,7 +61,7 @@ def test_pySym_Compare():
     ################
     # Greater Than #
     ################
-    b = ast.parse(compare1.format(1,5,">")).body
+    b = ast_parse.parse(compare1.format(1,5,">")).body
     p = Path(b,source=compare1.format(1,5,">"))
     # Step through the "if" statement
     p = p.step()[0]
@@ -85,7 +85,7 @@ def test_pySym_Compare():
     #########################
     # Greater Than Or Equal #
     #########################
-    b = ast.parse(compare1.format(2,2,">=")).body
+    b = ast_parse.parse(compare1.format(2,2,">=")).body
     p = Path(b,source=compare1.format(2,2,">="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -109,7 +109,7 @@ def test_pySym_Compare():
     #############
     # Less Than #
     #############
-    b = ast.parse(compare1.format(1,5,"<")).body
+    b = ast_parse.parse(compare1.format(1,5,"<")).body
     p = Path(b,source=compare1.format(1,5,"<"))
     # Step through the "if" statement
     p = p.step()[0]
@@ -133,7 +133,7 @@ def test_pySym_Compare():
     ######################
     # Less Than Or Equal #
     ######################
-    b = ast.parse(compare1.format(3,5,"<=")).body
+    b = ast_parse.parse(compare1.format(3,5,"<=")).body
     p = Path(b,source=compare1.format(3,5,"<="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -157,7 +157,7 @@ def test_pySym_Compare():
     #########
     # Equal #
     #########
-    b = ast.parse(compare1.format(1,5,"==")).body
+    b = ast_parse.parse(compare1.format(1,5,"==")).body
     p = Path(b,source=compare1.format(1,5,"=="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -181,7 +181,7 @@ def test_pySym_Compare():
     #############
     # Not Equal #
     #############
-    b = ast.parse(compare1.format(1,5,"!=")).body
+    b = ast_parse.parse(compare1.format(1,5,"!=")).body
     p = Path(b,source=compare1.format(1,5,"!="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -225,7 +225,7 @@ def test_pySym_CompareRightNum():
     ################
     # Greater Than #
     ################
-    b = ast.parse(compare2.format(1,5,">")).body
+    b = ast_parse.parse(compare2.format(1,5,">")).body
     p = Path(b,source=compare2.format(1,5,">"))
     # Step through the "if" statement
     p = p.step()[0]
@@ -252,7 +252,7 @@ def test_pySym_CompareRightNum():
     #########################
     # Greater Than Or Equal #
     #########################
-    b = ast.parse(compare2.format(2,2,">=")).body
+    b = ast_parse.parse(compare2.format(2,2,">=")).body
     p = Path(b,source=compare2.format(2,2,">="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -276,7 +276,7 @@ def test_pySym_CompareRightNum():
     #############
     # Less Than #
     #############
-    b = ast.parse(compare2.format(1,5,"<")).body
+    b = ast_parse.parse(compare2.format(1,5,"<")).body
     p = Path(b,source=compare2.format(1,5,"<"))
     # Step through the "if" statement
     p = p.step()[0]
@@ -300,7 +300,7 @@ def test_pySym_CompareRightNum():
     ######################
     # Less Than Or Equal #
     ######################
-    b = ast.parse(compare2.format(3,5,"<=")).body
+    b = ast_parse.parse(compare2.format(3,5,"<=")).body
     p = Path(b,source=compare2.format(3,5,"<="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -324,7 +324,7 @@ def test_pySym_CompareRightNum():
     #########
     # Equal #
     #########
-    b = ast.parse(compare2.format(1,5,"==")).body
+    b = ast_parse.parse(compare2.format(1,5,"==")).body
     p = Path(b,source=compare2.format(1,5,"=="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -348,7 +348,7 @@ def test_pySym_CompareRightNum():
     #############
     # Not Equal #
     #############
-    b = ast.parse(compare2.format(1,5,"!=")).body
+    b = ast_parse.parse(compare2.format(1,5,"!=")).body
     p = Path(b,source=compare2.format(1,5,"!="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -374,7 +374,7 @@ def test_pySym_CompareLeftNum():
     ################
     # Greater Than #
     ################
-    b = ast.parse(compare3.format(1,5,">")).body
+    b = ast_parse.parse(compare3.format(1,5,">")).body
     p = Path(b,source=compare3.format(1,5,">"))
     # Step through the "if" statement
     p = p.step()[0]
@@ -397,7 +397,7 @@ def test_pySym_CompareLeftNum():
     #########################
     # Greater Than Or Equal #
     #########################
-    b = ast.parse(compare3.format(2,2,">=")).body
+    b = ast_parse.parse(compare3.format(2,2,">=")).body
     p = Path(b,source=compare3.format(2,2,">="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -421,7 +421,7 @@ def test_pySym_CompareLeftNum():
     #############
     # Less Than #
     #############
-    b = ast.parse(compare3.format(1,5,"<")).body
+    b = ast_parse.parse(compare3.format(1,5,"<")).body
     p = Path(b,source=compare3.format(1,5,"<"))
     # Step through the "if" statement
     p = p.step()[0]
@@ -445,7 +445,7 @@ def test_pySym_CompareLeftNum():
     ######################
     # Less Than Or Equal #
     ######################
-    b = ast.parse(compare3.format(3,5,"<=")).body
+    b = ast_parse.parse(compare3.format(3,5,"<=")).body
     p = Path(b,source=compare3.format(3,5,"<="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -469,7 +469,7 @@ def test_pySym_CompareLeftNum():
     #########
     # Equal #
     #########
-    b = ast.parse(compare3.format(1,5,"==")).body
+    b = ast_parse.parse(compare3.format(1,5,"==")).body
     p = Path(b,source=compare3.format(1,5,"=="))
     # Step through the "if" statement
     p = p.step()[0]
@@ -493,7 +493,7 @@ def test_pySym_CompareLeftNum():
     #############
     # Not Equal #
     #############
-    b = ast.parse(compare3.format(1,5,"!=")).body
+    b = ast_parse.parse(compare3.format(1,5,"!=")).body
     p = Path(b,source=compare3.format(1,5,"!="))
     # Step through the "if" statement
     p = p.step()[0]

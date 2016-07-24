@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pytest
@@ -31,7 +31,7 @@ y += 1
 """
 
 def test_ifReturn():
-    b = ast.parse(testIfReturn).body
+    b = ast_parse.parse(testIfReturn).body
     p = Path(b,source=testIfReturn)
     p = p.step()[0].step()[0]
     ifSide,elseSide = p.step()
@@ -45,7 +45,7 @@ def test_ifReturn():
 
 
 def test_basicPathStep():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p1 = Path(b,source=test1)
     p2 = p1.step()[0].step()[0]
     p1.printBacktrace()
@@ -58,7 +58,7 @@ def test_basicPathStep():
         p1.state.any_int('y')
 
 def test_pathCopy():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     p2 = p.copy()
     assert p2 != p
@@ -68,7 +68,7 @@ def test_pathCopy():
         p2.state.any_int('x')
 
 def test_simpleIf():
-    b = ast.parse(simpleIf).body
+    b = ast_parse.parse(simpleIf).body
     p = Path(b,source=simpleIf)
     # Step through the "if" statement
     p = p.step()[0]

@@ -27,7 +27,6 @@ logger = logging.getLogger("State")
 
 
 """
-
 def astCopy(self):
     new = self.__class__()
     newDict = {x: copy(getattr(self,x)) for x in self.__dict__}
@@ -62,7 +61,7 @@ class ReturnObject:
     def __deepcopy__(self,_):
         return ReturnObject(self.retID)
 
-    def __copy__(self,_):
+    def __copy__(self):
         return ReturnObject(self.retID)
     
     def copy(self):

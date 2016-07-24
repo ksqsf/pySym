@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -36,7 +36,7 @@ if s[3] == "a":
 
 
 def test_function_String_Index_PartiallySymbolic():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
@@ -55,7 +55,7 @@ def test_function_String_Index_PartiallySymbolic():
 
 
 def test_function_String_Index_Symbolic():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
 
@@ -73,7 +73,7 @@ def test_function_String_Index_Symbolic():
 
 
 def test_function_String_Index():
-    b = ast.parse(test1.format("T")).body
+    b = ast_parse.parse(test1.format("T")).body
     p = Path(b,source=test1.format("T"))
     pg = PathGroup(p)
 
@@ -82,7 +82,7 @@ def test_function_String_Index():
 
     assert pg.completed[0].state.any_int('x') == 0
 
-    b = ast.parse(test1.format("t")).body
+    b = ast_parse.parse(test1.format("t")).body
     p = Path(b,source=test1.format("t"))
     pg = PathGroup(p)
 
@@ -91,7 +91,7 @@ def test_function_String_Index():
 
     assert pg.completed[0].state.any_int('x') == 3
 
-    b = ast.parse(test1.format("es")).body
+    b = ast_parse.parse(test1.format("es")).body
     p = Path(b,source=test1.format("es"))
     pg = PathGroup(p)
 
@@ -100,7 +100,7 @@ def test_function_String_Index():
 
     assert pg.completed[0].state.any_int('x') == 1
 
-    b = ast.parse(test1.format("st")).body
+    b = ast_parse.parse(test1.format("st")).body
     p = Path(b,source=test1.format("st"))
     pg = PathGroup(p)
 

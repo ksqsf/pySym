@@ -2,7 +2,7 @@ import logging
 import z3
 import ast
 import pyState.Compare, pyState.BoolOp
-from copy import deepcopy, copy
+from copy import copy
 
 logger = logging.getLogger("pyState:If")
 
@@ -19,7 +19,7 @@ def _handleConstraints(stateIf,stateElse,trueConstraint,element):
 
     # Check if statement. We'll have at least one instruction here, so treat this as a call
     # Saving off the current path so we can return to it and pick up at the next instruction
-    cs = deepcopy(stateIf.path)
+    cs = copy(stateIf.path)
     # Only push our stack if it's not empty
     if len(cs) == 0:
         cs.append(ast.Pass(lineno=0,col_offset=0))
@@ -33,7 +33,7 @@ def _handleConstraints(stateIf,stateElse,trueConstraint,element):
     # Update the else's path
     # Check if there is an else path we need to take
     if len(element.orelse) > 0:
-        cs = deepcopy(stateElse.path)
+        cs = copy(stateElse.path)
         if len(cs) > 0:
             stateElse.pushCallStack(cs,stateIf.ctx,stateIf.retID)
 

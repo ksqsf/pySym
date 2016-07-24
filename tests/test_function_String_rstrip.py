@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -50,7 +50,7 @@ x = "test".rstrip(pyState.String(1) + "t")
 """
 
 def test_function_String_rstrip_partiallySymbolic():
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
 
@@ -62,7 +62,7 @@ def test_function_String_rstrip_partiallySymbolic():
 
 
 def test_function_String_rstrip_Char():
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
 
@@ -72,7 +72,7 @@ def test_function_String_rstrip_Char():
 
 
 def test_function_String_rstrip_symbolicStrip():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
@@ -84,7 +84,7 @@ def test_function_String_rstrip_symbolicStrip():
     # "t" and the other hits "s"
     assert o == ['te', 'te', 'tes', 'tes', 'testt']
 
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -102,7 +102,7 @@ def test_function_String_rstrip_symbolicStrip():
 
 
 def test_function_String_rstrip_statesplit():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
 
@@ -114,7 +114,7 @@ def test_function_String_rstrip_statesplit():
 
 
 def test_function_String_rstrip():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 

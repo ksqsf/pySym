@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -86,7 +86,7 @@ x = l[i]
 """
 
 def test_pyState_symbolic_index():
-    b = ast.parse(test12).body
+    b = ast_parse.parse(test12).body
     p = Path(b,source=test12)
     pg = PathGroup(p)
     
@@ -99,7 +99,7 @@ def test_pyState_symbolic_index():
 
 
 def test_pyState_nestedSlice():
-    b = ast.parse(test11).body
+    b = ast_parse.parse(test11).body
     p = Path(b,source=test11)
     pg = PathGroup(p)
     
@@ -109,7 +109,7 @@ def test_pyState_nestedSlice():
 
 
 def test_pyState_SubscriptSlice():
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
     
@@ -117,7 +117,7 @@ def test_pyState_SubscriptSlice():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('x') == [1, 3.1415, 123]
 
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
     
@@ -125,7 +125,7 @@ def test_pyState_SubscriptSlice():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('x') == [123, 4, 3.1415, 2.2, 1]
 
-    b = ast.parse(test8).body
+    b = ast_parse.parse(test8).body
     p = Path(b,source=test8)
     pg = PathGroup(p)
 
@@ -133,7 +133,7 @@ def test_pyState_SubscriptSlice():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('x') == [1,2.2,3.1415,4,123,8,[1,2,3]]
 
-    b = ast.parse(test9).body
+    b = ast_parse.parse(test9).body
     p = Path(b,source=test9)
     pg = PathGroup(p)
 
@@ -141,7 +141,7 @@ def test_pyState_SubscriptSlice():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('x') == [1,2.2,3.1415,4,123,8,[1,2,3]][::-1]
 
-    b = ast.parse(test10).body
+    b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
     pg = PathGroup(p)
 
@@ -152,7 +152,7 @@ def test_pyState_SubscriptSlice():
 
 
 def test_pyState_AssignListFromSubscript():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
     
@@ -160,7 +160,7 @@ def test_pyState_AssignListFromSubscript():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('x') == [4,5]
 
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
     
@@ -171,7 +171,7 @@ def test_pyState_AssignListFromSubscript():
 
 
 def test_pyState_Subscript_MultiDimentional():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
     
@@ -181,7 +181,7 @@ def test_pyState_Subscript_MultiDimentional():
 
 
 def test_pyState_Subscript_VariableSubscript():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     
@@ -191,7 +191,7 @@ def test_pyState_Subscript_VariableSubscript():
 
 
 def test_pyState_Subscript_AssignToVar():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     

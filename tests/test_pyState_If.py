@@ -7,7 +7,7 @@ import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -44,7 +44,7 @@ if x == y or s.index('a') == 2:
 """
 
 def test_pySym_If_StateSplit():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
@@ -57,7 +57,7 @@ def test_pySym_If_StateSplit():
     # Two of those states should hit the y+=1
     assert sum([p.state.any_int('y') for p in pg.completed]) == 2
 
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -71,13 +71,13 @@ def test_pySym_If_StateSplit():
     assert sum([p.state.any_int('z') for p in pg.completed]) == 1
 
 def test_pySym_ifBoolOp():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     
     pg.explore()
 
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     

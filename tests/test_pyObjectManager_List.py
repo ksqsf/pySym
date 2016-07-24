@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -80,7 +80,7 @@ l = ["test",s.index('a')]
 """
 
 def test_pyObjectManager_List_StateSplit():
-    b = ast.parse(test12).body
+    b = ast_parse.parse(test12).body
     p = Path(b,source=test12)
     pg = PathGroup(p)
 
@@ -90,7 +90,7 @@ def test_pyObjectManager_List_StateSplit():
 
 
 def test_pyObjectManager_List_canBe():
-    b = ast.parse(test11).body
+    b = ast_parse.parse(test11).body
     p = Path(b,source=test11)
     pg = PathGroup(p)
 
@@ -108,7 +108,7 @@ def test_pyObjectManager_List_canBe():
 
 
 def test_pyObjectManager_List_setitem():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 
@@ -145,7 +145,7 @@ def test_pyObjectManager_List_setitem():
 
 
 def test_pyObjectManager_List_FunctionCalls():
-    b = ast.parse(test10).body
+    b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
     pg = PathGroup(p)
     
@@ -155,7 +155,7 @@ def test_pyObjectManager_List_FunctionCalls():
 
 
 def test_pyObjectManager_List_BitVec():
-    b = ast.parse(test8).body
+    b = ast_parse.parse(test8).body
     p = Path(b,source=test8)
     pg = PathGroup(p)
     
@@ -163,7 +163,7 @@ def test_pyObjectManager_List_BitVec():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1,2,1337,4]
 
-    b = ast.parse(test9).body
+    b = ast_parse.parse(test9).body
     p = Path(b,source=test9)
     pg = PathGroup(p)
     
@@ -174,7 +174,7 @@ def test_pyObjectManager_List_BitVec():
 
 
 def test_pyObjectManager_List_ReAssign():
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
     
@@ -184,7 +184,7 @@ def test_pyObjectManager_List_ReAssign():
 
 
 def test_pyObjectManager_List_varInList():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
     
@@ -192,7 +192,7 @@ def test_pyObjectManager_List_varInList():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1,2,3,4]
 
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -203,7 +203,7 @@ def test_pyObjectManager_List_varInList():
 
     # NOTE: This is correct behavior. Python resolves the object when creating the list
     # Updating the var later has no affect on the list
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
 
@@ -211,7 +211,7 @@ def test_pyObjectManager_List_varInList():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_list('l') == [1,2,[3,4]]
 
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
 
@@ -222,7 +222,7 @@ def test_pyObjectManager_List_varInList():
 
 
 def test_pyObjectManager_List_BasicAssign():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     
@@ -231,7 +231,7 @@ def test_pyObjectManager_List_BasicAssign():
     assert pg.completed[0].state.any_list('l') == [1,2.2,3]
 
 def test_pyObjectManager_List_NestedList():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     

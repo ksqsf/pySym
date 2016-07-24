@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pytest
@@ -21,7 +21,7 @@ z = 1
 
 def test_pySym_pass():
     # Testing we can pass :-)
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     p = p.step()[0]
     p = p.step()[0]

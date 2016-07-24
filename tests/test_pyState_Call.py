@@ -7,7 +7,7 @@ import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pytest
@@ -154,7 +154,7 @@ x = test()
 """
 
 def test_pySym_Return_Inside_Loop():
-    b = ast.parse(test14).body
+    b = ast_parse.parse(test14).body
     p = Path(b,source=test14)
     pg = PathGroup(p)
 
@@ -166,7 +166,7 @@ def test_pySym_Return_Inside_Loop():
 
 
 def test_pySym_Chained_AttrCall_Symbolic():
-    b = ast.parse(test13).body
+    b = ast_parse.parse(test13).body
     p = Path(b,source=test13)
     pg = PathGroup(p)
 
@@ -179,7 +179,7 @@ def test_pySym_Chained_AttrCall_Symbolic():
 
 
 def test_pySym_Chained_AttrCall():
-    b = ast.parse(test12).body
+    b = ast_parse.parse(test12).body
     p = Path(b,source=test12)
     pg = PathGroup(p)
 
@@ -191,7 +191,7 @@ def test_pySym_Chained_AttrCall():
 
 
 def test_pySym_Return_StateSplit():
-    b = ast.parse(test11).body
+    b = ast_parse.parse(test11).body
     p = Path(b,source=test11)
     pg = PathGroup(p)
 
@@ -204,7 +204,7 @@ def test_pySym_Return_StateSplit():
 
 
 def test_pySym_Call_KwArg_StateSplit():
-    b = ast.parse(test10).body
+    b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
     pg = PathGroup(p)
 
@@ -216,7 +216,7 @@ def test_pySym_Call_KwArg_StateSplit():
     assert set([p.state.any_list('l')[1] for p in pg.completed]) == set(range(8)) 
 
 def test_pySym_Call_arg_StateSplit():
-    b = ast.parse(test9).body
+    b = ast_parse.parse(test9).body
     p = Path(b,source=test9)
     pg = PathGroup(p)
 
@@ -229,7 +229,7 @@ def test_pySym_Call_arg_StateSplit():
 
 
 def test_pySym_functionNestingThree():
-    b = ast.parse(test8).body
+    b = ast_parse.parse(test8).body
     p = Path(b,source=test8)
     pg = PathGroup(p)
     pg.explore()
@@ -238,7 +238,7 @@ def test_pySym_functionNestingThree():
 
 def test_pySym_functionNestingTwo():
     # More intense nesting
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
     pg.explore()
@@ -247,7 +247,7 @@ def test_pySym_functionNestingTwo():
 
 def test_pySym_functionNesting():
     # Test out calling functions from functions
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
 
@@ -260,7 +260,7 @@ def test_pySym_functionNesting():
 
 def test_pySym_returnToAssign():
     # Testing that we can return a function to a variable
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     p = p.step()[0]
     p = p.step()[0]
@@ -272,7 +272,7 @@ def test_pySym_returnToAssign():
 
 
 def test_pySym_callwithKeyWordAndDefaultReturn():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -285,7 +285,7 @@ def test_pySym_callwithKeyWordAndDefaultReturn():
 
 
 def test_pySym_callwithKeyWordAndDefault():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
@@ -297,7 +297,7 @@ def test_pySym_callwithKeyWordAndDefault():
     
 
 def test_pySym_callThreeArgs():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     
@@ -311,7 +311,7 @@ def test_pySym_callThreeArgs():
 
 
 def test_pySym_CallNoArgs():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 

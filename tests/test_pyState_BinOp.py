@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 import pytest
@@ -93,7 +93,7 @@ x = s.rstrip("x") * 2
 """
 
 def test_pySym_BinOp_StatePropagation():
-    b = ast.parse(test15).body
+    b = ast_parse.parse(test15).body
     p = Path(b,source=test15)
     pg = PathGroup(p)
     pg.explore()
@@ -108,7 +108,7 @@ def test_pySym_BinOp_StatePropagation():
 
 
 def test_pySym_BinOp_StringMult():
-    b = ast.parse(test14).body
+    b = ast_parse.parse(test14).body
     p = Path(b,source=test14)
     pg = PathGroup(p)
     pg.explore()
@@ -118,7 +118,7 @@ def test_pySym_BinOp_StringMult():
 
 
 def test_pySym_BinOp_StateSplit():
-    b = ast.parse(test13).body
+    b = ast_parse.parse(test13).body
     p = Path(b,source=test13)
     pg = PathGroup(p)
     pg.explore()
@@ -129,7 +129,7 @@ def test_pySym_BinOp_StateSplit():
 
 
 def test_pySym_BinOp_ListMult():
-    b = ast.parse(test12).body
+    b = ast_parse.parse(test12).body
     p = Path(b,source=test12)
     pg = PathGroup(p)
     pg.explore()
@@ -140,7 +140,7 @@ def test_pySym_BinOp_ListMult():
 
 
 def test_pySym_BinOp_ListConcat():
-    b = ast.parse(test11).body
+    b = ast_parse.parse(test11).body
     p = Path(b,source=test11)
     pg = PathGroup(p)
     pg.explore()
@@ -150,7 +150,7 @@ def test_pySym_BinOp_ListConcat():
 
 
 def test_pySym_BinOp_StrConcat():
-    b = ast.parse(test10).body
+    b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
     pg = PathGroup(p)
     pg.explore()
@@ -165,7 +165,7 @@ def test_pySym_BinOp_StrConcat():
 
 
 def test_pySym_BinOp_Exp():
-    b = ast.parse(test9).body
+    b = ast_parse.parse(test9).body
     p = Path(b,source=test9)
     pg = PathGroup(p)
     pg.explore()
@@ -181,7 +181,7 @@ def test_pySym_BinOp_SafeBitVec():
     #######
     # Add #
     #######
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
     pg.explore()
@@ -192,7 +192,7 @@ def test_pySym_BinOp_SafeBitVec():
     #######
     # Mul #
     #######
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
     pg.explore()
@@ -203,7 +203,7 @@ def test_pySym_BinOp_SafeBitVec():
     #######
     # Sub #
     #######
-    b = ast.parse(test8).body
+    b = ast_parse.parse(test8).body
     p = Path(b,source=test8)
     pg = PathGroup(p)
     pg.explore()
@@ -215,7 +215,7 @@ def test_pySym_BinOp_SafeBitVec():
 
 
 def test_pySym_BinOp_BitStuff():
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
     pg.explore()
@@ -225,7 +225,7 @@ def test_pySym_BinOp_BitStuff():
 
 
 def test_pySym_BinOp_Xor():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
     pg.explore()
@@ -238,7 +238,7 @@ def test_pySym_BinOp():
     #######
     # Add #
     #######
-    b = ast.parse(test1.format("+")).body
+    b = ast_parse.parse(test1.format("+")).body
     p = Path(b,source=test1.format("+"))
     # Step through program
     p = p.step()[0]
@@ -251,7 +251,7 @@ def test_pySym_BinOp():
     #######
     # Sub #
     #######
-    b = ast.parse(test1.format("-")).body
+    b = ast_parse.parse(test1.format("-")).body
     p = Path(b,source=test1.format("-"))
     # Step through program
     p = p.step()[0]
@@ -264,7 +264,7 @@ def test_pySym_BinOp():
     #######
     # Mul #
     #######
-    b = ast.parse(test1.format("*")).body
+    b = ast_parse.parse(test1.format("*")).body
     p = Path(b,source=test1.format("*"))
     # Step through program
     p = p.step()[0]
@@ -277,7 +277,7 @@ def test_pySym_BinOp():
     #######
     # Div #
     #######
-    b = ast.parse(test1.format("/")).body
+    b = ast_parse.parse(test1.format("/")).body
     p = Path(b,source=test1.format("/"))
     # Step through program
     p = p.step()[0]
@@ -290,7 +290,7 @@ def test_pySym_BinOp():
     #######
     # Mod #
     #######
-    b = ast.parse(test2.format("%")).body
+    b = ast_parse.parse(test2.format("%")).body
     p = Path(b,source=test2.format("%"))
     # Step through program
     p = p.step()[0]
@@ -301,7 +301,7 @@ def test_pySym_BinOp():
     assert p.state.any_int('x') == 2
 
 def test_mixedTypes():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     # Step through program
     p = p.step()[0]

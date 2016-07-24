@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -37,7 +37,7 @@ e = "Feet"
 """
 
 def test_pyObjectManager_Char_mustBe():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -59,7 +59,7 @@ def test_pyObjectManager_Char_mustBe():
 
 
 def test_pyObjectManager_Char_strPrint():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
@@ -73,7 +73,7 @@ def test_pyObjectManager_Char_strPrint():
     
 
 def test_pyObjectManager_Char_setTo():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
 
@@ -87,7 +87,7 @@ def test_pyObjectManager_Char_setTo():
 
 
 def test_pyObjectManager_Char_isStatic():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 

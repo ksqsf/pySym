@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast
+import ast_parse
 import z3
 from pyState import State
 import pyState.Assign
@@ -43,7 +43,7 @@ x = "testt".rstrip(s)[-1]
 """
 
 def test_assign_statetrack():
-    b = ast.parse(test9).body
+    b = ast_parse.parse(test9).body
     p = Path(b,source=test9)
     pg = PathGroup(p)
     
@@ -56,7 +56,7 @@ def test_assign_statetrack():
 
 
 def test_assign_stateSplit():
-    b = ast.parse(test8).body
+    b = ast_parse.parse(test8).body
     p = Path(b,source=test8)
     pg = PathGroup(p)
     
@@ -67,7 +67,7 @@ def test_assign_stateSplit():
 
 
 def test_list_with_strings():
-    b = ast.parse(test7).body
+    b = ast_parse.parse(test7).body
     p = Path(b,source=test7)
     pg = PathGroup(p)
     
@@ -78,7 +78,7 @@ def test_list_with_strings():
 
 
 def test_recursiveCopy():
-    b = ast.parse(test6).body
+    b = ast_parse.parse(test6).body
     p = Path(b,source=test6)
     pg = PathGroup(p)
     
@@ -99,7 +99,7 @@ def test_recursiveCopy():
 
 
 def test_any_n_real():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
     
@@ -111,7 +111,7 @@ def test_any_n_real():
     assert pg.completed[0].state.any_n_real('x',10) == [3.1415]
     assert pg.completed[0].state.any_n_real('x',10) == [3.1415]
 
-    b = ast.parse(test5).body
+    b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
     pg = PathGroup(p)
 
@@ -125,7 +125,7 @@ def test_any_n_real():
 
 
 def test_any_n_int():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     
@@ -137,7 +137,7 @@ def test_any_n_int():
     assert pg.completed[0].state.any_n_int('x',10) == [1]
     assert pg.completed[0].state.any_n_int('x',10) == [1]
 
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
     
@@ -152,7 +152,7 @@ def test_any_n_int():
 
 
 def test_assignInt():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
     pg.explore()
@@ -171,7 +171,7 @@ def test_assignInt():
     assert s.any_int('x') == 1
     
     # Try assigning again
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
     pg.explore()
@@ -192,7 +192,7 @@ def test_assignInt():
 
 
 def test_assignFloat():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
     pg.explore()
@@ -216,7 +216,7 @@ def test_assignFloat():
     assert s.any_real('x') == 3.1415
 
 def test_copy():
-    b = ast.parse("a = 1").body
+    b = ast_parse.parse("a = 1").body
     p = Path(b,source="a = 1")
 
     s = p.state
@@ -235,7 +235,7 @@ def test_copy():
     #assert s2.objectManager.localVars == {0: {}, 1: {'ret': {'count': 0, 'varType': 'z3.IntSort()'}}}
 
 def test_any_int():
-    b = ast.parse("x = 12").body
+    b = ast_parse.parse("x = 12").body
     p = Path(b,source="x = 12")
     pg = PathGroup(p)
     pg.explore()
@@ -247,7 +247,7 @@ def test_any_int():
     
 
 def test_getZ3Object():
-    b = ast.parse("x = 12").body
+    b = ast_parse.parse("x = 12").body
     p = Path(b,source="x = 12")
     pg = PathGroup(p)
     pg.explore()

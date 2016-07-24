@@ -6,7 +6,7 @@ import logging
 import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
-import ast
+import ast_parse
 import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
@@ -38,7 +38,7 @@ d = pyState.String(5)
 """
 
 def test_pyObjectManager_String_isStatic():
-    b = ast.parse(test4).body
+    b = ast_parse.parse(test4).body
     p = Path(b,source=test4)
     pg = PathGroup(p)
 
@@ -55,7 +55,7 @@ def test_pyObjectManager_String_isStatic():
 
 
 def test_pyObjectManager_String_canBe_mustBe_String():
-    b = ast.parse(test3).body
+    b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
     pg = PathGroup(p)
 
@@ -75,7 +75,7 @@ def test_pyObjectManager_String_canBe_mustBe_String():
 
 
 def test_pyObjectMAnager_String_mustBe():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 
@@ -89,7 +89,7 @@ def test_pyObjectMAnager_String_mustBe():
 
 
 def test_pyObjectManager_String_canBe():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 
@@ -106,7 +106,7 @@ def test_pyObjectManager_String_canBe():
 
 
 def test_pyObjectManager_String_ListComp():
-    b = ast.parse(test2).body
+    b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
 
@@ -117,7 +117,7 @@ def test_pyObjectManager_String_ListComp():
 
 
 def test_pyObjectManager_String_Assign():
-    b = ast.parse(test1).body
+    b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
 
