@@ -21,22 +21,46 @@ def _handleNum(state,left,right,op):
         if type(left) is BitVec:
             # Check for over and underflows
             state.solver.add(pyState.z3Helpers.bvadd_safe(leftZ3Object,rightZ3Object))
-        ret = leftZ3Object + rightZ3Object
+
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() + right.getValue()
+
+        else:
+            ret = leftZ3Object + rightZ3Object
 
     elif type(op) == ast.Sub:
         if type(left) is BitVec:
             state.solver.add(pyState.z3Helpers.bvsub_safe(leftZ3Object,rightZ3Object))
-        ret = leftZ3Object - rightZ3Object
+
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() - right.getValue()
+
+        else:
+            ret = leftZ3Object - rightZ3Object
 
     elif type(op) == ast.Mult:
         if type(left) is BitVec:
             state.solver.add(pyState.z3Helpers.bvmul_safe(leftZ3Object,rightZ3Object))
-        ret = leftZ3Object * rightZ3Object
+
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() * right.getValue()
+
+        else:
+            ret = leftZ3Object * rightZ3Object
 
     elif type(op) == ast.Div:
         if type(left) is BitVec:
             state.solver.add(pyState.z3Helpers.bvdiv_safe(leftZ3Object,rightZ3Object))
-        ret = leftZ3Object / rightZ3Object
+
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() / right.getValue()
+
+        else:
+            ret = leftZ3Object / rightZ3Object
 
     elif type(op) == ast.Mod:
         # Z3 doesn't have native support for Real type modular arithmetic
@@ -67,22 +91,56 @@ def _handleNum(state,left,right,op):
             ret = mod(leftZ3Object,rightZ3Object)
 
         else:
-            ret = leftZ3Object % rightZ3Object
+
+            # Keep this out of the Z3 solver!
+            if left.isStatic() and right.isStatic():
+                ret = left.getValue() % right.getValue()
+
+            else:
+                ret = leftZ3Object % rightZ3Object
 
     elif type(op) == ast.BitXor:
-        ret = leftZ3Object ^ rightZ3Object
+
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() ^ right.getValue()
+
+        else:
+            ret = leftZ3Object ^ rightZ3Object
 
     elif type(op) == ast.BitOr:
-        ret = leftZ3Object | rightZ3Object
+
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() | right.getValue()
+
+        else:
+            ret = leftZ3Object | rightZ3Object
 
     elif type(op) == ast.BitAnd:
-        ret = leftZ3Object & rightZ3Object
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() & right.getValue()
+
+        else:
+            ret = leftZ3Object & rightZ3Object
 
     elif type(op) == ast.LShift:
-        ret = leftZ3Object << rightZ3Object
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() << right.getValue()
+
+        else:
+            ret = leftZ3Object << rightZ3Object
 
     elif type(op) == ast.RShift:
-        ret = leftZ3Object >> rightZ3Object
+
+        # Keep this out of the Z3 solver!
+        if left.isStatic() and right.isStatic():
+            ret = left.getValue() >> right.getValue()
+
+        else:
+            ret = leftZ3Object >> rightZ3Object
 
     # TODO: This one will fail if we use BitVecs.. Maybe think about check/convert?
     elif type(op) == ast.Pow:
@@ -95,7 +153,13 @@ def _handleNum(state,left,right,op):
             state.addConstraint(tmp.getZ3Object() >= 0)
             ret = tmp.getZ3Object()
         else:
-            ret = leftZ3Object ** rightZ3Object
+
+            # Keep this out of the Z3 solver!
+            if left.isStatic() and right.isStatic():
+                ret = left.getValue() ** right.getValue()
+
+            else:
+                ret = leftZ3Object ** rightZ3Object
         #ret = leftZ3Object ** rightZ3Object
 
     else:
@@ -120,9 +184,16 @@ def _handleNum(state,left,right,op):
             retVar = state.getVar(varName='BinOpTemp',varType=left_t,kwargs = left_args)
 
         retVar.increment()
+
         # Now that we have a clean variable to return, add constraints and return it
         logger.debug("Adding constraint {0} == {1}".format(retVar.getZ3Object(),ret))
-        state.addConstraint(retVar.getZ3Object() == ret)
+
+        # If it turns out we're dealing with constants, just set it directly.
+        if type(ret) in [int,float]:
+            retVar.setTo(ret)
+        else:
+            state.addConstraint(retVar.getZ3Object() == ret)
+
         #print([x for x in state.solver.assertions()])
         return [retVar.copy()]
 
