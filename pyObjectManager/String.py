@@ -99,18 +99,28 @@ class String:
             # For now, just add as many characters as there was originally
             for val in var:
                 self._addChar()
+                self[-1].setTo(val)
+                """
                 if type(val) is str:
-                    self.state.addConstraint(self[-1].getZ3Object() == ord(val))
+                    #self.state.addConstraint(self[-1].getZ3Object() == ord(val))
+                    self[-1].setTo(ord(val)
                 else:
-                    self.state.addConstraint(self[-1].getZ3Object() == val.getZ3Object())
+                    #self.state.addConstraint(self[-1].getZ3Object() == val.getZ3Object())
+                    self[-1].setTo(val)
+                """
         
         else:
             # Only set as much as we can.
             for (val,c) in zip(var,self):
+                c.setTo(val)
+                """
                 if type(val) is str:
-                    self.state.addConstraint(c.getZ3Object() == ord(val))
+                    #self.state.addConstraint(c.getZ3Object() == ord(val))
+                    c.setTo(ord(val))
                 else:
-                    self.state.addConstraint(c.getZ3Object() == val.getZ3Object())
+                    #self.state.addConstraint(c.getZ3Object() == val.getZ3Object())
+                    c.setTo(val)
+                """
 
 
     def _isSame(self,length=None,**args):

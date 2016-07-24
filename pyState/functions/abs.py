@@ -37,19 +37,26 @@ def handle(state,call,obj,ctx=None):
             logger.error(err)
             raise Exception(err)
         
-        oldObj = obj.getZ3Object()
+        oldObj = obj.copy()
 
-        newObj = obj.getZ3Object(increment=True)
+        obj.increment()
+        newObj = obj
 
-        # Add a little z3 If statement to mimic abs() call
-        s.addConstraint(
-            newObj == 
-            z3.If(
-                oldObj > 0,
-                oldObj,
-                -oldObj
+        # Take shortcut if we know these values are static-ish
+        if oldObj.isStatic():
+            newObj.setTo(abs(oldObj.getValue()))
+
+        else:
+
+            # Add a little z3 If statement to mimic abs() call
+            s.addConstraint(
+                newObj.getZ3Object() == 
+                z3.If(
+                    oldObj.getZ3Object() > 0,
+                    oldObj.getZ3Object(),
+                    -oldObj.getZ3Object()
+                    )
                 )
-            )
 
         retList.append(obj.copy())
 

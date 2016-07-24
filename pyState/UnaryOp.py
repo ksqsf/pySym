@@ -64,12 +64,18 @@ def handle(state,element,ctx=None):
         newVar.increment()
     
         if type(op) == ast.USub:
-            state.addConstraint(newVar.getZ3Object() == -target.getZ3Object())
+            # Optimize if we can
+            if target.isStatic():
+                newVar.setTo(target.getValue() * -1)
+            else:
+                state.addConstraint(newVar.getZ3Object() == -target.getZ3Object())
 
         elif type(op) == ast.UAdd:
-            state.addConstraint(newVar.getZ3Object() == target.getZ3Object())
+            #state.addConstraint(newVar.getZ3Object() == target.getZ3Object())
+            newVar.setTo(target)
 
         elif type(op) == ast.Not:
+            # TODO: Verify functionality here... Should be able to optimize like I did with the other two, but need to check how "Not" is being dealt with
             state.addConstraint(newVar.getZ3Object() == z3.Not(target.getZ3Object()))
 
         elif type(op) == ast.Invert:

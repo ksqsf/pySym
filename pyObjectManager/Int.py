@@ -49,6 +49,7 @@ class Int:
 
 
     def increment(self):
+        self.value = None
         self.count += 1
         
     def getZ3Object(self,increment=False):

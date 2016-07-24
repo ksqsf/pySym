@@ -19,10 +19,12 @@ from pyObjectManager.List import List
 test1 = """
 x = 10
 y = -10
+z = pyState.Int()
 a = abs(x)
 b = abs(y)
 c = abs(10)
 d = abs(-10)
+e = abs(z)
 """
 
 def test_funcion_abs():

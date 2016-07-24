@@ -50,6 +50,7 @@ class BitVec:
         """
         Increment the counter
         """
+        self.value = None
         self.count += 1
         
     def getZ3Object(self,increment=False):
