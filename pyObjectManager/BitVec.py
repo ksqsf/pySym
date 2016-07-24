@@ -6,7 +6,7 @@ class BitVec:
     Define a BitVec
     """
     
-    def __init__(self,varName,ctx,size,count=None,state=None,increment=False):
+    def __init__(self,varName,ctx,size,count=None,state=None,increment=False,value=None):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(size) is int
@@ -15,6 +15,7 @@ class BitVec:
         self.varName = varName
         self.ctx = ctx
         self.size = size
+        self.value = value
 
         if state is not None:
             self.setState(state)
@@ -32,7 +33,8 @@ class BitVec:
             ctx = self.ctx,
             size = self.size,
             count = self.count,
-            state = self.state if hasattr(self,"state") else None
+            state = self.state if hasattr(self,"state") else None,
+            value = self.value
         )
 
 
@@ -57,8 +59,12 @@ class BitVec:
         
         if increment:
             self.increment()
-        
-        return z3.BitVec("{0}{1}@{2}".format(self.count,self.varName,self.ctx),self.size,ctx=self.state.solver.ctx)
+    
+        # If we're not static    
+        if self.value == None:
+            return z3.BitVec("{0}{1}@{2}".format(self.count,self.varName,self.ctx),self.size,ctx=self.state.solver.ctx)
+
+        return z3.BitVecVal(self.value,self.size)
     
     def _isSame(self,size):
         """
@@ -76,10 +82,19 @@ class BitVec:
         assert type(var) in [int, BitVec]
 
         # Add the constraints
+
+        # Intentionally trying to unclutter the z3 solver here.
         if type(var) is int:
-            self.state.addConstraint(self.getZ3Object() == var)
+            #self.state.addConstraint(self.getZ3Object() == var)
+            self.value = var
+
+        elif var.isStatic():
+            self.value = var.getValue()
+
         else:
+            self.value = None
             self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+
 
     def isStatic(self):
         """
@@ -87,8 +102,8 @@ class BitVec:
         Also returns True if object has only one possibility
         """
         # If this is a static BitVec
-        #if self.value is not None:
-        #    return True
+        if self.value is not None:
+            return True
 
         # If this is a BitVec with only one possibility
         if len(self.state.any_n_int(self,2)) == 1:
@@ -102,8 +117,8 @@ class BitVec:
         Resolves the value of this BitVec. Assumes that isStatic method is called
         before this is called to ensure the value is not symbolic
         """
-        #if self.value is not None:
-        #    return self.value
+        if self.value is not None:
+            return self.value
 
         return self.state.any_int(self)
 
@@ -111,7 +126,8 @@ class BitVec:
         """
         str will change this object into a possible representation by calling state.any_int
         """
-        return str(self.state.any_int(self))
+        #return str(self.state.any_int(self))
+        return str(self.getValue())
 
 
     def canBe(self,var):
