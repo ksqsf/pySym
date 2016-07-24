@@ -11,8 +11,9 @@ to do just that.
 
 .. code-block:: python
 
-    import logging
-    logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+    # Enable logging if you want. It's faster without.
+    #import logging
+    #logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     from pyPath import Path
     import ast_parse
     import Colorer
@@ -44,7 +45,7 @@ to do just that.
     x = [x for x in range(50) if isprime(x) == 1]
     """
 
-    b = ast_parser.parse(source).body
+    b = ast_parse.parse(source).body
     p = Path(b,source=source)
     pg = PathGroup(p,discardFailures=True)
 
