@@ -74,10 +74,13 @@ def test_pyObjectManager_Int_setTo():
     x = pg.completed[0].state.getVar('x')
     y = pg.completed[0].state.getVar('y')
     x.setTo(1337)
+
     assert pg.completed[0].state.any_int('x') == 1337
     x.increment()
     x.setTo(y)
-    assert pg.completed[0].state.any_int('x') == 5
+
+    #assert pg.completed[0].state.any_int('x') == 5
+    assert x.getValue() == 5
 
 
 def test_pyObjectManager_Int_isStatic():

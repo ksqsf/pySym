@@ -37,7 +37,7 @@ class Char:
             ctx = self.ctx,
             count = self.count,
             variable = self.variable.copy(),
-            state = self.state if hasattr(self,"state") else None
+            state = self.state if hasattr(self,"state") else None,
         )
 
     def __str__(self):
@@ -59,13 +59,15 @@ class Char:
 
         # Go ahead and add the constraints
         if type(var) is str:
-            self.state.addConstraint(self.getZ3Object() == ord(var))
+            #self.state.addConstraint(self.getZ3Object() == ord(var))
+            self.variable.setTo(ord(var))
         
         else:
             if type(var) is String:
                 var = var[0]
             
-            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+            #self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+            self.variable.setTo(var.variable)
 
 
     def setState(self,state):
@@ -97,17 +99,20 @@ class Char:
         Returns True if this object is a static variety (i.e.: "a").
         Also returns True if object has only one possibility
         """
-        if len(self.state.any_n_int(self,2)) == 1:
-            return True
+        return self.variable.isStatic()
+        #if len(self.state.any_n_int(self,2)) == 1:
+        #    return True
 
-        return False
+        #return False
 
     def getValue(self):
         """
         Resolves the value of this Char. Assumes that isStatic method is called
         before this is called to ensure the value is not symbolic
         """
-        return chr(self.state.any_int(self))
+        #return chr(self.state.any_int(self))
+        return chr(self.variable.getValue())
+
 
     def mustBe(self,var):
         """
@@ -119,9 +124,16 @@ class Char:
         if not self.canBe(var):
             return False
         
+        # Utilize the BitVec's methods here
+        if type(var) is str:
+            return self.variable.mustBe(ord(var))
+
+        if type(var) is Char:
+            return self.variable.mustBe(var.variable)        
+
         # If we can be, determine if this is the only option
-        if len(self.state.any_n_int(self,2)) == 1 and len(self.state.any_n_int(var,2)) == 1:
-            return True
+        #if len(self.state.any_n_int(self,2)) == 1 and len(self.state.any_n_int(var,2)) == 1:
+        #    return True
         
         # Looks like we're only one option
         return False
@@ -139,18 +151,20 @@ class Char:
             return False
         
         if type(var) is str:
-            s = self.state.copy()
-            s.addConstraint(self.getZ3Object() == ord(var))
-            if s.isSat():
-                return True
-            return False
+            return self.variable.canBe(ord(var))
+            #s = self.state.copy()
+            #s.addConstraint(self.getZ3Object() == ord(var))
+            #if s.isSat():
+            #    return True
+            #return False
 
         elif type(var) is Char:
-            s = self.state.copy()
-            s.addConstraint(self.getZ3Object() == var.getZ3Object())
-            if s.isSat():
-                return True
-            return False
+            return self.variable.canBe(var.variable)
+            #s = self.state.copy()
+            #s.addConstraint(self.getZ3Object() == var.getZ3Object())
+            #if s.isSat():
+            #    return True
+            #return False
 
 
 

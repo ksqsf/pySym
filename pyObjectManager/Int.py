@@ -106,9 +106,18 @@ class Int:
         assert type(var) in [Int, int]
 
         # Add the constraints
+
+        # If we're adding a static variety, don't clutter up the solver
         if type(var) is int:
-            self.state.addConstraint(self.getZ3Object() == var)
+            #self.state.addConstraint(self.getZ3Object() == var)
+            self.value = var            
+
+        elif var.isStatic():
+            self.value = var.getValue()
+
+        # If we're setting this to a variable, make sure we're not set as static
         else:
+            self.value = None
             self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
 
     def __str__(self):

@@ -859,7 +859,8 @@ class State():
 
                         var.append(var=t,kwargs=args)
                         if t in [Int, Real, BitVec]:
-                            self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
+                            var[-1].setTo(elm)
+                            #self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
                         newVarList.append(var.copy())
                 varList = newVarList
 
@@ -876,7 +877,8 @@ class State():
                         if len(elm_resolved) > 1:
                             var = self.recursiveCopy(var)
                         var.append(t)
-                        self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
+                        var[-1].setTo(elm)
+                        #self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
                         newVarList.append(var.copy())
 
                 varList = newVarList
@@ -938,10 +940,11 @@ class State():
                         
                         # Add constraints
                         var.append(var=t,kwargs=args)
-                        if pyState.z3Helpers.isZ3Object(elm):
-                            self.addConstraint(var[-1].getZ3Object() == elm)
-                        elif type(elm) in [Int, Real, BitVec]:
-                            self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
+                        var[-1].setTo(elm)
+                        #if pyState.z3Helpers.isZ3Object(elm):
+                        #    self.addConstraint(var[-1].getZ3Object() == elm)
+                        #elif type(elm) in [Int, Real, BitVec]:
+                        #    self.addConstraint(var[-1].getZ3Object() == elm.getZ3Object())
                         
                         # Add to the new var List
                         newVarList.append(var.copy())

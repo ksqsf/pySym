@@ -113,3 +113,53 @@ class BitVec:
         """
         return str(self.state.any_int(self))
 
+
+    def canBe(self,var):
+        """
+        Test if this BitVec can be equal to the given variable
+        Returns True or False
+        """
+        if type(var) not in [Int, BitVec,int]:
+            return False
+
+        # Ask the solver
+        s = self.state.copy()
+
+        if type(var) in [Int, BitVec]:
+            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+
+        else:
+            s.addConstraint(self.getZ3Object() == var)
+
+        if s.isSat():
+            return True
+
+        return False
+
+    def mustBe(self,var):
+        """
+        Test if this BitVec must be equal to another variable
+        Returns True or False
+        """
+        if not self.canBe(var):
+            return False
+
+
+        # Can we be something else?
+        if len(self.state.any_n_int(self,2)) == 2:
+            return False
+
+        # Ok, we can't be anything else. How about the var?
+        if len(self.state.any_n_int(var,2)) == 2:
+            return False
+
+        # So we can be, now must we?
+        #if len(self.state.any_n_int(self,2)) == 1:
+        #    return True
+
+        #return False
+        # We CAN be the same, and neither of us can be different. We MUST be the same
+        return True
+
+        
+from pyObjectManager.Int import Int

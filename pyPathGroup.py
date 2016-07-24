@@ -2,10 +2,11 @@ from pyPath import Path
 
 class PathGroup:
 
-    def __init__(self,path=None,discardFailures=None):
+    def __init__(self,path=None,discardFailures=None,discardCompleted=None):
         """
         (optional) path = starting path object for path group
         (optional) discardFailure = Should we throw away bad paths to save on memory?
+        (optional) discardCompleted = Should we discard completed paths to save on memory?
         """
 
         # Init the groups
@@ -15,6 +16,8 @@ class PathGroup:
         self.errored = []
         self.found = []
         self.discardFailures = False if discardFailures is None else discardFailures
+        self.discardCompleted = False if discardCompleted is None else discardCompleted
+
 
     def __str__(self):
         """
@@ -59,6 +62,10 @@ class PathGroup:
             if self.discardFailures:
                 self.deadended = []
                 self.errored = []
+
+            # If we're really looking for something, throw away completed too
+            if self.discardCompleted:
+                self.completed = []
             
             if find:
                 # Check for any path that has made it here

@@ -102,9 +102,19 @@ class Real:
         assert type(var) in [Real, float, Int, int]
 
         # Add the constraints
+
+        # If we're adding static, don't clutter up the solve
         if type(var) in [float, int]:
-            self.state.addConstraint(self.getZ3Object() == var)
+            #self.state.addConstraint(self.getZ3Object() == var)
+            self.value = var
+
+        elif var.isStatic():
+            self.value = var.getValue()
+
         else:
+            # Be sure to reset our static value
+            self.value = None
+
             self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
 
     def __str__(self):
