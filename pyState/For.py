@@ -87,7 +87,8 @@ def _handle(state,element,newIter):
     
         if type(target) in [Int, Real, BitVec, Char]:
             # Copy the constraint
-            target.state.addConstraint(target.getZ3Object() == elm.getZ3Object())
+            #target.state.addConstraint(target.getZ3Object() == elm.getZ3Object())
+            target.setTo(elm)
 
         elif type(target) in [String, List]:
             target.setTo(elm,clear=True)

@@ -342,7 +342,8 @@ class State():
             newVar = self.getVar(varName,ctx=ctx,varType=t,kwargs=kwargs)
             newVar.increment()
             # Add the constraints to the solver
-            self.addConstraint(var.getZ3Object() == newVar.getZ3Object())
+            #self.addConstraint(var.getZ3Object() == newVar.getZ3Object())
+            newVar.setTo(var)
             return newVar.copy()
 
         elif type(var) is List:
@@ -589,7 +590,9 @@ class State():
             # We don't want static variables...
             kwargs.pop("value",None) if kwargs is not None else None
             dest_arg = self.getVar(call.keywords[i].arg,varType=varType,kwargs=kwargs)
-            self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
+            #self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
+            dest_arg.increment()
+            dest_arg.setTo(caller_arg)
             # Remove arg after it has been satisfied
             unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
             logger.debug("Call: Setting keyword argument {0} = {1}".format(type(dest_arg),type(caller_arg)))
@@ -607,7 +610,9 @@ class State():
             # We don't want static variables...
             kwargs.pop("value",None) if kwargs is not None else None
             dest_arg = self.getVar(arg.arg,varType=varType,kwargs=kwargs)
-            self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
+            #self.addConstraint(dest_arg.getZ3Object(increment=True) == caller_arg.getZ3Object())
+            dest_arg.increment()
+            dest_arg.setTo(caller_arg)
             logger.debug("Call: Setting default argument {0} = {1}".format(type(dest_arg),type(caller_arg)))
 
        

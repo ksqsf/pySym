@@ -177,7 +177,8 @@ def _handleSlice(state,sub_object,sub_slice):
             j = 0
             for i in range(lower,upper,step):
                 if type(sub_object[i]) in [Int, Real, BitVec]:
-                    state.addConstraint(newObject[j].getZ3Object() == sub_object[i].getZ3Object())
+                    #state.addConstraint(newObject[j].getZ3Object() == sub_object[i].getZ3Object())
+                    newObject[j].setTo(sub_object[i])
                 else:
                     newObject[j] = state.recursiveCopy(sub_object[i])
                 j += 1
