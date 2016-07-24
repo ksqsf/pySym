@@ -1603,7 +1603,7 @@ class State():
             retVar=self.retVar,
             callStack=self.copyCallStack(),
             path=[copy(x) for x in self.path],
-            backtrace=deepcopy(self.backtrace),
+            backtrace=copy(self.backtrace),
             retID=copy(self.retID),
             loop=copy(self.loop),
             maxRetID=self.maxRetID,
