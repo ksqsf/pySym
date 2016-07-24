@@ -9,7 +9,7 @@ from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
 from pyObjectManager.Char import Char
-from copy import deepcopy
+from copy import copy
 
 logger = logging.getLogger("pyState:For")
 
@@ -41,7 +41,7 @@ def _handle(state,element,newIter):
 
     # If we're out of things to iterate, take the else
     if newIter.length() == 0:
-        cs = deepcopy(state.path)
+        cs = copy(state.path) #[copy(x) for x in state.path]
         if len(cs) > 0:
             state.pushCallStack(path=cs)
 
@@ -58,7 +58,7 @@ def _handle(state,element,newIter):
     element.iter = newIter
 
     # Setup our callstack for this loop
-    cs = deepcopy(state.path)
+    cs = copy(state.path) 
 
     # Don't want to push an empth path into call stack for now
     # If this is a new loop, save the previous info
@@ -72,7 +72,7 @@ def _handle(state,element,newIter):
     state.path = element.body
 
     # If state should get a copy of the loop we're now in
-    state.loop = element # deepcopy(element)
+    state.loop = element 
 
 
     # Create the target var
@@ -150,7 +150,7 @@ def handle(state,element):
     ret = []
 
     for newIter in newIters:
-        ret += _handle(state.copy(),deepcopy(element),newIter)
+        ret += _handle(state.copy(),copy(element),newIter)
 
     return ret
 

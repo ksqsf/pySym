@@ -1,7 +1,7 @@
 import z3, z3util
 import ast
 import logging
-from copy import copy, deepcopy
+from copy import copy
 import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For, pyState.ListComp, pyState.UnaryOp, pyState.GeneratorExp
 import random
 import os.path
