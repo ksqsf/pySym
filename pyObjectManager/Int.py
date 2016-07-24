@@ -104,6 +104,15 @@ class Int:
         """
         Sets this Int object to be equal/copy of another. Type can be int or Int
         """
+        # Floats are OK so long as they are equal to an int
+        if type(var) is float:
+            if int(var) == var:
+                var = int(var)
+            else:
+                err = "Attempting to set float {0} to int {1}!".format(var,int(var))
+                logger.error(err)
+                raise Exception(err)
+
         assert type(var) in [Int, int]
 
         # Add the constraints

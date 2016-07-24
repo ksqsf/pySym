@@ -42,63 +42,115 @@ def _handleNum(state,element,value,op):
     
         if hasRealComponent(valueVar) or hasRealComponent(oldTargetVar):
             parent[index] = Real(oldTarget.varName,ctx=state.ctx,state=state)
-            newTargetVar = parent[index].getZ3Object(increment=True)
+            #newTargetVar = parent[index].getZ3Object(increment=True)
 
         elif type(valueVar) in [z3.BitVecRef,z3.BitVecNumRef]:
             parent[index] = BitVec(oldTarget.varName,ctx=state.ctx,size=valueVar.size(),state=state)
-            newTargetVar = parent[index].getZ3Object(increment=True)
+            #newTargetVar = parent[index].getZ3Object(increment=True)
     
         else:
             parent[index] = Int(oldTarget.varName,ctx=state.ctx,state=state)
-            newTargetVar = parent[index].getZ3Object(increment=True)
+            #newTargetVar = parent[index].getZ3Object(increment=True)
+
+        newTargetObj = parent[index]
+        newTargetObj.increment()
+        newTargetVar = newTargetObj.getZ3Object()
 
         # Figure out what the op is and add constraint
         if type(op) == ast.Add:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
                 state.solver.add(pyState.z3Helpers.bvadd_safe(oldTargetVar,valueVar))
-            state.addConstraint(newTargetVar == oldTargetVar + valueVar)
+
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() + value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar + valueVar)
     
         elif type(op) == ast.Sub:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
                 state.solver.add(pyState.z3Helpers.bvsub_safe(oldTargetVar,valueVar))
-            state.addConstraint(newTargetVar == oldTargetVar - valueVar)
+
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() - value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar - valueVar)
     
         elif type(op) == ast.Mult:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
                 state.solver.add(pyState.z3Helpers.bvmul_safe(oldTargetVar,valueVar))
-            state.addConstraint(newTargetVar == oldTargetVar * valueVar)
+
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() * value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar * valueVar)
     
         elif type(op) == ast.Div:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
                 state.solver.add(pyState.z3Helpers.bvdiv_safe(oldTargetVar,valueVar))
-            state.addConstraint(newTargetVar == oldTargetVar / valueVar)
+
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() / value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar / valueVar)
     
         elif type(op) == ast.Mod:
-            state.addConstraint(newTargetVar == oldTargetVar % valueVar)
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() % value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar % valueVar)
     
         elif type(op) == ast.BitXor:
             logger.debug("{0} = {1} ^ {2}".format(newTargetVar,oldTargetVar,valueVar))
-            state.addConstraint(newTargetVar == oldTargetVar ^ valueVar)
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() ^ value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar ^ valueVar)
     
         elif type(op) == ast.BitOr:
-            state.addConstraint(newTargetVar == oldTargetVar | valueVar)
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() | value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar | valueVar)
     
         elif type(op) == ast.BitAnd:
-            state.addConstraint(newTargetVar == oldTargetVar & valueVar)
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() & value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar & valueVar)
     
         elif type(op) == ast.LShift:
-            state.addConstraint(newTargetVar == oldTargetVar << valueVar)
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() << value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar << valueVar)
     
         elif type(op) == ast.RShift:
-            state.addConstraint(newTargetVar == oldTargetVar >> valueVar)
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() >> value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar >> valueVar)
 
         # TODO: This will fail with BitVec objects...
         elif type(op) == ast.Pow:
-            state.addConstraint(newTargetVar == oldTargetVar ** valueVar)
+            # Keep clutter out of z3
+            if oldTarget.isStatic() and value.isStatic():
+                newTargetObj.setTo(oldTarget.getValue() ** value.getValue())
+            else:
+                state.addConstraint(newTargetVar == oldTargetVar ** valueVar)
 
         else:
             err = "Don't know how to handle op type {0} at line {1} col {2}".format(type(op),op.lineno,op.col_offset)
