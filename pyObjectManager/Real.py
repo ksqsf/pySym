@@ -132,10 +132,20 @@ class Real:
             return False
 
         # So we can be, now must we?
-        if len(self.state.any_n_real(self,2)) == 1:
-            return True
+        #if len(self.state.any_n_real(self,2)) == 1:
+        #    return True
 
-        return False
+        # Can we be something else?
+        if len(self.state.any_n_int(self,2)) == 2:
+            return False
+
+        # Can the other var be something else?
+        if len(self.state.any_n_int(var,2)) == 2:
+            return False
+
+
+        #return False
+        return True
 
 
     def canBe(self,var):

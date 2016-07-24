@@ -134,11 +134,16 @@ class Int:
         if not self.canBe(var):
             return False
 
-        # So we can be, now must we?
-        if len(self.state.any_n_int(self,2)) == 1:
-            return True
+        # Can we be something else?
+        if len(self.state.any_n_int(self,2)) == 2:
+            return False
+
+        # Can the other var be something else?
+        if len(self.state.any_n_int(var,2)) == 2:
+            return False
         
-        return False
+        #return False
+        return True
 
 
     def canBe(self,var):
