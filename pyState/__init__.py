@@ -1122,8 +1122,12 @@ class State():
             Nothing
         """
         # Sanity checks
-        assert "z3." in str(type(constraint))
+        assert "z3." in str(type(constraint)) or type(constraint) is bool
         
+        # No point in adding tautologies
+        if type(constraint) is bool and constraint == True:
+            return
+
         # Add our new constraint to the solver
         self.solver.add(constraint)
         

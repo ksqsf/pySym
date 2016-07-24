@@ -9,8 +9,10 @@ logger = logging.getLogger("pyState:While")
 def _handle(stateIf,stateElse,element,ifConstraint):
 
     # Add the constraints
-    stateIf.addConstraint(ifConstraint)
-    stateElse.addConstraint(z3.Not(ifConstraint))
+    if type(ifConstraint) is not bool or ifConstraint != True:
+        stateIf.addConstraint(ifConstraint)
+    if type(ifConstraint) is not bool or ifConstraint == True:
+        stateElse.addConstraint(z3.Not(ifConstraint))
 
     # Check if statement. We'll have at least one instruction here, so treat this as a call
     # Saving off the current path so we can return to it and pick up at the next instruction

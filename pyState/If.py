@@ -9,8 +9,11 @@ logger = logging.getLogger("pyState:If")
 
 def _handleConstraints(stateIf,stateElse,trueConstraint,element):
     # Add the constraints we just got
-    stateIf.addConstraint(trueConstraint)
-    stateElse.addConstraint(z3.Not(trueConstraint))
+    # Optimization to not add extra constraints
+    if type(trueConstraint) is not bool or trueConstraint != True:
+        stateIf.addConstraint(trueConstraint)
+    if type(trueConstraint) is not bool or trueConstraint == True:
+        stateElse.addConstraint(z3.Not(trueConstraint))
 
     ret_states = [stateIf,stateElse]
 

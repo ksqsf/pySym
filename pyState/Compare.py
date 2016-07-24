@@ -84,28 +84,52 @@ def _handleLeftVarInt(state,element,left):
 
 
         # Adjust the types if needed
-        l,r = pyState.z3Helpers.z3_matchLeftAndRight(left,r,ops)
+        lz3,rz3 = pyState.z3Helpers.z3_matchLeftAndRight(left,r,ops)
         
-        logger.debug("_handleLeftVar: Comparing {0} (type: {2}) and {1} (type: {3})".format(l,r,type(l),type(r)))
+        logger.debug("_handleLeftVar: Comparing {0} (type: {2}) and {1} (type: {3})".format(lz3,rz3,type(lz3),type(rz3)))
     
         # Assume success. Add constraints
         if type(ops) == ast.Gt:
-            ret += [l > r]
+            # Don't clutter up z3!
+            if left.isStatic() and r.isStatic():
+                ret += [left.getValue() > r.getValue()]
+            else:
+                ret += [lz3 > rz3]
         
         elif type(ops) == ast.GtE:
-            ret += [l >= r]
+            # Don't clutter up z3!
+            if left.isStatic() and r.isStatic():
+                ret += [left.getValue() >= r.getValue()]
+            else:
+                ret += [lz3 >= rz3]
     
         elif type(ops) == ast.Lt:
-            ret += [l < r]
+            # Don't clutter up z3!
+            if left.isStatic() and r.isStatic():
+                ret += [left.getValue() < r.getValue()]
+            else:
+                ret += [lz3 < rz3]
     
         elif type(ops) == ast.LtE:
-            ret += [l <= r]
+            # Don't clutter up z3!
+            if left.isStatic() and r.isStatic():
+                ret += [left.getValue() <= r.getValue()]
+            else:
+                ret += [lz3 <= rz3]
     
         elif type(ops) == ast.Eq:
-            ret += [l == r]
+            # Don't clutter up z3!
+            if left.isStatic() and r.isStatic():
+                ret += [left.getValue() == r.getValue()]
+            else:
+                ret += [lz3 == rz3]
     
         elif type(ops) == ast.NotEq:
-            ret += [l != r]
+            # Don't clutter up z3!
+            if left.isStatic() and r.isStatic():
+                ret += [left.getValue() != r.getValue()]
+            else:
+                ret += [lz3 != rz3]
     
         else:
             err = "_handleLeftVar: Don't know how to handle type '{0}' at line {1} column {2}".format(type(ops),element.lineno,element.col_offset)
