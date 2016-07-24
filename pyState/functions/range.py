@@ -1,4 +1,3 @@
-from copy import deepcopy
 from pyObjectManager.List import List
 from pyObjectManager.Int import Int
 from pyObjectManager.BitVec import BitVec

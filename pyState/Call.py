@@ -2,7 +2,7 @@ import logging
 import z3
 import ast
 import pyState
-from copy import deepcopy
+from copy import copy
 import itertools
 
 logger = logging.getLogger("pyState:Call")
@@ -45,7 +45,7 @@ def _resolveKeywords(state,element):
 
         # Add all of these to a list
         for arg in caller_args:
-            kw = deepcopy(keyword)
+            kw = copy(keyword)
             kw.value = arg.copy()
             kws.append(kw)
 
@@ -89,7 +89,7 @@ def handle(state,element,retObj=None):
     assert type(element) == ast.Call
 
     argElements = list(_resolveArgs(state,element))
-    keywordElements = list(_resolveKeywords(state,deepcopy(element)))
+    keywordElements = list(_resolveKeywords(state,copy(element)))
     ret = [] 
 
     # Yeah, this is a hack. But when we're soft matching, this number can help us identify the right thing.
@@ -101,7 +101,7 @@ def handle(state,element,retObj=None):
         for keyword in keywordElements:
 
             # Set the arg list
-            elm = deepcopy(element)
+            elm = copy(element)
             elm.args = arg
 
             # Set the kwlist

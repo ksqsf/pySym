@@ -6,7 +6,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
 from pyObjectManager.String import String
 import pyState
-from copy import deepcopy
+from copy import copy
 
 logger = logging.getLogger("pyState:SimFunction:List:append")
 
@@ -41,7 +41,7 @@ def handle(state,call,var,ctx=None):
         assert type(root) is List
 
         # Append it
-        root.append(deepcopy(var))
+        root.append(copy(var))
         
         # Add this to our returns
         retObj = pyState.ReturnObject(1)

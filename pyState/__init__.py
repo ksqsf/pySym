@@ -25,6 +25,19 @@ SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger("State")
 
+
+"""
+
+def astCopy(self):
+    new = self.__class__()
+    newDict = {x: copy(getattr(self,x)) for x in self.__dict__}
+    new.__dict__ = newDict
+    return new
+
+for t in ['If','While','Compare']:
+    getattr(ast,t).__copy__ = astCopy
+"""
+
 # Create small class for keeping track of return values
 class ReturnObject:
     def __init__(self,retID,state=None):
@@ -47,6 +60,9 @@ class ReturnObject:
         self.state = state
     
     def __deepcopy__(self,_):
+        return ReturnObject(self.retID)
+
+    def __copy__(self,_):
         return ReturnObject(self.retID)
     
     def copy(self):

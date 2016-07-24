@@ -4,7 +4,7 @@ import logging
 from pyState import State
 from prettytable import PrettyTable
 import sys
-from copy import deepcopy, copy
+from copy import copy
 import pyState.Assign, pyState.If, pyState.AugAssign, pyState.FunctionDef, pyState.Expr, pyState.Return
 from random import random
 
@@ -80,7 +80,7 @@ class Path():
         """
         # TODO: Don't think i need to copy state in this...
         return Path(
-                backtrace=deepcopy(self.backtrace),
+                backtrace=copy(self.backtrace),
                 state=self.state.copy(),
-                source=deepcopy(self.source),
+                source=copy(self.source),
                 )

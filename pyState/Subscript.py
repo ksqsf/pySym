@@ -7,7 +7,6 @@ from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 from pyObjectManager.String import String
-from copy import deepcopy
 import itertools
 
 logger = logging.getLogger("pyState:Subscript")

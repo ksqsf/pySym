@@ -5,7 +5,6 @@ import pyState
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
-from copy import deepcopy
 
 logger = logging.getLogger("pyState:UnaryOp")
 

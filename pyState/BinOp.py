@@ -7,7 +7,6 @@ from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
 from pyObjectManager.List import List
-from copy import deepcopy
 import pyState.z3Helpers
 
 logger = logging.getLogger("pyState:BinOp")

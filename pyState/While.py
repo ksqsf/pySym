@@ -2,11 +2,14 @@ import logging
 import z3
 import ast
 import pyState.Compare
-from copy import deepcopy
+from copy import deepcopy, copy
+import pickle
 
 logger = logging.getLogger("pyState:While")
 
 def _handle(stateIf,stateElse,element,ifConstraint):
+    # TODO: The deepcopy calls here are necessary because I'm dorking with AST objects and their copy method isn't sufficient.
+    # TODO: Need to write my own copy method for these modified AST objects!
 
     # Add the constraints
     if type(ifConstraint) is not bool or ifConstraint != True:

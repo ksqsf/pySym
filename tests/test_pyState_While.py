@@ -12,6 +12,33 @@ import z3
 from pyPath import Path
 from pyPathGroup import PathGroup
 import pytest
+from copy import copy
+
+"""
+# This doesn't work lol
+def astCopy(self):
+    new = self.__class__()
+
+    newDict = {}
+
+    for var in self.__dict__:
+        val = self.__dict__[var]
+
+        if type(val) is list:
+            newDict[var] = [copy(x) for x in val]
+
+        elif type(val) is dict:
+            newDict[var] = {x: copy(val[x]) for x in val}
+
+        else:
+            newDict[var] = copy(val)
+
+    new.__dict__ = newDict
+    return new
+
+for t in ['If','While','Compare']:
+    getattr(ast,t).__copy__ = astCopy
+"""
 
 test1 = """
 x = 0
@@ -137,7 +164,6 @@ def test_pySym_complicated():
     
     assert pg.explore(find=19)
     assert pg.found[0].state.any_int('z') == 26
-
 
 def test_pySym_nestedWhile():
     b = ast.parse(test3).body

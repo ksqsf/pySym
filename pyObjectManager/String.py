@@ -50,9 +50,9 @@ class String:
         return self.copy()
 
 
+    def __copy__(self):
+        return self.copy()
 
-        if increment:
-            self.increment()
     def setState(self,state):
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy

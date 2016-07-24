@@ -6,7 +6,6 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
 from pyObjectManager.String import String
 import pyState
-from copy import deepcopy
 
 logger = logging.getLogger("pyState:SimFunction:List:clear")
 

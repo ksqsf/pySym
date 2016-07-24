@@ -29,6 +29,8 @@ class Int:
     def __deepcopy__(self,_):
         return self.copy()
 
+    def __copy__(self):
+        return self.copy()
 
     def copy(self):
         return Int(
