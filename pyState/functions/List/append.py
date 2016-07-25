@@ -17,6 +17,8 @@ def handle(state,call,var,ctx=None):
     """
     ctx = ctx if ctx is not None else state.ctx
     
+    #print("Attempting to append {0} of type {1} from CTX {2}".format(var,type(var),ctx))
+
     # Resolve what we're going to be appending
     varList = state.resolveObject(var,ctx=ctx)
 

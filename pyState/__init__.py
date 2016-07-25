@@ -347,13 +347,13 @@ class State():
         if type(var) is ReturnObject:
             return var
 
-        assert type(var) in [Int, Real, BitVec, List, String]
+        assert type(var) in [Int, Real, BitVec, List, String, Char]
         assert type(varName) in [type(None), str]
 
         ctx = ctx if ctx is not None else 1
         varName = "tempRecursiveCopy" if varName is None else varName
         
-        if type(var) in [Int, Real, BitVec]:
+        if type(var) in [Int, Real, BitVec, Char]:
             t, kwargs = duplicateSort(var)
             newVar = self.getVar(varName,ctx=ctx,varType=t,kwargs=kwargs)
             newVar.increment()
@@ -545,11 +545,10 @@ class State():
         ######################
         # Populate Variables #
         ######################
-
         # Create local vars dict
         if self.ctx not in self.objectManager.variables:
             self.objectManager.newCtx(self.ctx)
-        
+
         # If there are arguments, fill them in
         for i in range(len(call.args)):
             caller_arg = self.resolveObject(call.args[i],ctx=oldCtx)
@@ -565,10 +564,10 @@ class State():
             #index = parent.index(dest_arg)
             self.objectManager.variables[self.ctx][func.args.args[i].arg] = self.recursiveCopy(caller_arg,varName=func.args.args[i].arg)
             logger.debug("Call: Setting argument {0} = {1}".format(type(self.objectManager.variables[self.ctx][func.args.args[i].arg]),type(caller_arg)))
-        
+
         # Grab any unset vars
         unsetArgs = func.args.args[len(call.args):]
-        
+
         # Handle any keyword vars
         for i in range(len(call.keywords)):
             # Make sure this is a valid keyword
@@ -592,7 +591,6 @@ class State():
             # Remove arg after it has been satisfied
             unsetArgs.remove([x for x in unsetArgs if x.arg == call.keywords[i].arg][0])
             logger.debug("Call: Setting keyword argument {0} = {1}".format(type(dest_arg),type(caller_arg)))
-
 
         # Handle any defaults
         for arg in unsetArgs:
@@ -1067,7 +1065,7 @@ class State():
         t = type(obj)
 
         # If the object is already resolved, just return it
-        if t in [Int, Real, BitVec, List, Ctx, String]:
+        if t in [Int, Real, BitVec, List, Ctx, String, Char]:
             return obj
         
         if t == ast.Name:
@@ -1101,6 +1099,10 @@ class State():
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
+            # Sometimes we run into a situation where we need to return the retID...
+            # TODO: This is weird and seems like a hack...
+            if obj.retID not in self.objectManager.returnObjects:
+                return [obj]
             rets = self.objectManager.returnObjects[obj.retID]
             # make sure the state is sync'd
             for ret in rets:
@@ -1149,7 +1151,7 @@ class State():
 
 
         else:
-            err = "resolveObject: unable to resolve object '{0}'".format(obj)
+            err = "resolveObject: unable to resolve object '{0}' of type {1} in CTX {2}".format(obj,type(obj),ctx)
             logger.error(err)
             raise Exception(err)
 
