@@ -106,19 +106,30 @@ class Real:
 
         # Add the constraints
 
-        # If we're adding static, don't clutter up the solve
+        # If we're not in the solver, we can play some tricks to make things faster
+        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+
+            # If we're adding static, don't clutter up the solve
+            if type(var) in [float, int]:
+                self.value = var
+                return
+
+            elif var.isStatic():
+                self.value = var.getValue()
+                return
+
         if type(var) in [float, int]:
-            #self.state.addConstraint(self.getZ3Object() == var)
-            self.value = var
-
+            obj = var
         elif var.isStatic():
-            self.value = var.getValue()
-
+            obj = var.getValue()
         else:
-            # Be sure to reset our static value
-            self.value = None
+            obj = var.getZ3Object()
 
-            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+        # Be sure to reset our static value
+        self.value = None
+
+        self.state.addConstraint(self.getZ3Object() == obj)
+
 
     def __str__(self):
         """

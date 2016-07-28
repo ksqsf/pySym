@@ -39,6 +39,29 @@ if l[0] == l[1]:
 pass
 """
 
+test5 = """
+i = pyState.Int()
+l = [0,1,2,3,4,5]
+x = l[i]
+"""
+
+def test_pyObjectManager_Int_PostSet():
+    b = ast_parse.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+    
+    pg.explore()
+    assert len(pg.completed) == 1
+
+    for q in range(6):
+        s = pg.completed[0].state.copy()
+        x = s.getVar('x')
+        i = s.getVar('i')
+        i.setTo(q)
+        assert x.getValue() == q
+    
+
+
 def test_pyObjectManager_Int_MultipleObj():
     b = ast_parse.parse(test4).body
     p = Path(b,source=test4)

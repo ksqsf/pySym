@@ -30,6 +30,8 @@ test3 = """
 x = 6.2
 """
 
+
+
 def test_pyObjectManager_Real_strPrint():
     b = ast_parse.parse(test3).body
     p = Path(b,source=test3)

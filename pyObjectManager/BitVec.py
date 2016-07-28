@@ -86,17 +86,27 @@ class BitVec:
 
         # Add the constraints
 
-        # Intentionally trying to unclutter the z3 solver here.
+        # If we're not in the solver, we can play some tricks to make things faster
+        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+
+            # Intentionally trying to unclutter the z3 solver here.
+            if type(var) is int:
+                self.value = var
+                return
+
+            elif var.isStatic():
+                self.value = var.getValue()
+                return
+
         if type(var) is int:
-            #self.state.addConstraint(self.getZ3Object() == var)
-            self.value = var
-
+            obj = var
         elif var.isStatic():
-            self.value = var.getValue()
-
+            obj = var.getValue()
         else:
-            self.value = None
-            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+            obj = var.getZ3Object()
+
+        self.value = None
+        self.state.addConstraint(self.getZ3Object() == obj)
 
 
     def isStatic(self):

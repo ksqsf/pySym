@@ -43,27 +43,82 @@ def _handleIndex(state,sub_object,sub_slice):
 
         # Truly symbolic index. Example: array[x] where x can be multiple values at that point
         else:
-            logger.debug("Symbolic index into list of size {0}. Global max is {1}".format(sub_object.length(),Config.PYSYM_MAX_SYM_LIST_SPLIT))
-            
-            # Split off up to our max allowed
-            added = 0
 
-            # TODO: This might get TOO big... Large input arrays could crush pySym..
-            
-            # Instead of asking for valid values, walk the index of the list and see if our symbolic input can be that
+            # Because Z3 needs to know var type, we can only offload this onto z3 if all the valid vars inside this list are of the same type!
+            varCount = 0
+            varAllSameType = False
+            oldVarType = None
+
+            # Loop through all values of list, check to see if they could be returned as well as their type
             for i in range(sub_object.length()):
-                # Can this symbolic value be this index?
                 if sub_index.canBe(i):
-                    # Add it, increment our count
-                    ret.append(sub_object[i])
-                    added += 1
-
-                    # Check if we need to be done
-                    if added == Config.PYSYM_MAX_SYM_LIST_SPLIT:
-                        # Not the end of the world, but likely means that we're missing cases
-                        logger.warn("Symbolic index into list of size {0}. Global max split of {1} reached. Coverage likely incomplete. Consider upping Config.PYSYM_MAX_SYM_LIST_SPLIT if you need to.")
+                    varCount += 1
+                    varType, kwargs = pyState.duplicateSort(sub_object[i])
+                    # If we might return different types of objects, we can't use this optimization
+                    if oldVarType != None and varType != oldVarType:
                         break
+                    oldVarType = varType
+            else:
+                # If we get here, we must have all of the same types we can return
+                varAllSameType = True
 
+            # If we have nothing valid to return, just move on
+            if varCount == 0:
+                continue
+
+            # We can only use z3 this way if the types are all the same
+            if varAllSameType:
+    
+                # Create a dummy variable to return
+                tmpRetVar = sub_index.state.getVar("tmpSymbolicIndexVar",varType=varType,kwargs=kwargs,ctx=1,softFail=True)
+                # Make sure we're not clobbering something
+                tmpRetVar.increment()
+
+                # Hopefully we never hit this....
+                expr = z3.Bool(False)
+
+                # Build the z3 if then else statement in reverse
+                for i in range(sub_object.length()):
+                    # Can we be this value?
+                    if sub_index.canBe(i):
+                        # Add it to our z3 expression
+                        expr = z3.If(
+                                sub_index.getZ3Object() == i,
+                                tmpRetVar.getZ3Object() == sub_object[i].getZ3Object(),
+                                expr
+                            )
+
+                # Add the constraints we just generated
+                tmpRetVar.state.addConstraint(expr)
+
+                # Add our var to the return object list
+                ret.append(tmpRetVar)
+
+
+            # If we might return different variable types, we can't use Z3 directly, we need to state split. This sucks :-(
+            else:
+
+                logger.info("Symbolic index into list with possible multi-type returns... Falling back to state splitting :-(")
+                logger.debug("Symbolic index into list of size {0}. Global max is {1}".format(sub_object.length(),Config.PYSYM_MAX_SYM_LIST_SPLIT))
+                
+                # Split off up to our max allowed
+                added = 0
+    
+                # TODO: This might get TOO big... Large input arrays could crush pySym..
+                
+                # Instead of asking for valid values, walk the index of the list and see if our symbolic input can be that
+                for i in range(sub_object.length()):
+                    # Can this symbolic value be this index?
+                    if sub_index.canBe(i):
+                        # Add it, increment our count
+                        ret.append(sub_object[i])
+                        added += 1
+    
+                        # Check if we need to be done
+                        if added == Config.PYSYM_MAX_SYM_LIST_SPLIT:
+                            # Not the end of the world, but likely means that we're missing cases
+                            logger.warn("Symbolic index into list of size {0}. Global max split of {1} reached. Coverage likely incomplete. Consider upping Config.PYSYM_MAX_SYM_LIST_SPLIT if you need to.")
+                            break
 
             #err = "handle: Don't know how to handle symbolic slice integers at the moment"
             #logger.error(err)

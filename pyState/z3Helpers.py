@@ -16,6 +16,23 @@ logger = logging.getLogger("pyState:z3Helpers")
 Z3_DEFAULT_BITVEC_SIZE = 64
 Z3_MAX_STRING_LENGTH = 256
 
+def varIsUsedInSolver(var,solver):
+    """
+    Determine if the given var (z3 object) is used in solver
+    """
+
+    # Sanity check
+    assert isZ3Object(var)
+    assert isinstance(solver,z3.Solver)
+
+    for ass in solver.assertions():
+        if var.get_id() in [x.get_id() for x in pyState.get_all(ass)]:
+            return True
+
+    return False
+
+
+
 def isInt(x):
     """Wraps Z3 C API to perform isInt check on Real object x
     

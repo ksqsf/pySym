@@ -118,19 +118,32 @@ class Int:
         assert type(var) in [Int, int]
 
         # Add the constraints
+        
+        # If we're not in the solver, we can play some tricks to make things faster
+        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
 
-        # If we're adding a static variety, don't clutter up the solver
+            # If we're adding a static variety, don't clutter up the solver
+            if type(var) is int:
+                self.value = var            
+                return
+
+            # If var is static and not being used in any expressions
+            elif var.isStatic():
+                self.value = var.getValue()
+                return
+
+        ## At this point, we know that our own variable is in the solver already, need to add this to the solver        
+
         if type(var) is int:
-            #self.state.addConstraint(self.getZ3Object() == var)
-            self.value = var            
-
+            obj = var
         elif var.isStatic():
-            self.value = var.getValue()
+            obj = var.getValue()
+        else:
+            obj = var.getZ3Object()
 
         # If we're setting this to a variable, make sure we're not set as static
-        else:
-            self.value = None
-            self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
+        self.value = None
+        self.state.addConstraint(self.getZ3Object() == obj)
 
     def __str__(self):
         """
@@ -181,3 +194,4 @@ class Int:
         return False
 
 from pyObjectManager.BitVec import BitVec
+import pyState.z3Helpers

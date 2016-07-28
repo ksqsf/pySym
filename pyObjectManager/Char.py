@@ -61,14 +61,12 @@ class Char:
 
         # Go ahead and add the constraints
         if type(var) is str:
-            #self.state.addConstraint(self.getZ3Object() == ord(var))
             self.variable.setTo(ord(var))
         
         else:
             if type(var) is String:
                 var = var[0]
             
-            #self.state.addConstraint(self.getZ3Object() == var.getZ3Object())
             self.variable.setTo(var.variable)
 
 
