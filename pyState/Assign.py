@@ -1,7 +1,7 @@
 import logging
 import z3, z3util
 import ast
-from pyState import hasRealComponent, ReturnObject
+from pyState import hasRealComponent, ReturnObject, duplicateSort
 import pyState.z3Helpers
 import pyState.BinOp, pyState.Call
 from pyObjectManager.Int import Int
@@ -18,14 +18,19 @@ def _handleAssignNum(target,value):
     """
     Handle assigning a number to a variable (i.e.: x = 1)
     Update local variable dict and return
-    value should already be resolved via state.resolveObject (meaning it is now an expression)
+    value should already be resolved via state.resolveObject (meaning it is now a pyObjectManager object such as pyObjectManager.Int.Int)
     """
 
     # Implicitly taking value's state
     state = value.state.copy()
 
     logger.debug("_handleAssignNum: Handling {0} = {1}".format(type(target),type(value)))
+
+    varType,kwargs = duplicateSort(value)
+
+    x = state.resolveObject(target,varType=varType,kwargs=kwargs)
     
+    """
     if type(value) is Real:
         x = state.resolveObject(target,varType=Real)
 
@@ -34,15 +39,21 @@ def _handleAssignNum(target,value):
 
     else:
         x = state.resolveObject(target,varType=Int)
+    """
 
     ret = []
 
     for x2 in x:
 
+        """
         parent = x2.state.objectManager.getParent(x2)
         index = parent.index(x2)
         parent[index] = value
+        """
+        # Get a new variable assignment since we're...assigning...
+        x2.increment()
 
+        x2.setTo(value)
         x2.state = x2.state.copy()
 
         x2.state.path.pop(0)

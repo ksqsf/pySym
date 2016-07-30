@@ -363,4 +363,3 @@ def test_pySym_AugAssign():
 
     assert elseSide.state.isSat()
     assert elseSide.state.any_int('x') == 0
-

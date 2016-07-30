@@ -57,7 +57,8 @@ def handle(state,element):
             return states
 
     # Don't really care about the return object for now... Maybe later?
-    elif type(value) == ReturnObject:
+    # A str expression is just a multi-line comment. Ignore
+    elif type(value) in [ReturnObject, ast.Str]:
         pass
 
     else:
