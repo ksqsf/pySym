@@ -1,5 +1,5 @@
 import logging
-import z3, z3util
+import z3, z3.z3util as z3util
 import ast
 from pyState import hasRealComponent, ReturnObject, duplicateSort
 import pyState.z3Helpers

@@ -1,4 +1,4 @@
-import z3, z3util
+import z3, z3.z3util as z3util
 import ast
 import logging
 from copy import copy
