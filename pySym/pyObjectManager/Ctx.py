@@ -1,12 +1,12 @@
 import z3
 import ast
 import logging
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
-from pyObjectManager.String import String
-from pyObjectManager.Char import Char
+from .Int import Int
+from .Real import Real
+from .BitVec import BitVec
+from .List import List
+from .String import String
+from .Char import Char
 from pySym import pyState
 
 logger = logging.getLogger("ObjectManager:Ctx")

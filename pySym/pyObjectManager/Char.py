@@ -169,6 +169,6 @@ class Char:
 
 
 # Circular importing problem. Don't hate :-)
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.String import String
+from pySym.pyObjectManager.BitVec import BitVec
+from pySym.pyObjectManager.String import String
 

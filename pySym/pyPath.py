@@ -5,7 +5,7 @@ from pySym.pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import copy
-from pySym import pyState.Assign, pyState.If, pyState.AugAssign, pyState.FunctionDef, pyState.Expr, pyState.Return
+#from pySym.pyState import Assign, If, pyState.AugAssign, pyState.FunctionDef, pyState.Expr, pyState.Return
 from random import random
 
 logger = logging.getLogger("Path")

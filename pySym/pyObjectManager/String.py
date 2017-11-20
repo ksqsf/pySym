@@ -271,8 +271,8 @@ class String:
 
 
 # Circular importing problem. Don't hate :-)
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.Char import Char
+from pySym.pyObjectManager.Int import Int
+from pySym.pyObjectManager.Real import Real
+from pySym.pyObjectManager.BitVec import BitVec
+from pySym.pyObjectManager.Char import Char
 

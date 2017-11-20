@@ -6,10 +6,10 @@ import z3
 import ast
 from pySym import pyState
 import logging
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.Real import Real
-from pyObjectManager.Int import Int
-from pyObjectManager.Char import Char
+from pySym.pyObjectManager.BitVec import BitVec
+from pySym.pyObjectManager.Real import Real
+from pySym.pyObjectManager.Int import Int
+from pySym.pyObjectManager.Char import Char
 
 logger = logging.getLogger("pyState:z3Helpers")
 
@@ -522,7 +522,7 @@ def z3_matchLeftAndRight(left,right,op):
 
         In [1]: import z3, pyState.z3Helpers, ast
     
-        In [2]: from pyObjectManager.BitVec import BitVec
+        In [2]: from pySym.pyObjectManager.BitVec import BitVec
 
         In [3]: from pySym.pyState import State
 

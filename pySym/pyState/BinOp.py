@@ -2,12 +2,12 @@ import logging
 import z3
 import ast
 from pySym import pyState
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.Real import Real
-from pySym.pyObjectManager.BitVec import BitVec
-from pySym.pyObjectManager.String import String
-from pySym.pyObjectManager.List import List
-import pySym.z3Helpers as z3Helpers
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.String import String
+from ..pyObjectManager.List import List
+from . import z3Helpers
 
 logger = logging.getLogger("pyState:BinOp")
 

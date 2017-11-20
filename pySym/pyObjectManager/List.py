@@ -249,9 +249,9 @@ class List:
         return True
 
 # Circular importing problem. Don't hate :-)
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.Char import Char
-from pyObjectManager.String import String
+from .Int import Int
+from .Real import Real
+from .BitVec import BitVec
+from .Char import Char
+from .String import String
 

@@ -191,4 +191,4 @@ class BitVec:
         return True
 
         
-from pyObjectManager.Int import Int
+from pySym.pyObjectManager.Int import Int

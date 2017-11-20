@@ -187,6 +187,6 @@ class Real:
 
 
 # Circular importing problem. Don't hate :-)
-from pyObjectManager.Int import Int
-from pyObjectManager.BitVec import BitVec
+from pySym.pyObjectManager.Int import Int
+from pySym.pyObjectManager.BitVec import BitVec
 

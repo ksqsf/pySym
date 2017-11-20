@@ -193,5 +193,6 @@ class Int:
         
         return False
 
-from pyObjectManager.BitVec import BitVec
-import pySym.pyState.z3Helpers as z3Helpers
+from pySym.pyObjectManager.BitVec import BitVec
+#import pySym.pyState.z3Helpers as z3Helpers
+from ..pyState import z3Helpers

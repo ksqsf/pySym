@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-from pySym import pyState.Compare
+from . import Compare
 from copy import copy
 import pickle
 
@@ -78,7 +78,7 @@ def handle(state,element):
     # Check what type of test this is    
     if type(element.test) == ast.Compare:
         # Try to handle the compare
-        ifConstraint = pyState.Compare.handle(stateIf,element.test)
+        ifConstraint = Compare.handle(stateIf,element.test)
 
     else:
         err = "handle: I don't know how to handle type {0}".format(type(element.test))

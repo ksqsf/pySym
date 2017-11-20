@@ -5,7 +5,7 @@ sys.path.insert(0, myPath + '/../')
 import ast_parse
 import z3
 from pySym.pyPath import Path
-from pySym import pyState.Compare
+from pySym.pyState import Compare
 import pytest
 from pyPathGroup import PathGroup
 
@@ -218,7 +218,7 @@ def test_unhandled_input():
    
     # We aren't handling multiple comps/ops at this point 
     with pytest.raises(Exception):
-        pyState.Compare._handleLeftVar(True,False,element,"x")
+        Compare._handleLeftVar(True,False,element,"x")
 
 
 def test_pySym_CompareRightNum():
