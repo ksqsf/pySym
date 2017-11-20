@@ -6,7 +6,7 @@ logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(mes
 
 import ast_parse
 import z3
-from pyState import State
+from pySym.pyState import State
 import pyState.Assign
 import pytest
 from pyPath import Path

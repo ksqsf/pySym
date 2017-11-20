@@ -524,7 +524,7 @@ def z3_matchLeftAndRight(left,right,op):
     
         In [2]: from pyObjectManager.BitVec import BitVec
 
-        In [3]: from pyState import State
+        In [3]: from pySym.pyState import State
 
         In [4]: state = State()
     
