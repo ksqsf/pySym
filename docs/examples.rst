@@ -14,7 +14,7 @@ to do just that.
     # Enable logging if you want. It's faster without.
     #import logging
     #logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-    from pyPath import Path
+    from pySym.pyPath import Path
     import ast_parse
     from pySym import Colorer
     from pyPathGroup import PathGroup

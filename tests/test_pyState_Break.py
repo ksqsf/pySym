@@ -4,7 +4,7 @@ sys.path.insert(0, myPath + '/../')
 
 import ast_parse
 import z3
-from pyPath import Path
+from pySym.pyPath import Path
 import pytest
 from pyPathGroup import PathGroup
 

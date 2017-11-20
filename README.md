@@ -57,7 +57,7 @@ while x < 5:
 You can use a path group to automagically walk through the program as follows:
 
 ```python
-from pyPath import Path
+from pySym.pyPath import Path
 import ast
 from pySym from pySym import Colorer
 from pyPathGroup import PathGroup
@@ -94,7 +94,7 @@ else:
 While basic, it can show how stepping through a program works. The following python script excersizes this functionality:
 
 ```python
-from pyPath import Path
+from pySym.pyPath import Path
 import ast
 import logging
 from pySym from pySym import Colorer

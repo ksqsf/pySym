@@ -9,7 +9,7 @@ import z3
 from pySym.pyState import State
 import pyState.Assign
 import pytest
-from pyPath import Path
+from pySym.pyPath import Path
 from pyPathGroup import PathGroup
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real

@@ -16,7 +16,7 @@ and paste the script you want to execute or load it using file:
 
 .. code-block:: python
 
-   In [1]: from pyPath import Path
+   In [1]: from pySym.pyPath import Path
 
    In [2]: import ast
 
