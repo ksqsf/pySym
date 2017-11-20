@@ -2,7 +2,7 @@ import z3, z3.z3util as z3util
 import ast
 import logging
 from copy import copy
-import pyState.BinOp, pyState.Pass, pyState.While, pyState.Break, pyState.Subscript, pyState.For, pyState.ListComp, pyState.UnaryOp, pyState.GeneratorExp
+import pySym.pyState.BinOp, pySym.pyState.Pass, pySym.pyState.While, pySym.pyState.Break, pySym.pyState.Subscript, pySym.pyState.For, pySym.pyState.ListComp, pySym.pyState.UnaryOp, pySym.pyState.GeneratorExp
 import random
 import os.path
 import importlib
@@ -40,7 +40,7 @@ for t in ['If','While','Compare']:
 # Create small class for keeping track of return values
 class ReturnObject:
     def __init__(self,retID,state=None):
-        """Initialize a pyState.ReturnObject instance
+        """Initialize a pySym.pyState.ReturnObject instance
     
         Parameters
         ----------
@@ -52,7 +52,7 @@ class ReturnObject:
 
         Returns
         -------
-        pyState.ReturnObject
+        pySym.pyState.ReturnObject
     
         """
         self.retID = retID
@@ -69,7 +69,7 @@ class ReturnObject:
         
         Returns
         -------
-        pyState.ReturnObject
+        pySym.pyState.ReturnObject
             ReturnObject with the same ID and State as the previous one
         """
 
@@ -109,7 +109,7 @@ def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
 
         In [2]: import pyState
 
-        In [3]: ret = pyState.ReturnObject(5)
+        In [3]: ret = pySym.pyState.ReturnObject(5)
 
         In [4]: s = ast.parse("if 5 > 2:\\n\\tpass").body[0]
 
@@ -119,7 +119,7 @@ def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
         In [6]: assert pyState.replaceObjectWithObject(s,s.test,ret)
 
         In [7]: print(s.test)
-        <pyState.ReturnObject object at 0x7f563b4c1048>
+        <pySym.pyState.ReturnObject object at 0x7f563b4c1048>
 
     """
     parent = haystack if parent is None else parent
@@ -431,12 +431,12 @@ class State():
             ast.AugAssign: pyState.AugAssign,
             ast.FunctionDef: pyState.FunctionDef,
             ast.Expr: pyState.Expr,
-            ast.Pass: pyState.Pass,
-            ast.Return: pyState.Return,
-            ast.If: pyState.If,
-            ast.While: pyState.While,
-            ast.Break: pyState.Break,
-            ast.For: pyState.For
+            ast.Pass: pySym.pyState.Pass,
+            ast.Return: pySym.pyState.Return,
+            ast.If: pySym.pyState.If,
+            ast.While: pySym.pyState.While,
+            ast.Break: pySym.pyState.Break,
+            ast.For: pySym.pyState.For
             }
 
         # Return initial return state
@@ -488,7 +488,7 @@ class State():
         obj = self.resolveObject(obj)
         
         # Resolve calls if we need to
-        retObjs = [x for x in obj if type(x) is pyState.ReturnObject]
+        retObjs = [x for x in obj if type(x) is pySym.pyState.ReturnObject]
         if len(retObjs) > 0:
             return retObjs
 
@@ -876,7 +876,7 @@ class State():
                 ret = ret if type(ret) is list else [ret]
 
                 # If we're making a call, return for now so we can do that
-                retObjs = [x for x in ret if type(x) is pyState.ReturnObject]
+                retObjs = [x for x in ret if type(x) is pySym.pyState.ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -942,7 +942,7 @@ class State():
                 ret = ret if type(ret) is list else [ret]
 
                 # If we're making a call, return for now so we can do that
-                retObjs = [x for x in ret if type(x) is pyState.ReturnObject]
+                retObjs = [x for x in ret if type(x) is pySym.pyState.ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -973,7 +973,7 @@ class State():
                 # Resolve the name
                 elm_resolved = self.resolveObject(elm)
                 elm_resolved = elm_resolved if type(elm_resolved) is list else [elm_resolved]
-                retObjs = [x for x in elm_resolved if type(x) is pyState.ReturnObject]
+                retObjs = [x for x in elm_resolved if type(x) is pySym.pyState.ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -1011,7 +1011,7 @@ class State():
                 elm_resolved = elm_resolved if type(elm_resolved) is list else [elm_resolved]
 
                 # If we're waiting on a symbolic call, return
-                retObjs = [x for x in elm_resolved if type(x) is pyState.ReturnObject]
+                retObjs = [x for x in elm_resolved if type(x) is pySym.pyState.ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -1095,7 +1095,7 @@ class State():
 
         elif t == ast.Subscript:
             logger.debug("resolveObject: Resolving object type Subscript")
-            return pyState.Subscript.handle(self,obj,ctx=ctx)
+            return pySym.pyState.Subscript.handle(self,obj,ctx=ctx)
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
@@ -1111,11 +1111,11 @@ class State():
 
         elif t == ast.ListComp:
             logger.debug("resolveObject: Resolving ListComprehension")
-            return pyState.ListComp.handle(self,obj,ctx=ctx)
+            return pySym.pyState.ListComp.handle(self,obj,ctx=ctx)
 
         elif t == ast.GeneratorExp:
             logger.debug("resolveObject: Resolving GeneratorExpression")
-            return pyState.GeneratorExp.handle(self,obj,ctx=ctx)
+            return pySym.pyState.GeneratorExp.handle(self,obj,ctx=ctx)
 
         elif t == ast.Compare:
             logger.debug("resolveObject: Resolving Compare")
@@ -1147,7 +1147,7 @@ class State():
             # TODO: Not sure if there will be symbolic UnaryOp objects... This wouldn't work for those.
             logger.debug("resolveObject: Resolving UnaryOp type object")
             #return ast.literal_eval(obj)
-            return pyState.UnaryOp.handle(self,obj,ctx=ctx)
+            return pySym.pyState.UnaryOp.handle(self,obj,ctx=ctx)
 
 
         else:
