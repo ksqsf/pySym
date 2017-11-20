@@ -1,14 +1,13 @@
 import logging
 import z3
 import ast
-from pySym import pyState.Compare
 from pySym import pyState
-from pyObjectManager.List import List
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.String import String
-from pyObjectManager.Char import Char
+from ..pyObjectManager.List import List
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.String import String
+from ..pyObjectManager.Char import Char
 from copy import copy
 
 logger = logging.getLogger("pyState:For")

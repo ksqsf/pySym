@@ -2,9 +2,9 @@ import logging
 import z3
 import ast
 from pySym import pyState
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
 
 logger = logging.getLogger("pyState:UnaryOp")
 

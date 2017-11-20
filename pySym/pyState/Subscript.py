@@ -2,16 +2,16 @@ import logging
 import z3
 import ast
 from pySym import pyState
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
-from pyObjectManager.String import String
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.List import List
+from ..pyObjectManager.String import String
 import itertools
 
 logger = logging.getLogger("pyState:Subscript")
 
-import Config
+from .. import Config
 
 def _handleIndex(state,sub_object,sub_slice):
 

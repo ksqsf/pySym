@@ -1,12 +1,12 @@
 import logging
 import z3
 import ast
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.List import List
 from pySym import pyState
-from pySym import pyState.ListComp
+from . import ListComp
 
 logger = logging.getLogger("pyState:GeneratorExp")
 
@@ -65,6 +65,6 @@ def handle(state,element,ctx=None):
     #print(astunparse.unparse(listComp))
 
     # Call ListComp to handle this
-    return pyState.ListComp.handle(state,listComp,ctx=ctx)
+    return ListComp.handle(state,listComp,ctx=ctx)
 
 

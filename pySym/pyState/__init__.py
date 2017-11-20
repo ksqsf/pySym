@@ -9,14 +9,14 @@ import importlib
 from types import ModuleType
 import ntpath
 import pickle
-from pyObjectManager import ObjectManager
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
-from pyObjectManager.Ctx import Ctx
-from pyObjectManager.String import String
-from pyObjectManager.Char import Char
+from ..pyObjectManager import ObjectManager
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.List import List
+from ..pyObjectManager.Ctx import Ctx
+from ..pyObjectManager.String import String
+from ..pyObjectManager.Char import Char
 
 
 # The current directory for running pySym

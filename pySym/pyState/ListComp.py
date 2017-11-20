@@ -1,10 +1,10 @@
 import logging
 import z3
 import ast
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.List import List
 from pySym import pyState
 
 logger = logging.getLogger("pyState:ListComp")
