@@ -59,7 +59,7 @@ You can use a path group to automagically walk through the program as follows:
 ```python
 from pyPath import Path
 import ast
-import Colorer
+from pySym from pySym import Colorer
 from pyPathGroup import PathGroup
 b = ast.parse(source).body
 p = Path(b,source=source)
@@ -97,7 +97,7 @@ While basic, it can show how stepping through a program works. The following pyt
 from pyPath import Path
 import ast
 import logging
-import Colorer
+from pySym from pySym import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 source = """

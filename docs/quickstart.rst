@@ -20,7 +20,7 @@ and paste the script you want to execute or load it using file:
 
    In [2]: import ast
 
-   In [3]: import Colorer
+   In [3]: from pySym import Colorer
 
    In [4]: from pyPathGroup import PathGroup
 

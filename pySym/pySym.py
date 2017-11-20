@@ -4,7 +4,7 @@ import ast
 import argparse
 import logging
 import symbolicExecutor
-import Colorer
+from pySym import Colorer
 
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 logger = logging.getLogger('main')

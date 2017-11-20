@@ -16,7 +16,7 @@ to do just that.
     #logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     from pyPath import Path
     import ast_parse
-    import Colorer
+    from pySym import Colorer
     from pyPathGroup import PathGroup
 
     source = """
