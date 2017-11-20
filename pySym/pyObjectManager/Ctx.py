@@ -7,7 +7,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
 from pyObjectManager.String import String
 from pyObjectManager.Char import Char
-import pyState
+from pySym import pyState
 
 logger = logging.getLogger("ObjectManager:Ctx")
 

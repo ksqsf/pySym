@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-import pyState.Compare, pyState.BoolOp
+from pySym import pyState.Compare, pyState.BoolOp
 from copy import copy
 
 logger = logging.getLogger("pyState:If")

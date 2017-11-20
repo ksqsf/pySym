@@ -2,8 +2,8 @@ import logging
 import z3, z3.z3util as z3util
 import ast
 from pyState import hasRealComponent, ReturnObject, duplicateSort
-import pyState.z3Helpers
-import pyState.BinOp, pyState.Call
+from pySym import pyState.z3Helpers
+from pySym import pyState.BinOp, pyState.Call
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec

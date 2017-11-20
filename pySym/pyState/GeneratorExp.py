@@ -5,8 +5,8 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.List import List
-import pyState
-import pyState.ListComp
+from pySym import pyState
+from pySym import pyState.ListComp
 
 logger = logging.getLogger("pyState:GeneratorExp")
 

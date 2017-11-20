@@ -1,8 +1,8 @@
 import logging
 import z3
 import ast
-import pyState
-import pyState.Compare
+from pySym import pyState
+from pySym import pyState.Compare
 
 logger = logging.getLogger("pyState:BoolOp")
 

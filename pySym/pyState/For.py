@@ -1,8 +1,8 @@
 import logging
 import z3
 import ast
-import pyState.Compare
-import pyState
+from pySym import pyState.Compare
+from pySym import pyState
 from pyObjectManager.List import List
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real

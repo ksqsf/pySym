@@ -1,7 +1,7 @@
 import z3
 import ast
 import logging
-import pyState
+from pySym import pyState
 
 logger = logging.getLogger("ObjectManager:Char")
 

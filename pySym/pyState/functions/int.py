@@ -4,7 +4,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
 from pyObjectManager.Char import Char
 import logging
-import pyState
+from pySym import pyState
 
 logger = logging.getLogger("pyState:functions:int")
 

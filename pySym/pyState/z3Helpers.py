@@ -4,7 +4,7 @@ A file to hold my helper items directly relating to z3
 
 import z3
 import ast
-import pyState
+from pySym import pyState
 import logging
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Real import Real
@@ -60,7 +60,7 @@ def isInt(x):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: s = z3.Solver()
     
@@ -113,7 +113,7 @@ def bvadd_safe(x, y, signed=False):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: s = z3.Solver()
     
@@ -169,7 +169,7 @@ def bvmul_safe(x, y, signed=False):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: s = z3.Solver()
     
@@ -222,7 +222,7 @@ def bvsub_safe(x, y, signed=False):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: s = z3.Solver()
     
@@ -280,7 +280,7 @@ def bvdiv_safe(x, y, signed=False):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: s = z3.Solver()
     
@@ -329,7 +329,7 @@ def z3_bv_to_int(x):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: s = z3.Solver()
     
@@ -379,7 +379,7 @@ def z3_int_to_bv(x,size=Z3_DEFAULT_BITVEC_SIZE):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: s = z3.Solver()
     
@@ -430,7 +430,7 @@ def isZ3Object(obj):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: x = z3.Real('x')
     
@@ -468,7 +468,7 @@ def mk_var(name,vsort):
 
         In [1]: import z3
     
-        In [2]: import pyState.z3Helpers
+        In [2]: from pySym import pyState.z3Helpers
     
         In [3]: x = z3.Real('x')
     

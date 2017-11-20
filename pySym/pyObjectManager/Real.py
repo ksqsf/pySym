@@ -1,6 +1,6 @@
 import z3
 import logging
-import pyState
+from pySym import pyState
 
 logger = logging.getLogger("ObjectManager:Real")
 

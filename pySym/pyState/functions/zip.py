@@ -4,7 +4,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
 from pyObjectManager.List import List
 import logging
-import pyState
+from pySym import pyState
 import itertools
 
 logger = logging.getLogger("pyState:functions:zip")

@@ -1,25 +1,25 @@
 import logging
 import z3
 import ast
-import pyState
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.String import String
-from pyObjectManager.List import List
-import pyState.z3Helpers
+from pySym import pyState
+from pySym.pyObjectManager.Int import Int
+from pySym.pyObjectManager.Real import Real
+from pySym.pyObjectManager.BitVec import BitVec
+from pySym.pyObjectManager.String import String
+from pySym.pyObjectManager.List import List
+import pySym.z3Helpers as z3Helpers
 
 logger = logging.getLogger("pyState:BinOp")
 
 def _handleNum(state,left,right,op):
     # Match our object types
-    leftZ3Object,rightZ3Object = pyState.z3Helpers.z3_matchLeftAndRight(left,right,op)
+    leftZ3Object,rightZ3Object = z3Helpers.z3_matchLeftAndRight(left,right,op)
 
     # Figure out what the op is and add constraint
     if type(op) == ast.Add:
         if type(left) is BitVec:
             # Check for over and underflows
-            state.solver.add(pyState.z3Helpers.bvadd_safe(leftZ3Object,rightZ3Object))
+            state.solver.add(z3Helpers.bvadd_safe(leftZ3Object,rightZ3Object))
 
         # Keep this out of the Z3 solver!
         if left.isStatic() and right.isStatic():
@@ -30,7 +30,7 @@ def _handleNum(state,left,right,op):
 
     elif type(op) == ast.Sub:
         if type(left) is BitVec:
-            state.solver.add(pyState.z3Helpers.bvsub_safe(leftZ3Object,rightZ3Object))
+            state.solver.add(z3Helpers.bvsub_safe(leftZ3Object,rightZ3Object))
 
         # Keep this out of the Z3 solver!
         if left.isStatic() and right.isStatic():
@@ -41,7 +41,7 @@ def _handleNum(state,left,right,op):
 
     elif type(op) == ast.Mult:
         if type(left) is BitVec:
-            state.solver.add(pyState.z3Helpers.bvmul_safe(leftZ3Object,rightZ3Object))
+            state.solver.add(z3Helpers.bvmul_safe(leftZ3Object,rightZ3Object))
 
         # Keep this out of the Z3 solver!
         if left.isStatic() and right.isStatic():
@@ -52,7 +52,7 @@ def _handleNum(state,left,right,op):
 
     elif type(op) == ast.Div:
         if type(left) is BitVec:
-            state.solver.add(pyState.z3Helpers.bvdiv_safe(leftZ3Object,rightZ3Object))
+            state.solver.add(z3Helpers.bvdiv_safe(leftZ3Object,rightZ3Object))
 
         # Keep this out of the Z3 solver!
         if left.isStatic() and right.isStatic():
@@ -68,23 +68,23 @@ def _handleNum(state,left,right,op):
             if z3.is_real(rightZ3Object):
                 mod = z3.Function('mod', z3.RealSort(),z3.RealSort(), z3.RealSort())
                 quot = z3.Function('quot', z3.RealSort(),z3.RealSort(), z3.RealSort())
-                constraint += [pyState.z3Helpers.isInt(rightZ3Object)]
+                constraint += [z3Helpers.isInt(rightZ3Object)]
             else:
                 mod = z3.Function('mod', z3.RealSort(),z3.IntSort(), z3.RealSort())
                 quot = z3.Function('quot', z3.RealSort(),z3.IntSort(), z3.RealSort())
             constraint.append(0 <= mod(leftZ3Object,rightZ3Object))
             constraint.append(mod(leftZ3Object,rightZ3Object) < rightZ3Object)
             constraint.append(rightZ3Object * quot(leftZ3Object,rightZ3Object) + mod(leftZ3Object,rightZ3Object) == leftZ3Object)
-            constraint.append(pyState.z3Helpers.isInt(quot(leftZ3Object,rightZ3Object)))
-            constraint.append(pyState.z3Helpers.isInt(leftZ3Object))
+            constraint.append(z3Helpers.isInt(quot(leftZ3Object,rightZ3Object)))
+            constraint.append(z3Helpers.isInt(leftZ3Object))
             constraint.append(leftZ3Object >= 0)
             state.addConstraint(z3.And(constraint))
             """
             state.addConstraint(0 <= mod(leftZ3Object,rightZ3Object))
             state.addConstraint(mod(leftZ3Object,rightZ3Object) < rightZ3Object)
             state.addConstraint(rightZ3Object * quot(leftZ3Object,rightZ3Object) + mod(leftZ3Object,rightZ3Object) == leftZ3Object)
-            state.addConstraint(pyState.z3Helpers.isInt(quot(leftZ3Object,rightZ3Object)))
-            state.addConstraint(pyState.z3Helpers.isInt(leftZ3Object))
+            state.addConstraint(z3Helpers.isInt(quot(leftZ3Object,rightZ3Object)))
+            state.addConstraint(z3Helpers.isInt(leftZ3Object))
             state.addConstraint(leftZ3Object >= 0)
             """
             ret = mod(leftZ3Object,rightZ3Object)

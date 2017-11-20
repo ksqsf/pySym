@@ -33,7 +33,7 @@ Example:
 
 * If we want to declare a variable to be a Symbolic String of length 10, this would go in the python source code script that we're executing
     * s = pyState.String(10)
-    * Note that you assign it like you would if you were executing it. Also, you do not need to import pyState to call this.
+    * Note that you assign it like you would if you were executing it. Also, you do not need to from pySym import pyState to call this.
 
 
 Python Built-in

@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-import pyState.Compare
+from pySym import pyState.Compare
 from copy import copy
 import pickle
 

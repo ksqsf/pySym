@@ -8,7 +8,6 @@ import os.path
 import importlib
 from types import ModuleType
 import ntpath
-import pyState.z3Helpers
 import pickle
 from pyObjectManager import ObjectManager
 from pyObjectManager.Int import Int
@@ -107,7 +106,7 @@ def replaceObjectWithObject(haystack,fromObj,toObj,parent=None):
 
         In [1]: import ast
 
-        In [2]: import pyState
+        In [2]: from pySym import pyState
 
         In [3]: ret = pySym.pyState.ReturnObject(5)
 
@@ -272,7 +271,7 @@ def hasRealComponent(expr):
 
         In [1]: import z3
 
-        In [2]: import pyState
+        In [2]: from pySym import pyState
 
         In [3]: r = z3.Real('r')
 

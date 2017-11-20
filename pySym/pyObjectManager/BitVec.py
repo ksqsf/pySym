@@ -1,5 +1,5 @@
 import z3
-import pyState
+from pySym import pyState
 
 class BitVec:
     """

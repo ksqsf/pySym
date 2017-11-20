@@ -6,7 +6,7 @@ from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
 from pyObjectManager.String import String
 import ast
-import pyState
+from pySym import pyState
 
 logger = logging.getLogger("pyState:SimFunction:String.join")
 

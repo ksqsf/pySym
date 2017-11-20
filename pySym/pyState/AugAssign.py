@@ -2,7 +2,7 @@ import logging
 import z3
 import ast
 from pyState import hasRealComponent, ReturnObject, z3Helpers
-import pyState.z3Helpers
+from pySym import pyState.z3Helpers
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec

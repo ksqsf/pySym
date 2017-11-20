@@ -1,6 +1,6 @@
 import z3
 import logging
-import pyState
+from pySym import pyState
 
 logger = logging.getLogger("ObjectManager:Int")
 
@@ -120,7 +120,7 @@ class Int:
         # Add the constraints
         
         # If we're not in the solver, we can play some tricks to make things faster
-        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        if not z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
 
             # If we're adding a static variety, don't clutter up the solver
             if type(var) is int:
@@ -194,4 +194,4 @@ class Int:
         return False
 
 from pyObjectManager.BitVec import BitVec
-import pyState.z3Helpers
+import pySym.pyState.z3Helpers as z3Helpers

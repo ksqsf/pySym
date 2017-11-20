@@ -2,7 +2,7 @@ from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.String import String
-import pyState
+from pySym import pyState
 import logging
 import z3
 

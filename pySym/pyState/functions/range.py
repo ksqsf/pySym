@@ -2,7 +2,7 @@ from pyObjectManager.List import List
 from pyObjectManager.Int import Int
 from pyObjectManager.BitVec import BitVec
 import itertools
-import pyState
+from pySym import pyState
 import logging
 
 logger = logging.getLogger("pyState:functions:range")

@@ -1,5 +1,5 @@
 from pyObjectManager.Int import Int
-import pyState
+from pySym import pyState
 
 def handle(state,call,obj,ctx=None):
     """

@@ -29,7 +29,7 @@ sys.path.append('z3-4.4.1-x64-ubuntu-14.04/bin/')
 
 
 # Need to import this so that we don't get cicular importing
-import pyState
+from pySym import pyState
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-import pyState
+from pySym import pyState
 
 logger = logging.getLogger("pyState:Pass")
 

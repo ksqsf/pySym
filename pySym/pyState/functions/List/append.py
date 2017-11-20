@@ -5,7 +5,7 @@ from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
 from pyObjectManager.Char import Char
 from pyObjectManager.String import String
-import pyState
+from pySym import pyState
 from copy import copy
 
 logger = logging.getLogger("pyState:SimFunction:List:append")

@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-import pyState
+from pySym import pyState
 from pyObjectManager.Int import Int
 from pyObjectManager.Real import Real
 from pyObjectManager.BitVec import BitVec
