@@ -43,7 +43,7 @@ setup(
 
     #entry_points={
     #    'console_scripts': [
-    #        'sharePlayer = sharePlayer.sharePlayer:main',
+    #        'pySym = pySym.pySym:main',
     #    ],
     #},
 

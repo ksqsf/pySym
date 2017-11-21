@@ -3,6 +3,7 @@ A file to hold my helper items directly relating to z3
 """
 
 import z3
+from z3.z3 import _coerce_exprs
 import ast
 from .. import pyState
 import logging
@@ -135,7 +136,7 @@ def bvadd_safe(x, y, signed=False):
     """
 
     assert x.ctx_ref()==y.ctx_ref()
-    a, b = z3._coerce_exprs(x, y)
+    a, b = _coerce_exprs(x, y)
     return (z3.BoolRef(z3.Z3_mk_bvadd_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed)),
             z3.BoolRef(z3.Z3_mk_bvadd_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast())))
 
@@ -188,7 +189,7 @@ def bvmul_safe(x, y, signed=False):
     """
 
     assert x.ctx_ref()==y.ctx_ref()
-    a, b = z3._coerce_exprs(x, y)
+    a, b = _coerce_exprs(x, y)
     return (z3.BoolRef(z3.Z3_mk_bvmul_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed)),
             z3.BoolRef(z3.Z3_mk_bvmul_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast())))
 
@@ -246,7 +247,7 @@ def bvsub_safe(x, y, signed=False):
 
     """
     assert x.ctx_ref()==y.ctx_ref()
-    a, b = z3._coerce_exprs(x, y)
+    a, b = _coerce_exprs(x, y)
     return (z3.BoolRef(z3.Z3_mk_bvsub_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast())),
             z3.BoolRef(z3.Z3_mk_bvsub_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed)))
 
@@ -298,7 +299,7 @@ def bvdiv_safe(x, y, signed=False):
 
     """
     assert x.ctx_ref()==y.ctx_ref()
-    a, b = z3._coerce_exprs(x, y)
+    a, b = _coerce_exprs(x, y)
     return z3.BoolRef(z3.Z3_mk_bvsdiv_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast()))
 
 

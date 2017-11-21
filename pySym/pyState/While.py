@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-from . import Compare
+from . import Compare, ReturnObject
 from copy import copy
 import pickle
 
@@ -89,7 +89,7 @@ def handle(state,element):
     ifConstraint = ifConstraint if type(ifConstraint) is list else [ifConstraint]
 
     # See if we need to pass back a call
-    retObjs = [x.state for x in ifConstraint if type(x) is pyState.ReturnObject]
+    retObjs = [x.state for x in ifConstraint if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
 
