@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-from . import Compare, BoolOp
+from . import Compare, BoolOp, ReturnObject
 from copy import copy
 
 logger = logging.getLogger("pyState:If")
@@ -79,10 +79,10 @@ def handle(state,element):
 
     # Check what type of test this is    
     if type(element.test) == ast.Compare:
-        trueConstraint = pyState.Compare.handle(state,element.test)
+        trueConstraint = Compare.handle(state,element.test)
         
     elif type(element.test) == ast.BoolOp:
-        trueConstraint = pyState.BoolOp.handle(state, element.test)
+        trueConstraint = BoolOp.handle(state, element.test)
     
 
     elif type(element.test) == ast.Call:
@@ -104,7 +104,7 @@ def handle(state,element):
     trueConstraint = trueConstraint if type(trueConstraint) is list else [trueConstraint]
 
     # Resolve calls if we need to
-    retObjs = [x.state for x in trueConstraint if type(x) is pyState.ReturnObject]
+    retObjs = [x.state for x in trueConstraint if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
 

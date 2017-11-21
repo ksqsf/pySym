@@ -22,7 +22,7 @@ def _handleNum(state,element,value,op):
     oldTargets = [oldTargets] if type(oldTargets) is not list else oldTargets
 
     # Resolve calls if we need to
-    retObjs = [x for x in oldTargets if type(x) is pyState.ReturnObject]
+    retObjs = [x for x in oldTargets if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
 
@@ -60,7 +60,7 @@ def _handleNum(state,element,value,op):
         if type(op) == ast.Add:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
-                state.solver.add(pyState.z3Helpers.bvadd_safe(oldTargetVar,valueVar))
+                state.solver.add(z3Helpers.bvadd_safe(oldTargetVar,valueVar))
 
             # Keep clutter out of z3
             if oldTarget.isStatic() and value.isStatic():
@@ -71,7 +71,7 @@ def _handleNum(state,element,value,op):
         elif type(op) == ast.Sub:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
-                state.solver.add(pyState.z3Helpers.bvsub_safe(oldTargetVar,valueVar))
+                state.solver.add(z3Helpers.bvsub_safe(oldTargetVar,valueVar))
 
             # Keep clutter out of z3
             if oldTarget.isStatic() and value.isStatic():
@@ -82,7 +82,7 @@ def _handleNum(state,element,value,op):
         elif type(op) == ast.Mult:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
-                state.solver.add(pyState.z3Helpers.bvmul_safe(oldTargetVar,valueVar))
+                state.solver.add(z3Helpers.bvmul_safe(oldTargetVar,valueVar))
 
             # Keep clutter out of z3
             if oldTarget.isStatic() and value.isStatic():
@@ -93,7 +93,7 @@ def _handleNum(state,element,value,op):
         elif type(op) == ast.Div:
             if type(newTargetVar) in [z3.BitVecRef, z3.BitVecNumRef]:
                 # Check for over and underflows
-                state.solver.add(pyState.z3Helpers.bvdiv_safe(oldTargetVar,valueVar))
+                state.solver.add(z3Helpers.bvdiv_safe(oldTargetVar,valueVar))
 
             # Keep clutter out of z3
             if oldTarget.isStatic() and value.isStatic():
@@ -177,7 +177,7 @@ def _handleString(state,element,value,op):
     oldTargets = [oldTargets] if type(oldTargets) is not list else oldTargets
 
     # Resolve calls if we need to
-    retObjs = [x for x in oldTargets if type(x) is pyState.ReturnObject]
+    retObjs = [x for x in oldTargets if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
 
@@ -241,7 +241,7 @@ def handle(state,element):
     values = [value] if type(value) is not list else value
     
     # Check for return object. Return all applicable
-    retObjs = [x.state for x in values if type(x) is pyState.ReturnObject]
+    retObjs = [x.state for x in values if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
 

@@ -793,9 +793,11 @@ class State():
         # If this is a local context call (i.e.: test())
         if type(call.func) == ast.Name:
             funcName = call.func.id
+            logger.debug("resolveCall: Resolving call as name: %s", funcName)
         
         # If this is an attr form (i.e.: telnetlib.Telnet())
         elif type(call.func) == ast.Attribute:
+            logger.debug("resolveCall: Resolving call as attribute call.")
             try:
                 funcName = self.resolveObject(call.func.value,ctx=ctx)
 
@@ -810,8 +812,8 @@ class State():
                 funcName = funcName.__class__.__name__ + "." + call.func.attr
 
             except Exception as e:
-                #print(str(e))
                 funcName = call.func.value.id + "." + call.func.attr
+                logger.debug("resolveCall: Resolved call name to '%s'", funcName)
 
         else:
                 err = "resolveCall: unknown call-type object '{0}'".format(type(call))
@@ -1124,6 +1126,8 @@ class State():
 
         # Hack-ish solution to handle calls
         elif t == ast.Call:
+
+            logger.debug("resolveObject: Resolving Call")
 
             # Let's see if this is a real or sim call
             func = self.resolveCall(obj,ctx=ctx)

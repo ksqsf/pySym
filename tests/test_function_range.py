@@ -53,6 +53,7 @@ def test_function_range():
     pg = PathGroup(p)
 
     pg.explore()
+
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_int('out') == 150
 
