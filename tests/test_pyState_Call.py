@@ -11,7 +11,7 @@ import ast_parse
 import z3
 from pySym.pyPath import Path
 import pytest
-from pyPathGroup import PathGroup
+from pySym.pyPathGroup import PathGroup
 
 test1 = """
 def test():

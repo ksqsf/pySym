@@ -9,10 +9,10 @@ import z3
 from pySym.pyState import State
 import pytest
 from pySym.pyPath import Path
-from pyPathGroup import PathGroup
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
+from pySym.pyPathGroup import PathGroup
+from pySym.pyObjectManager.Int import Int
+from pySym.pyObjectManager.Real import Real
+from pySym.pyObjectManager.BitVec import BitVec
 
 test1 = "x = 1"
 test2 = "x = 2"

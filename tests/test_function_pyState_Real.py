@@ -9,13 +9,13 @@ logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(mes
 import ast_parse
 import z3
 from pySym.pyPath import Path
-from pyPathGroup import PathGroup
+from pySym.pyPathGroup import PathGroup
 import pytest
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
-from pyState.z3Helpers import Z3_MAX_STRING_LENGTH
+from pySym.pyObjectManager.Int import Int
+from pySym.pyObjectManager.Real import Real
+from pySym.pyObjectManager.BitVec import BitVec
+from pySym.pyObjectManager.List import List
+from pySym.pyState.z3Helpers import Z3_MAX_STRING_LENGTH
 
 test1 = """
 s = pyState.Real()

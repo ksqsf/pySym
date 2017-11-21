@@ -60,7 +60,7 @@ You can use a path group to automagically walk through the program as follows:
 from pySym.pyPath import Path
 import ast
 from pySym import Colorer
-from pyPathGroup import PathGroup
+from pySym.pyPathGroup import PathGroup
 b = ast.parse(source).body
 p = Path(b,source=source)
 pg = PathGroup(p)

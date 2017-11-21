@@ -9,12 +9,12 @@ logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(mes
 import ast_parse
 import z3
 from pySym.pyPath import Path
-from pyPathGroup import PathGroup
+from pySym.pyPathGroup import PathGroup
 import pytest
-from pyObjectManager.Int import Int
-from pyObjectManager.Real import Real
-from pyObjectManager.BitVec import BitVec
-from pyObjectManager.List import List
+from pySym.pyObjectManager.Int import Int
+from pySym.pyObjectManager.Real import Real
+from pySym.pyObjectManager.BitVec import BitVec
+from pySym.pyObjectManager.List import List
 
 test1 = """
 l = [1,2,3]

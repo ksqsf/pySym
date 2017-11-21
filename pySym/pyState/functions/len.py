@@ -1,4 +1,4 @@
-from pyObjectManager.Int import Int
+from pySym.pyObjectManager.Int import Int
 from pySym import pyState
 
 def handle(state,call,obj,ctx=None):

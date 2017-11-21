@@ -22,7 +22,7 @@ and paste the script you want to execute or load it using file:
 
    In [3]: from pySym import Colorer
 
-   In [4]: from pyPathGroup import PathGroup
+   In [4]: from pySym.pyPathGroup import PathGroup
 
    In [5]: with open("test","r") as f:
       ...:         b = ast.parse(source).body

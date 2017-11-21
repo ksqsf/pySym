@@ -2,7 +2,7 @@
 import z3
 import ast
 from pyState.z3Helpers import Z3_MAX_STRING_LENGTH
-from pyObjectManager.String import String
+from pySym.pyObjectManager.String import String
 
 def handle(state,call,length=ast.Num(Z3_MAX_STRING_LENGTH),ctx=None):
     """

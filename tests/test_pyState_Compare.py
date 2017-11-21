@@ -7,7 +7,7 @@ import z3
 from pySym.pyPath import Path
 from pySym.pyState import Compare
 import pytest
-from pyPathGroup import PathGroup
+from pySym.pyPathGroup import PathGroup
 
 compare1 = """
 x = {0}

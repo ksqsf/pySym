@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(mes
 import ast_parse
 import z3
 from pySym.pyPath import Path
-from pyPathGroup import PathGroup
+from pySym.pyPathGroup import PathGroup
 
 test1 = """
 def test2():

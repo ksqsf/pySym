@@ -17,7 +17,7 @@ to do just that.
     from pySym.pyPath import Path
     import ast_parse
     from pySym import Colorer
-    from pyPathGroup import PathGroup
+    from pySym.pyPathGroup import PathGroup
 
     source = """
     def isprime(n):
