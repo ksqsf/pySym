@@ -5,7 +5,7 @@ sys.path.insert(0, myPath + '/../')
 import logging
 from pySym import Colorer
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-import ast_parse
+from pySym import ast_parse
 import z3
 from pySym.pyPath import Path
 from pySym.pyPathGroup import PathGroup

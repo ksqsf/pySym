@@ -15,7 +15,7 @@ to do just that.
     #import logging
     #logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     from pySym.pyPath import Path
-    import ast_parse
+    from pySym import ast_parse
     from pySym import Colorer
     from pySym.pyPathGroup import PathGroup
 

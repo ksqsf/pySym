@@ -2,7 +2,7 @@ import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 
-import ast_parse
+from pySym import ast_parse
 import z3
 from pySym.pyPath import Path
 import pytest

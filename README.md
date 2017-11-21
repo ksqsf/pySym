@@ -16,12 +16,12 @@ For examples of what is possible, probably the best resource right now is the un
 Please see my ReadTheDocs for the most updated documentation: http://pysym.readthedocs.org/en/latest
 
 # Install
-Basic installation requires installing z3 with python bindings. It's recommended to install this into a python virtualenv to keep things a bit more clean.
-
-I created a setup script. It works on Ubuntu 15.04. It is untested on other releases.
+pySym is now structured as a python package. You can use pip to install it:
 
 ```bash
-$ ./setup.sh
+$ git clone https://github.com/bannsec/pySym.git && cd pySym
+$ (optional) virtualenv --python=$(which python3) pySym && . pySym/bin/activate
+(pySym)$ pip install .
 ```
 
 # Tests

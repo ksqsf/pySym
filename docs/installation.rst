@@ -2,7 +2,21 @@
 Installing pySym
 ========================
 
-setup.sh
+pip install
+========================
+``pySym`` has been refactored to be a proper python package. This is now the
+easiest means of installing this library. To do so, simply clone this repo and
+run pip install::
+
+    $ git clone https://github.com/bannsec/pySym.git
+    $ cd pySym
+    $ pip install .
+
+Note that it's recommended to install into a python virtual environment instead
+of your system environment.
+
+
+setup.sh (depreciated)
 ========================
 
 If you run on Ubuntu (or derivative) this will probably work for you. It
