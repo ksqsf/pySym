@@ -61,6 +61,7 @@ def test_longer_one():
     pg = PathGroup(p)
 
     pg.explore()
+    print(pg.errored[0].error)
     assert len(pg.completed) == 1
 
     assert pg.completed[0].state.any_list('CRC_POLY') == [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1]

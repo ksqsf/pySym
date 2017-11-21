@@ -1,6 +1,6 @@
 
 from multiprocessing import Pool
-from pySym.pyPath import Path
+from .pyPath import Path
 
 class PathGroup:
 

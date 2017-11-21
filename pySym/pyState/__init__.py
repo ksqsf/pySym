@@ -2,7 +2,7 @@ import z3, z3.z3util as z3util
 import ast
 import logging
 from copy import copy
-import pySym.pyState.BinOp, pySym.pyState.Pass, pySym.pyState.While, pySym.pyState.Break, pySym.pyState.Subscript, pySym.pyState.For, pySym.pyState.ListComp, pySym.pyState.UnaryOp, pySym.pyState.GeneratorExp
+#import pySym.pyState.BinOp, pySym.pyState.Pass, pySym.pyState.While, pySym.pyState.Break, pySym.pyState.Subscript, pySym.pyState.For, pySym.pyState.ListComp, pySym.pyState.UnaryOp, pySym.pyState.GeneratorExp
 import random
 import os.path
 import importlib
@@ -426,16 +426,16 @@ class State():
         # More cleanly resolve instructions
         # TODO: Move this somewhere else... Moving it to the top of State introduced "include hell" :-(
         instructions = {
-            ast.Assign: pyState.Assign,
-            ast.AugAssign: pyState.AugAssign,
-            ast.FunctionDef: pyState.FunctionDef,
-            ast.Expr: pyState.Expr,
-            ast.Pass: pySym.pyState.Pass,
-            ast.Return: pySym.pyState.Return,
-            ast.If: pySym.pyState.If,
-            ast.While: pySym.pyState.While,
-            ast.Break: pySym.pyState.Break,
-            ast.For: pySym.pyState.For
+            ast.Assign: Assign,
+            ast.AugAssign: AugAssign,
+            ast.FunctionDef: FunctionDef,
+            ast.Expr: Expr,
+            ast.Pass: Pass,
+            ast.Return: Return,
+            ast.If: If,
+            ast.While: While,
+            ast.Break: Break,
+            ast.For: For
             }
 
         # Return initial return state
@@ -487,7 +487,7 @@ class State():
         obj = self.resolveObject(obj)
         
         # Resolve calls if we need to
-        retObjs = [x for x in obj if type(x) is pySym.pyState.ReturnObject]
+        retObjs = [x for x in obj if type(x) is ReturnObject]
         if len(retObjs) > 0:
             return retObjs
 
@@ -737,7 +737,7 @@ class State():
                 modName = "." + os.path.join(subdir,f).replace(BASE,"").replace(f,"").strip("/").replace("/",".")
                 modName = "" if modName is "." else modName
                 modFName = os.path.splitext(f)[0]
-                imp = importlib.import_module(('pyState.functions' + modName + "." + modFName).replace("..","."))
+                imp = importlib.import_module(('pySym.pyState.functions' + modName + "." + modFName).replace("..","."))
                 self.registerFunction(imp,modName,True)
 
 
@@ -773,7 +773,7 @@ class State():
         # This must be a simFunction
         else:
             assert type(func) is ModuleType
-            funcName = func.__package__.replace("pyState.functions","") + "." + os.path.splitext(ntpath.basename(func.__file__))[0]
+            funcName = func.__package__.replace("pySym.pyState.functions","") + "." + os.path.splitext(ntpath.basename(func.__file__))[0]
             funcName = funcName.lstrip(".")
             logger.debug("registerFunction: Registering simFunction '{0}'".format(funcName))
             self.simFunctions[funcName] = func
@@ -809,7 +809,8 @@ class State():
                 
                 funcName = funcName.__class__.__name__ + "." + call.func.attr
 
-            except:
+            except Exception as e:
+                #print(str(e))
                 funcName = call.func.value.id + "." + call.func.attr
 
         else:
@@ -875,7 +876,7 @@ class State():
                 ret = ret if type(ret) is list else [ret]
 
                 # If we're making a call, return for now so we can do that
-                retObjs = [x for x in ret if type(x) is pySym.pyState.ReturnObject]
+                retObjs = [x for x in ret if type(x) is ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -941,7 +942,7 @@ class State():
                 ret = ret if type(ret) is list else [ret]
 
                 # If we're making a call, return for now so we can do that
-                retObjs = [x for x in ret if type(x) is pySym.pyState.ReturnObject]
+                retObjs = [x for x in ret if type(x) is ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -972,7 +973,7 @@ class State():
                 # Resolve the name
                 elm_resolved = self.resolveObject(elm)
                 elm_resolved = elm_resolved if type(elm_resolved) is list else [elm_resolved]
-                retObjs = [x for x in elm_resolved if type(x) is pySym.pyState.ReturnObject]
+                retObjs = [x for x in elm_resolved if type(x) is ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -1010,7 +1011,8 @@ class State():
                 elm_resolved = elm_resolved if type(elm_resolved) is list else [elm_resolved]
 
                 # If we're waiting on a symbolic call, return
-                retObjs = [x for x in elm_resolved if type(x) is pySym.pyState.ReturnObject]
+                #retObjs = [x for x in elm_resolved if type(x) is pySym.pyState.ReturnObject]
+                retObjs = [x for x in elm_resolved if type(x) is ReturnObject]
                 if len(retObjs) > 0:
                     return retObjs
 
@@ -1094,7 +1096,7 @@ class State():
 
         elif t == ast.Subscript:
             logger.debug("resolveObject: Resolving object type Subscript")
-            return pySym.pyState.Subscript.handle(self,obj,ctx=ctx)
+            return Subscript.handle(self,obj,ctx=ctx)
 
         elif t == ReturnObject:
             logger.debug("resolveObject: Resolving return type object with ID: ret{0}".format(obj.retID))
@@ -1110,11 +1112,11 @@ class State():
 
         elif t == ast.ListComp:
             logger.debug("resolveObject: Resolving ListComprehension")
-            return pySym.pyState.ListComp.handle(self,obj,ctx=ctx)
+            return ListComp.handle(self,obj,ctx=ctx)
 
         elif t == ast.GeneratorExp:
             logger.debug("resolveObject: Resolving GeneratorExpression")
-            return pySym.pyState.GeneratorExp.handle(self,obj,ctx=ctx)
+            return GeneratorExp.handle(self,obj,ctx=ctx)
 
         elif t == ast.Compare:
             logger.debug("resolveObject: Resolving Compare")
@@ -1146,7 +1148,7 @@ class State():
             # TODO: Not sure if there will be symbolic UnaryOp objects... This wouldn't work for those.
             logger.debug("resolveObject: Resolving UnaryOp type object")
             #return ast.literal_eval(obj)
-            return pySym.pyState.UnaryOp.handle(self,obj,ctx=ctx)
+            return UnaryOp.handle(self,obj,ctx=ctx)
 
 
         else:
@@ -1634,3 +1636,4 @@ class State():
         
         return newState
         
+from . import BinOp, Pass, While, Break, Subscript, For, ListComp, UnaryOp, GeneratorExp, Assign, AugAssign, FunctionDef, Expr, Return, If

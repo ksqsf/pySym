@@ -1,7 +1,7 @@
 import z3
 import ast
 import logging
-from pySym import pyState
+from .. import pyState
 
 logger = logging.getLogger("ObjectManager:String")
 
@@ -271,8 +271,8 @@ class String:
 
 
 # Circular importing problem. Don't hate :-)
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.Real import Real
-from pySym.pyObjectManager.BitVec import BitVec
-from pySym.pyObjectManager.Char import Char
+from .Int import Int
+from .Real import Real
+from .BitVec import BitVec
+from .Char import Char
 

@@ -1,7 +1,7 @@
 import z3
 import ast
-from pySym.pyObjectManager.Real import Real
-from pySym import pyState.z3Helpers
+from ....pyObjectManager.Real import Real
+from ... import z3Helpers
 
 def handle(state,call,value=None,ctx=None):
     """
@@ -21,7 +21,7 @@ def handle(state,call,value=None,ctx=None):
             value = state.resolveObject(value,ctx=ctx)
 
             for v in value:
-                realObj,valueObj = pyState.z3Helpers.z3_matchLeftAndRight(r,v,ast.Add)
+                realObj,valueObj = z3Helpers.z3_matchLeftAndRight(r,v,ast.Add)
                 #r.setTo(v)
                 r.increment()
                 state.addConstraint(r.getZ3Object() == valueObj)

@@ -1,15 +1,14 @@
 import logging
 import z3, z3.z3util as z3util
 import ast
-from pyState import hasRealComponent, ReturnObject, duplicateSort
-from pySym import pyState.z3Helpers
-from pySym import pyState.BinOp, pyState.Call
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.Real import Real
-from pySym.pyObjectManager.BitVec import BitVec
-from pySym.pyObjectManager.List import List
-from pySym.pyObjectManager.String import String
-from pySym.pyObjectManager.Char import Char
+#from . import hasRealComponent, ReturnObject, duplicateSort
+#from pySym import pyState.BinOp, pyState.Call
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.List import List
+from ..pyObjectManager.String import String
+from ..pyObjectManager.Char import Char
 
 logger = logging.getLogger("pyState:Assign")
 
@@ -195,3 +194,5 @@ def handle(state,element):
             raise Exception(err)
 
     return ret
+
+from . import ReturnObject, duplicateSort

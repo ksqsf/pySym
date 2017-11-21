@@ -1,12 +1,12 @@
 import logging
 import z3
 import ast
-from pyState import hasRealComponent, ReturnObject, z3Helpers
-from pySym import pyState.z3Helpers
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.Real import Real
-from pySym.pyObjectManager.BitVec import BitVec
-from pySym.pyObjectManager.String import String
+from . import hasRealComponent, ReturnObject, z3Helpers
+from . import z3Helpers
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.String import String
 
 logger = logging.getLogger("pyState:AugAssign")
 

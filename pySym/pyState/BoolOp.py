@@ -1,8 +1,8 @@
 import logging
 import z3
 import ast
-from pySym import pyState
-from pySym import pyState.Compare
+from .. import pyState
+from . import Compare
 
 logger = logging.getLogger("pyState:BoolOp")
 
@@ -12,7 +12,7 @@ def _handle(state,op,values,ifSideConstraints=None):
     # Loop through our requested checks
     for value in values:
         if type(value) is ast.Compare:
-            ifSide = pyState.Compare.handle(state,value)
+            ifSide = Compare.handle(state,value)
 
             # Normalize
             ifSide = [ifSide] if type(ifSide) is not list else ifSide

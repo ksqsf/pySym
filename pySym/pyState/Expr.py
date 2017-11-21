@@ -1,7 +1,7 @@
 import logging
 import z3
 import ast
-from pySym import pyState
+from .. import pyState
 from . import Call, ReturnObject
 
 logger = logging.getLogger("pyState:Expr")

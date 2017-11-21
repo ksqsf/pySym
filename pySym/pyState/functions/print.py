@@ -1,4 +1,4 @@
-from pySym import pyState
+from ... import pyState
 
 def handle(state,call,s,ctx=None):
     """

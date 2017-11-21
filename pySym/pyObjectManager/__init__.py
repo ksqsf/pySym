@@ -2,14 +2,14 @@ import z3
 import ast
 import logging
 #from pyState import z3Helpers
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.Real import Real
-from pySym.pyObjectManager.BitVec import BitVec
-from pySym.pyObjectManager.List import List
-from pySym.pyObjectManager.Ctx import Ctx
-from pySym.pyObjectManager.String import String
-from pySym.pyObjectManager.Char import Char
-from pySym import pyState
+from .Int import Int
+from .Real import Real
+from .BitVec import BitVec
+from .List import List
+from .Ctx import Ctx
+from .String import String
+from .Char import Char
+from .. import pyState
 
 logger = logging.getLogger("ObjectManager")
 

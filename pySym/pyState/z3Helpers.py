@@ -4,12 +4,12 @@ A file to hold my helper items directly relating to z3
 
 import z3
 import ast
-from pySym import pyState
+from .. import pyState
 import logging
-from pySym.pyObjectManager.BitVec import BitVec
-from pySym.pyObjectManager.Real import Real
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.Char import Char
+from ..pyObjectManager.BitVec import BitVec
+from ..pyObjectManager.Real import Real
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.Char import Char
 
 logger = logging.getLogger("pyState:z3Helpers")
 

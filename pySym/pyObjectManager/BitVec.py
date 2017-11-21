@@ -1,5 +1,5 @@
 import z3
-from pySym import pyState
+from .. import pyState
 
 class BitVec:
     """
@@ -191,4 +191,4 @@ class BitVec:
         return True
 
         
-from pySym.pyObjectManager.Int import Int
+from .Int import Int

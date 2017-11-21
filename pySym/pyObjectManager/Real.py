@@ -1,6 +1,6 @@
 import z3
 import logging
-from pySym import pyState
+from .. import pyState
 
 logger = logging.getLogger("ObjectManager:Real")
 
@@ -187,6 +187,6 @@ class Real:
 
 
 # Circular importing problem. Don't hate :-)
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.BitVec import BitVec
+from .Int import Int
+from .BitVec import BitVec
 

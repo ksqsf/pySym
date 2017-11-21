@@ -1,7 +1,7 @@
 import z3
 import ast
 import logging
-from pySym.pyState import State
+from .pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import copy

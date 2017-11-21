@@ -1,8 +1,8 @@
-from pySym.pyObjectManager.List import List
-from pySym.pyObjectManager.Int import Int
-from pySym.pyObjectManager.BitVec import BitVec
+from ...pyObjectManager.List import List
+from ...pyObjectManager.Int import Int
+from ...pyObjectManager.BitVec import BitVec
 import itertools
-from pySym import pyState
+from ... import pyState
 import logging
 
 logger = logging.getLogger("pyState:functions:range")

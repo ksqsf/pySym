@@ -1,6 +1,6 @@
 import z3
 import logging
-from pySym import pyState
+from .. import pyState
 
 logger = logging.getLogger("ObjectManager:Int")
 
@@ -193,6 +193,6 @@ class Int:
         
         return False
 
-from pySym.pyObjectManager.BitVec import BitVec
+from .BitVec import BitVec
 #import pySym.pyState.z3Helpers as z3Helpers
 from ..pyState import z3Helpers
