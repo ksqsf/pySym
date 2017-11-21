@@ -85,6 +85,9 @@ def isInt(x):
 # Watch for BitVec Overflow #
 #############################
 
+# TODO: Nikolaj went ahead and exposed this functionality directly in pyZ3 now. Update my stuff to use it
+# https://github.com/Z3Prover/z3/commit/18200f55edf14e5360c9095736710ae689032f6d
+
 def bvadd_safe(x, y, signed=False):
     """BitVector addition overflow/underflow checks
     
