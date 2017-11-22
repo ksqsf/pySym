@@ -1,7 +1,2 @@
 [run]
-# Check coverage of branches
-branch = True
-omit = tests/*
-       Colorer.py
-
-[report]
+omit = pySym/Colorer.py

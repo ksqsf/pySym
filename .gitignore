@@ -6,3 +6,4 @@ htmlcov
 test
 docs/_build
 *.egg-info/
+.eggs/

@@ -17,6 +17,8 @@ here = path.abspath(path.dirname(__file__))
 #    long_description = f.read()
 long_description = "See website for more info."
 
+dev_tools = ['pytest','python-coveralls','coverage','pytest-cov','pytest-xdist','ipython']
+
 setup(
     name='pySym',
     version='0.0.1',
@@ -37,8 +39,10 @@ setup(
     keywords='symbolic execution python',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'longer_tests']),
     install_requires=['z3-solver','prettytable'],
+    setup_requires=['pytest-runner'],
+    tests_require=dev_tools,
     extras_require={
-        'dev': ['pytest','python-coveralls','coverage','pytest-cov','pytest-xdist','ipython'],
+        'dev': dev_tools,
     },
 
     #entry_points={

@@ -15,6 +15,14 @@ run pip install::
 Note that it's recommended to install into a python virtual environment instead
 of your system environment.
 
+Docker install
+========================
+You can also install ``pySym`` using a pre-build Docker container. This is
+setup as an auto-build image, so you will always be up-to-date::
+
+    $ sudo docker pull bannsec/pysym
+    $ sudo docker run -it --rm bannsec/pysym
+
 
 setup.sh (depreciated)
 ========================

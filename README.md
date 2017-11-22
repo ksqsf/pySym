@@ -16,12 +16,21 @@ For examples of what is possible, probably the best resource right now is the un
 Please see my ReadTheDocs for the most updated documentation: http://pysym.readthedocs.org/en/latest
 
 # Install
+## Pypi
 pySym is now structured as a python package. You can use pip to install it:
 
 ```bash
 $ git clone https://github.com/bannsec/pySym.git && cd pySym
 $ (optional) virtualenv --python=$(which python3) pySym && . pySym/bin/activate
 (pySym)$ pip install .
+```
+
+## Docker
+pySym has a docker build for easy install and use. Just do the following:
+
+```bash
+$ sudo docker pull bannsec/pysym
+$ sudo docker run -it --rm bannsec/pysym
 ```
 
 # Tests
