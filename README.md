@@ -34,11 +34,11 @@ $ sudo docker run -it --rm bannsec/pysym
 ```
 
 # Tests
-Tests need to be done from somewhere that has z3 access. For my env, this means the virtual environment.
+Just open up your environment and run ``pytest`` from the root directory.
 
 ```bash
 $ workon pySym
-(pySym)$ py.test --cov=. --cov-config=.coveragerc
+(pySym)$ pytest
 ```
 
 # Basic/Medium Example
