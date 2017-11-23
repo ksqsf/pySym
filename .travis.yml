@@ -12,4 +12,4 @@ before_install:
 install:
     - docker build -t bannsec/pysym .
 script:
-    - docker run -it --rm bannsec/pysym bash -c '. ~/.virtualenvs/pysym/bin/activate && cd /home/pySym/pySym/ && python setup.py test'
+    - docker run -it --rm bannsec/pysym bash -c '. ~/.virtualenvs/pySym/bin/activate && cd /home/pySym/pySym/ && python setup.py test'
