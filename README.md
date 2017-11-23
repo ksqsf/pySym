@@ -1,7 +1,6 @@
 # pySym
 Python Symbolic Execution
 
-[ ![Codeship Status for Owlz/pySym](https://codeship.com/projects/691a2930-c591-0133-c81b-4e8753dd3f97/status?branch=master)](https://codeship.com/projects/138556)
 [![Build Status](https://travis-ci.org/bannsec/pySym.svg?branch=master)](https://travis-ci.org/bannsec/pySym)
 [![Coverage Status](https://coveralls.io/repos/github/Owlz/pySym/badge.svg?branch=HEAD)](https://coveralls.io/github/Owlz/pySym?branch=HEAD)
 [![Documentation Status](https://readthedocs.org/projects/pysym/badge/?version=latest)](http://pysym.readthedocs.org/en/latest/?badge=latest)
