@@ -1,7 +1,7 @@
 FROM ubuntu:17.10
 
 # Root commands
-RUN apt-get update && apt-get install -y python3 python3-virtualenv sudo git binutils g++ gcc make && \
+RUN apt-get update && apt-get install -y python3 python3-virtualenv sudo git binutils g++ gcc make libdpkg-perl && \
     rm -rf /var/lib/apt/lists/* && \
     useradd -m pySym && \
     echo 'pySym ALL=(ALL) NOPASSWD:ALL' | sudo EDITOR='tee -a' visudo
