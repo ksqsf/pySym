@@ -10,6 +10,7 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 from os import path
+import os
 
 here = path.abspath(path.dirname(__file__))
 
@@ -18,6 +19,15 @@ here = path.abspath(path.dirname(__file__))
 long_description = "See website for more info."
 
 dev_tools = ['pytest','python-coveralls','coverage','pytest-cov','pytest-xdist','ipython']
+
+#
+# Install z3 or no?
+# 
+
+install_requires=['prettytable']
+
+if "PYSYM_NO_Z3" not in os.environ:
+    install_requires.append('z3-solver')
 
 setup(
     name='pySym',
@@ -38,7 +48,7 @@ setup(
     ],
     keywords='symbolic execution python',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'longer_tests']),
-    install_requires=['z3-solver','prettytable'],
+    install_requires=install_requires,
     setup_requires=['pytest-runner'],
     tests_require=dev_tools,
     extras_require={
