@@ -149,7 +149,11 @@ class Int:
         """
         str will change this object into a possible representation by calling state.any_int
         """
-        return str(self.state.any_int(self))
+        return str(int(self))
+
+    def __int__(self):
+        """int: Possible integer value of this object."""
+        return self.state.any_int(self)
 
     def mustBe(self,var):
         """
