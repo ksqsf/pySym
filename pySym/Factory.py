@@ -28,7 +28,7 @@ class Factory:
 
     def path_group(self) -> PathGroup:
         """pySym.pyPathGroup.PathGroup: Basic PathGroup object for this project."""
-        return PathGroup(self.path)
+        return PathGroup(self.path())
 
     ##############
     # Properties #
