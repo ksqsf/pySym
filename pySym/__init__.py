@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from .Project import Project
+
 """
 import ast
 import argparse

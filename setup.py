@@ -24,7 +24,7 @@ dev_tools = ['pytest','python-coveralls','coverage','pytest-cov','pytest-xdist',
 # Install z3 or no?
 # 
 
-install_requires=['prettytable']
+install_requires=['prettytable','enforce']
 
 if "PYSYM_NO_Z3" not in os.environ:
     install_requires.append('z3-solver')
