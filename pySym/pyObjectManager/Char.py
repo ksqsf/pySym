@@ -15,7 +15,7 @@ class Char:
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
 
-        self.size = 16
+        self.size = 16 # TODO: This should probably be 8...
         self.count = 0 if count is None else count
         self.varName = varName
         self.ctx = ctx
@@ -43,7 +43,10 @@ class Char:
         )
 
     def __str__(self):
-        return chr(self.state.any_int(self))
+        return chr(int(self))
+
+    def __int__(self):
+        return self.state.any_int(self)
 
     def setTo(self,var):
         """
