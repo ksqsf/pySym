@@ -63,16 +63,12 @@ while x < 5:
     x += 1
 ```
 
-You can use a path group to automagically walk through the program as follows:
+You can use a path group to automagically walk through the program as follows. First, save that example as 'test.py'. Now, do the following:
 
 ```python
-from pySym.pyPath import Path
-import ast
-from pySym import Colorer
-from pySym.pyPathGroup import PathGroup
-b = ast.parse(source).body
-p = Path(b,source=source)
-pg = PathGroup(p)
+import pySym
+proj = pySym.Project("./test.py")
+pg = proj.factory.path_group()
 pg.explore()
 ```
 
@@ -87,7 +83,7 @@ Out[5]: 26
 ```
 
 # Basic Example
-A lot of the layout for pySym is shamelessly stolen from the angr project. If you're familiar with their calls, this will make sense to you.
+A lot of the layout for pySym is shamelessly stolen from the `angr` project. If you're familiar with their calls, this will make sense to you.
 
 As an example of what is currently working, take the following script:
 
