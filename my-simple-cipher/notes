@@ -4,5 +4,17 @@ https://dowsll.github.io/writeups/tokyowesternctf2017/mysimplecipher
 
 TODO:
  - Add assert handling
+   - tests
  - Add string.encode('hex') handling
- - Add pySym project class (just to make things easier to load)
+   - tests
+ - [DONE] Add pySym project class (just to make things easier to load)
+   - [DONE] tests
+ - Implement random.randint
+   - tests
+ - [DONE] Implement symbolic Char for ord
+   - [DONE] tests
+ - [DONE] Implement __int__ for Int object
+   - [DONE] tests
+ - Check BitVecs to use ULE/UGT/etc if doing compare. It defaults to signed.
+ - Update docs
+ 

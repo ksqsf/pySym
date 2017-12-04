@@ -84,7 +84,7 @@ Python Built-in
 * object (Not Implemented)
 * oct (Not Implemented)
 * open (Not Implemented)
-* ord (Partially Implemented)
+* ord (Fully Implemented)
 * pow (Not Implemented)
 * print (Partially Implemented)
 * property (Not Implemented)

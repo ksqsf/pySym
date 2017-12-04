@@ -9,6 +9,7 @@ from ... import pyState
 
 logger = logging.getLogger("pyState:functions:ord")
 
+import z3
 
 def handle(state,call,obj,ctx=None):
     """
@@ -37,21 +38,22 @@ def handle(state,call,obj,ctx=None):
             logger.error(err)
             raise Exception(err)
 
-        # Only dealing with concrete values for now.
+        # Grab a new var to work with
+        ret = state.getVar("tmpOrdVal",ctx=1,varType=Int)
+        ret.increment()
+
+        # Sanitize String to Char
+        if type(obj) is String:
+            obj = obj[0]
+
+        # Simple case, it's static
         if obj.isStatic():
-            ret = state.getVar("tmpOrdVal",ctx=1,varType=Int)
-            ret.increment()
-            # Sanitize String to Char
-            if type(obj) is String:
-                obj = obj[0]
             ret.setTo(ord(obj.getValue()))
 
-        # TODO: Deal with symbolic values (returning list of possibilities)
+        # If it's symbolic, we need help from z3
         else:
-            err = "handle: Don't know how to handle symbolic Char/String for now"
-            logger.error(err)
-            raise Exception(err)
-
+            # Tell z3 to convert the BitVec to an int, then set equal
+            ret.state.addConstraint(z3.BV2Int(obj.getZ3Object()) == ret.getZ3Object())
 
         retList.append(ret.copy())
 
