@@ -2,7 +2,6 @@ import z3, z3.z3util as z3util
 import ast
 import logging
 from copy import copy
-#import pySym.pyState.BinOp, pySym.pyState.Pass, pySym.pyState.While, pySym.pyState.Break, pySym.pyState.Subscript, pySym.pyState.For, pySym.pyState.ListComp, pySym.pyState.UnaryOp, pySym.pyState.GeneratorExp
 import random
 import os.path
 import importlib
@@ -435,7 +434,8 @@ class State():
             ast.If: If,
             ast.While: While,
             ast.Break: Break,
-            ast.For: For
+            ast.For: For,
+            ast.Assert: Assert,
             }
 
         # Return initial return state
@@ -1640,4 +1640,4 @@ class State():
         
         return newState
         
-from . import BinOp, Pass, While, Break, Subscript, For, ListComp, UnaryOp, GeneratorExp, Assign, AugAssign, FunctionDef, Expr, Return, If
+from . import BinOp, Pass, While, Break, Subscript, For, ListComp, UnaryOp, GeneratorExp, Assign, AugAssign, FunctionDef, Expr, Return, If, Assert
