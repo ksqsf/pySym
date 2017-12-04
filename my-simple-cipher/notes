@@ -15,6 +15,26 @@ TODO:
    - [DONE] tests
  - [DONE] Implement __int__ for Int object
    - [DONE] tests
+ - Add support in resolveObject for ast.NameConstant (True, False, None, others?)
+   - tests
+ - Add support for _ast.BoolOp in Assert (assert True and True)
+   - tests
  - Check BitVecs to use ULE/UGT/etc if doing compare. It defaults to signed.
+ - Change Char bitvec size to 8...
+   - Or really just change char to be a constrained int...
+   - Need to pull all Char sets into the object. I.e.: Externally, only use Char.setTo
+   - Implement logic in Char.setTo to add bound constraints to the solver if we are adding to the solver and don't have those constraints already.
+   - Instantiate Char internally as an Int instead of a BitVec
+   - On getZ3Var method for Char, ensure that the constraints are in the solver. This could end up producing excess constraints, but...
+ - [DONE] Update Int to handle setTo of Z3 expression
+   - [DONE] Update symbolic ord function to use this
+   - tests
+ - Implement max
+   - tests
+   - doc
+ - Implement chr (fully)
+   - tests
+   - doc
  - Update docs
+ - Get away from using recursive copy... It's SSA! Need to keep track of context somewhere outside the solver.
  

@@ -115,7 +115,7 @@ class Int:
                 logger.error(err)
                 raise Exception(err)
 
-        assert type(var) in [Int, int]
+        assert type(var) in [Int, int, z3.z3.ArithRef], "Unexpected type for var of {0}".format(type(var))
 
         # Add the constraints
         
@@ -128,13 +128,13 @@ class Int:
                 return
 
             # If var is static and not being used in any expressions
-            elif var.isStatic():
+            elif type(var) is Int and var.isStatic():
                 self.value = var.getValue()
                 return
 
         ## At this point, we know that our own variable is in the solver already, need to add this to the solver        
 
-        if type(var) is int:
+        if type(var) in [int, z3.z3.ArithRef]:
             obj = var
         elif var.isStatic():
             obj = var.getValue()

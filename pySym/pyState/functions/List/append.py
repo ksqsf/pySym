@@ -3,7 +3,6 @@ from ....pyObjectManager.List import List
 from ....pyObjectManager.Int import Int
 from ....pyObjectManager.Real import Real
 from ....pyObjectManager.BitVec import BitVec
-from ....pyObjectManager.Char import Char
 from ....pyObjectManager.String import String
 from .... import pyState
 from copy import copy

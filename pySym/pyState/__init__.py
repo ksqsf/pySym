@@ -1414,6 +1414,14 @@ class State():
         """
         assert type(var) in [str, Char]
 
+        # Check if we have it in our variable
+        if type(var) is str and self.getVar(var,ctx=ctx) == None:
+            logger.debug("any_char: var '{0}' not in known variables".format(var))
+            return None
+
+        # Resolve the variable
+        var = self.getVar(var,ctx=ctx) if type(var) is str else var
+
         # Solve model first
         if not self.isSat():
             logger.debug("any_char: No valid model found")
@@ -1422,17 +1430,9 @@ class State():
         # Get model
         m = self.solver.model()
 
-        # Check if we have it in our variable
-        if type(var) is str and self.getVar(var,ctx=ctx) == None:
-            logger.debug("any_char: var '{0}' not in known variables".format(var))
-            return None
-
-
-        # Resolve the variable
-        var = self.getVar(var,ctx=ctx) if type(var) is str else var
-
         # Return a possible string
-        return chr(m.eval(var.getZ3Object(),model_completion=True).as_long())
+        #return chr(m.eval(var.getZ3Object(),model_completion=True).as_long())
+        return chr(int(var))
 
 
     def any_str(self,var,ctx=None):

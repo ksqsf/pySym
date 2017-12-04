@@ -3,7 +3,6 @@ from ...pyObjectManager.Real import Real
 from ...pyObjectManager.BitVec import BitVec
 from ...pyObjectManager.String import String
 from ...pyObjectManager.List import List
-from ...pyObjectManager.Char import Char
 import logging
 from ... import pyState
 

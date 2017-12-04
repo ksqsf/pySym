@@ -53,7 +53,8 @@ def handle(state,call,obj,ctx=None):
         # If it's symbolic, we need help from z3
         else:
             # Tell z3 to convert the BitVec to an int, then set equal
-            ret.state.addConstraint(z3.BV2Int(obj.getZ3Object()) == ret.getZ3Object())
+            #ret.state.addConstraint(z3.BV2Int(obj.getZ3Object()) == ret.getZ3Object())
+            ret.setTo(z3.BV2Int(obj.getZ3Object()))
 
         retList.append(ret.copy())
 
