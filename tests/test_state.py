@@ -43,6 +43,25 @@ s = pyState.String(2)
 x = "testt".rstrip(s)[-1]
 """
 
+def test_extra_constraints():
+    b = ast_parse.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    state = pg.completed[0].state.copy()
+    solver = state.solver
+    num_assert = len(solver.assertions())
+    x = state.getVar('x')
+    i = state.any_int(x)
+    assert state.any_int(x, extra_constraints=x.getZ3Object() != i) != i
+    assert len(solver.assertions()) == num_assert
+    assert state.any_int(x, extra_constraints=[x.getZ3Object() != i]) != i
+    assert len(solver.assertions()) == num_assert
+
+
 def test_assign_statetrack():
     b = ast_parse.parse(test9).body
     p = Path(b,source=test9)

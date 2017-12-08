@@ -1472,11 +1472,12 @@ class State():
         
 
 
-    def any_int(self,var,ctx=None):
+    def any_int(self,var,ctx=None, extra_constraints=None):
         """
         Input:
             var == variable name. i.e.: "x" --or-- ObjectManager object (i.e.: Int)
             (optional) ctx = context if not current one
+            (optional) extra_constraints = tuple of extra constraints to temporarily place on the solve.
         Action:
             Resolve possible value for this variable
         Return:
@@ -1491,8 +1492,23 @@ class State():
             # No valid ints
             return None
 
-        # Get model
-        m = self.solver.model()
+        # If we're adding temporary constraints, create a temporary solver
+        if extra_constraints is not None:
+            # Normalize it to a tuple if need be
+            if type(extra_constraints) not in [tuple, list]:
+                extra_constraints = (extra_constraints,)
+
+            solver = self.solver.translate(self.solver.ctx)
+            solver.add(*extra_constraints)
+
+            # Make sure this new situation is possible
+            if solver.check() != z3.sat:
+                return None
+
+            m = solver.model()
+        
+        else:
+            m = self.solver.model()
         
         # Check if we have it in our localVars
         if type(var) is str and self.getVar(var,ctx=ctx) == None:
