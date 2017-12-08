@@ -115,7 +115,7 @@ class Int:
                 logger.error(err)
                 raise Exception(err)
 
-        assert type(var) in [Int, int, z3.z3.ArithRef], "Unexpected type for var of {0}".format(type(var))
+        assert type(var) in [Int, int, z3.z3.ArithRef, Char], "Unexpected type for var of {0}".format(type(var))
 
         # Add the constraints
         
@@ -128,7 +128,7 @@ class Int:
                 return
 
             # If var is static and not being used in any expressions
-            elif type(var) is Int and var.isStatic():
+            elif type(var) in [Int, Char] and var.isStatic():
                 self.value = var.getValue()
                 return
 
@@ -198,5 +198,6 @@ class Int:
         return False
 
 from .BitVec import BitVec
+from .Char import Char
 #import pySym.pyState.z3Helpers as z3Helpers
 from ..pyState import z3Helpers

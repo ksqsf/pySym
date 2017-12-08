@@ -15,17 +15,29 @@ class Char:
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
 
-        self.size = 16 # TODO: This should probably be 8...
+        #self.size = 16 # TODO: This should probably be 8...
         self.count = 0 if count is None else count
         self.varName = varName
         self.ctx = ctx
-        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size) if variable is None else variable
+        #self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size) if variable is None else variable
+        self.variable = Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx) if variable is None else variable
+        self._bounds_added = False
 
         if state is not None:
             self.setState(state)
 
         if increment:
             self.increment()
+
+    def _add_variable_bounds(self):
+        """Adds variable bounds to the solver for this Int to emulate a Char."""
+        assert self.state is not None, "Char: Trying to add bounds without a state..."
+
+        self._bounds_added = True
+
+        z3_obj = self.getZ3Object()
+        self.state.addConstraint(z3_obj <= 0xff)
+        self.state.addConstraint(z3_obj >= 0)
 
     def __deepcopy__(self,_):
         return self.copy()
@@ -85,7 +97,9 @@ class Char:
     def increment(self):
         self.count += 1
         # reset variable list if we're incrementing our count
-        self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size,state=self.state)
+        self.variable = Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,state=self.state)
+        self._bounds_added = False
+
     
     def _isSame(self,**args):
         """
@@ -95,6 +109,9 @@ class Char:
         return True
 
     def getZ3Object(self):
+        # Since we might not have a state at creation time...
+        if not self._bounds_added:
+            self._add_variable_bounds()
         return self.variable.getZ3Object()
 
     def isStatic(self):
@@ -173,5 +190,6 @@ class Char:
 
 # Circular importing problem. Don't hate :-)
 from .BitVec import BitVec
+from .Int import Int
 from .String import String
 
