@@ -47,7 +47,7 @@ Python Built-in
 * bytearray (Not implemented)
 * bytes (Not Implemented)
 * callable (Not Implemented)
-* chr (Not Implemented)
+* chr (Fully Implemented)
 * classmethod (Not Implemented)
 * compile (Not Implemented)
 * complex (Not Implemented)

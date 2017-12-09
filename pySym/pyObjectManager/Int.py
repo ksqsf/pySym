@@ -138,6 +138,9 @@ class Int:
             obj = var
         elif var.isStatic():
             obj = var.getValue()
+            # If it was a Char, just turn it into an int
+            if type(obj) == str:
+                obj = ord(obj)
         else:
             obj = var.getZ3Object()
 

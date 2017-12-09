@@ -93,7 +93,8 @@ def test_function_String_rstrip_symbolicStrip():
 
     # TODO: This is a brittle match..
     o = [p.state.any_str('s') for p in pg.completed]
-    o.sort()
+    # Sort by number of 'x' that appear in the output
+    o = sorted(o, key=lambda x: x.count('x'))
     assert not o[0].endswith("x")
     for x in range(1,8):
         assert o[x].endswith("x"*x)

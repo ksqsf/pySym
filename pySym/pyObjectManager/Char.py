@@ -21,7 +21,6 @@ class Char:
         self.ctx = ctx
         #self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size) if variable is None else variable
         self.variable = Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx) if variable is None else variable
-        self._bounds_added = False
 
         if state is not None:
             self.setState(state)
@@ -33,11 +32,13 @@ class Char:
         """Adds variable bounds to the solver for this Int to emulate a Char."""
         assert self.state is not None, "Char: Trying to add bounds without a state..."
 
-        self._bounds_added = True
+        z3_obj = self.variable.getZ3Object() # This is hackish... But if I call my own getZ3Object it will recurse forever.
+        bounds = z3.And(z3_obj <= 0xff, z3_obj >= 0)
 
-        z3_obj = self.getZ3Object()
-        self.state.addConstraint(z3_obj <= 0xff)
-        self.state.addConstraint(z3_obj >= 0)
+        # If we don't already have those added, add them
+        if bounds not in self.state.solver.assertions():
+            self.state.addConstraint(bounds)
+
 
     def __deepcopy__(self,_):
         return self.copy()
@@ -64,7 +65,7 @@ class Char:
         """
         Sets this Char to the variable. Raises exception on failure.
         """
-        if type(var) not in [str, String, Char]:
+        if type(var) not in [str, String, Char, Int]:
             err = "setTo: Invalid argument type {0}".format(type(var))
             logger.error(err)
             raise Exception(err)
@@ -74,6 +75,9 @@ class Char:
             logger.error(err)
             raise Exception(err)
 
+        # Make sure we have our bounds set
+        self._add_variable_bounds()
+
         # Go ahead and add the constraints
         if type(var) is str:
             self.variable.setTo(ord(var))
@@ -82,7 +86,7 @@ class Char:
             if type(var) is String:
                 var = var[0]
             
-            self.variable.setTo(var.variable)
+            self.variable.setTo(var)
 
 
     def setState(self,state):
@@ -109,9 +113,7 @@ class Char:
         return True
 
     def getZ3Object(self):
-        # Since we might not have a state at creation time...
-        if not self._bounds_added:
-            self._add_variable_bounds()
+        self._add_variable_bounds()
         return self.variable.getZ3Object()
 
     def isStatic(self):

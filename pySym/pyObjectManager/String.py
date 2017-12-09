@@ -89,12 +89,16 @@ class String:
         Sets this String object to be equal/copy of another. Type can be str or String.
         clear = Boolean if this variable should be cleared before setting (default False)
         """
-        assert type(var) in [String, str]
+        assert type(var) in [String, Int, str], "Unhandled setTo type of {0}".format(type(var))
         
         clear = False if clear is None else clear
         
         if clear:
             self.variables = []
+
+            # Hack to standardize how I treat the var.
+            if type(var) is Int:
+                var = [var]
 
             # For now, just add as many characters as there was originally
             for val in var:
@@ -121,6 +125,14 @@ class String:
                     #self.state.addConstraint(c.getZ3Object() == val.getZ3Object())
                     c.setTo(val)
                 """
+
+    def getZ3Object(self):
+        """Convenience function. Will return z3 object for Chr if this is a string of length 1, else error."""
+
+        if self.length() == 1:
+            return self.variables[0].getZ3Object()
+
+        raise Exception("String: getZ3Object with String of length {0} makes no sense.".format(self.length()))
 
 
     def _isSame(self,length=None,**args):
