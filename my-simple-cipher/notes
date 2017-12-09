@@ -33,6 +33,10 @@ TODO:
  - Implement max
    - tests
    - doc
+ - [DONE] Create "remove_constraints" method of pyState
+   - Basically it will just create a new solver with any of those constraints not in it
+   - [DONE] doc
+   - [DONE] test
  - [DONE] Implement chr (fully)
    - [DONE] tests
    - [DONE] doc

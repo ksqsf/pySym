@@ -43,6 +43,30 @@ s = pyState.String(2)
 x = "testt".rstrip(s)[-1]
 """
 
+test10 = """
+i = pyState.Int()
+"""
+
+def test_remove_constraints():
+    b = ast_parse.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    s = pg.completed[0].state.copy()
+    i = s.getVar('i')
+    
+    z = i.getZ3Object()
+
+    # Adding a constraint then removing it
+    const = z<22
+    s.addConstraint(const)
+    assert not i.canBe(30)
+    assert s.remove_constraints(const) == 1
+    assert i.canBe(30)
+
+
 def test_extra_constraints():
     b = ast_parse.parse(test4).body
     p = Path(b,source=test4)

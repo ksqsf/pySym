@@ -300,7 +300,8 @@ class State():
         #self.solver = z3.Solver() if solver is None else solver
         #self.solver = z3.Then("simplify","solve-eqs","smt").solver() if solver is None else solver
         #self.solver = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver() if solver is None else solver
-        self.solver = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver() if solver is None else solver
+        #self.solver = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver() if solver is None else solver
+        self.solver = self.__new_solver() if solver is None else solver
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
@@ -317,6 +318,10 @@ class State():
         # Initialize our known functions if this is the first time through
         if backtrace is None:
             self._init_simFunctions()
+
+    def __new_solver(self):
+        """Generates a new solver."""
+        return z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver()
 
 
     def setVar(self,varName,var,ctx=None):
@@ -1166,6 +1171,30 @@ class State():
         This doesn't seem to work...
         """
         self.solver.pop()
+
+    def remove_constraints(self, constraints):
+        """Removes the given z3 constraints.
+
+        Args:
+            constraints (list): List of z3 constraints to remove from the solver.
+
+        Returns:
+            int: Returns how many constraints were actually removed.
+        """
+
+        # Make it a list if need be
+        if type(constraints) not in [list, tuple]:
+            constraints = [constraints]
+
+        new_constraints = [assertion for assertion in self.solver.assertions() if assertion not in constraints]
+
+        # If we have less, then we successfully removed at least one thing
+        ret_code = len(self.solver.assertions()) - len(new_constraints)
+
+        self.solver = self.__new_solver()
+        self.solver.add(*new_constraints)
+
+        return ret_code
 
 
     def addConstraint(self,constraint):
