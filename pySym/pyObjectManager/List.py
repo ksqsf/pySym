@@ -5,12 +5,14 @@ from .. import pyState
 
 logger = logging.getLogger("ObjectManager:List")
 
+import os
+
 class List:
     """
     Define a List
     """
 
-    def __init__(self,varName,ctx,count=None,variables=None,state=None,increment=False):
+    def __init__(self,varName,ctx,count=None,variables=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
         assert type(ctx) is int
 
@@ -18,6 +20,7 @@ class List:
         self.varName = varName
         self.ctx = ctx
         self.variables = [] if variables is None else variables
+        self.uuid = os.urandom(32) if uuid is None else uuid
 
         if state is not None:
             self.setState(state)
@@ -32,7 +35,8 @@ class List:
             ctx = self.ctx,
             count = self.count,
             variables = [x.copy() for x in self.variables],
-            state = self.state if hasattr(self,"state") else None
+            state = self.state if hasattr(self,"state") else None,
+            uuid = self.uuid
         )
 
     def __deepcopy__(self,_):

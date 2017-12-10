@@ -17,7 +17,7 @@ class Ctx:
     """
 
     def __init__(self,ctx,variables=None):
-        assert type(ctx) is int
+        assert type(ctx) is int, "Unexpected ctx type of {}".format(type(ctx))
         
         self.ctx = ctx
         self.variables = {} if variables is None else variables
@@ -25,7 +25,7 @@ class Ctx:
     def copy(self):
         return Ctx(
             ctx = self.ctx,
-            variables = {key:self.variables[key].copy() for key in self.variables}
+            variables = {key:self.variables[key].copy() for key in self.variables},
         )
 
     def setState(self,state):
@@ -85,15 +85,18 @@ class Ctx:
 
         if type(value) is Int:
             logger.debug("__setitem__: setting Int")
-            self.variables[key] = Int('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
+            #self.variables[key] = Int('{0}'.format(key),ctx=self.ctx,count=count,state=self.state,on_increment=value.on_increment)
+
+            self.variables[key] = value
             # Don't add a constraint if it's the same thing!
-            if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
-                #self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
-                self.variables[key].setTo(value)
+            #if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
+            #    #self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
+            #    self.variables[key].setTo(value)
 
         elif type(value) is Real:
             logger.debug("__setitem__: setting Real")
-            self.variables[key] = Real('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
+            #self.variables[key] = Real('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
+            self.variables[key] = value
             # Don't add a constraint if it's the same thing!
             if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
                 #self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
@@ -101,7 +104,8 @@ class Ctx:
 
         elif type(value) is BitVec:
             logger.debug("__setitem__: setting BitVec")
-            self.variables[key] = BitVec('{0}'.format(key),ctx=self.ctx,count=count,size=value.size,state=self.state)
+            #self.variables[key] = BitVec('{0}'.format(key),ctx=self.ctx,count=count,size=value.size,state=self.state)
+            self.variables[key] = value
             # Don't add a constraint if it's the same thing!
             if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
                 #self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
@@ -109,13 +113,15 @@ class Ctx:
 
         elif type(value) in [List, String]:
             logger.debug("__setitem__: setting {0}".format(type(value)))
-            self.variables[key] = value.copy()
+            value = value.copy()
+            self.variables[key] = value
             self.variables[key].setState(self.state)
             #value.count = count
         
         elif type(value) is Char:
             logger.debug("__setitem__: setting Char")
-            self.variables[key] = Char('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
+            #self.variables[key] = Char('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
+            self.variables[key] = value
             # Don't add a constraint if it's the same thing!
             if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
                 #self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())

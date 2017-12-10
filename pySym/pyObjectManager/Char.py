@@ -5,28 +5,35 @@ from .. import pyState
 
 logger = logging.getLogger("ObjectManager:Char")
 
+import os
+
 class Char:
     """
     Define a Char (Character)
     """
 
-    def __init__(self,varName,ctx,count=None,variable=None,state=None,increment=False):
-        assert type(varName) is str
-        assert type(ctx) is int
-        assert type(count) in [int, type(None)]
+    def __init__(self,varName,ctx,count=None,variable=None,state=None,increment=False,uuid=None):
+        assert type(varName) is str, "Unexpected varName type of {}".format(type(varName))
+        assert type(ctx) is int, "Unexpected ctx type of {}".format(type(ctx))
+        assert type(count) in [int, type(None)], "Unexpected count type of {}".format(type(count))
 
+        self.uuid = os.urandom(32) if uuid is None else uuid
         #self.size = 16 # TODO: This should probably be 8...
+        self.state = state
         self.count = 0 if count is None else count
         self.varName = varName
         self.ctx = ctx
         #self.variable = BitVec('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,size=self.size) if variable is None else variable
-        self.variable = Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx) if variable is None else variable
+        self.variable = self.__make_variable() if variable is None else variable
 
         if state is not None:
             self.setState(state)
 
         if increment:
             self.increment()
+
+    def __make_variable(self):
+        return Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,state=self.state)
 
     def __z3_bounds_constraint(self):
         """Returns the z3 bounds constraint for use in adding and removing it."""
@@ -38,6 +45,13 @@ class Char:
         assert self.state is not None, "Char: Trying to add bounds without a state..."
 
         bounds = self.__z3_bounds_constraint()
+
+        # If we're static, we don't need the bounds
+        if self.isStatic():
+            if bounds in self.state.solver.assertions():
+                self.state.remove_constraints(bounds)
+
+            return
 
         # If we don't already have those added, add them
         if bounds not in self.state.solver.assertions():
@@ -57,6 +71,7 @@ class Char:
             count = self.count,
             variable = self.variable.copy(),
             state = self.state if hasattr(self,"state") else None,
+            uuid = self.uuid,
         )
 
     def __str__(self):
@@ -79,10 +94,7 @@ class Char:
             logger.error(err)
             raise Exception(err)
 
-        # Make sure we have our bounds set
-        self._add_variable_bounds()
-
-        # Go ahead and add the constraints
+        # We are becoming static
         if type(var) is str:
             # Remove our bounds constraints to help improve speed.
             self.state.remove_constraints(self.__z3_bounds_constraint())
@@ -91,6 +103,9 @@ class Char:
         else:
             if type(var) is String:
                 var = var[0]
+
+            # Make sure we have our bounds set
+            self._add_variable_bounds()
             
             # Remove our bounds constraints to help improve speed.
             if var.isStatic():
@@ -110,8 +125,7 @@ class Char:
 
     def increment(self):
         self.count += 1
-        # reset variable list if we're incrementing our count
-        self.variable = Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,state=self.state)
+        self.variable = self.__make_variable()
         self._bounds_added = False
 
     

@@ -350,8 +350,8 @@ class State():
         if type(var) is ReturnObject:
             return var
 
-        assert type(var) in [Int, Real, BitVec, List, String, Char]
-        assert type(varName) in [type(None), str]
+        assert type(var) in [Int, Real, BitVec, List, String, Char], "Unexpected var type of {}".format(type(var))
+        assert type(varName) in [type(None), str], "Unexpected varName type of {}".format(type(varName))
 
         ctx = ctx if ctx is not None else 1
         varName = "tempRecursiveCopy" if varName is None else varName
@@ -1191,6 +1191,10 @@ class State():
         # If we have less, then we successfully removed at least one thing
         ret_code = len(self.solver.assertions()) - len(new_constraints)
 
+        # Removing is costly. Don't rebuild solver if we don't have to.
+        if ret_code == 0:
+            return 0
+
         self.solver = self.__new_solver()
         self.solver.add(*new_constraints)
 
@@ -1206,6 +1210,7 @@ class State():
         Returns:
             Nothing
         """
+
         # Sanity checks
         assert "z3." in str(type(constraint)) or type(constraint) is bool
         
@@ -1215,9 +1220,6 @@ class State():
 
         # Add our new constraint to the solver
         self.solver.add(constraint)
-        
-        # Using iterative engine
-        #self.solver.push()
         
 
     def isSat(self):

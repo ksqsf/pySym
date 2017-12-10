@@ -5,12 +5,14 @@ from .. import pyState
 
 logger = logging.getLogger("ObjectManager:String")
 
+import os
+
 class String:
     """
     Define a String
     """
 
-    def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None,length=None,increment=False):
+    def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None,length=None,increment=False,uuid=None):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(count) in [int, type(None)]
@@ -20,6 +22,7 @@ class String:
         self.ctx = ctx
         # Treating string as a list of BitVecs
         self.variables = [] if variables is None else variables
+        self.uuid = os.urandom(32) if uuid is None else uuid
 
         if increment:
             self.increment()
@@ -43,7 +46,8 @@ class String:
             ctx = self.ctx,
             count = self.count,
             variables = [x.copy() for x in self.variables],
-            state = self.state if hasattr(self,"state") else None
+            state = self.state if hasattr(self,"state") else None,
+            uuid = self.uuid
         )
 
     def __deepcopy__(self, _):

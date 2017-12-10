@@ -133,18 +133,21 @@ class ObjectManager:
             for k,v in haystack.items():
                 if v == key:
                     return haystack
-                elif type(v) in [dict, List, Ctx]:
+                elif type(v) in [dict, List, Ctx,String]:
                     p = self.getParent(key,v)
                     if p:
                         return p
-        elif isinstance(haystack,List):
+        elif isinstance(haystack,(List,String)):
             for v in haystack:
                 if v == key:
                     return haystack
-                elif type(v) in [dict,List]:
+                elif type(v) in [dict,List,String]:
                     p = self.getParent(key,v)
                     if p:
                         return p
+        elif isinstance(haystack,Char):
+            if haystack.variable == key:
+                return haystack
 
 
     def copy(self):

@@ -17,6 +17,8 @@ def handle(state,call,i,size=ast.Num(Z3_DEFAULT_BITVEC_SIZE),ctx=None):
     bvv = state.resolveObject(ast.Name('temp',0),ctx=1,varType=BitVec,kwargs={'size': size.n})
     assert len(bvv) == 1
     bvv = bvv.pop()
-    state.addConstraint(bvv.getZ3Object(increment=True) == i.n)
+
+    bvv.increment()
+    state.addConstraint(bvv.getZ3Object() == i.n)
 
     return bvv

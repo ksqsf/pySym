@@ -1,5 +1,6 @@
 import logging
 logger = logging.getLogger("Project")
+from . import Colorer
 
 import enforce
 import os
@@ -7,7 +8,11 @@ import os
 #@enforce.runtime_validation
 class Project:
 
-    def __init__(self, file):
+    def __init__(self, file, debug=False):
+    
+        if debug:
+            logging.basicConfig(level=logging.DEBUG)
+
         self.file_name = file
         self.factory = Factory(self)
 

@@ -1,21 +1,29 @@
 import z3
 from .. import pyState
+from . import decorators
+
+import logging
+logger = logging.getLogger("ObjectManager:BitVec")
+
+import os
 
 class BitVec:
     """
     Define a BitVec
     """
     
-    def __init__(self,varName,ctx,size,count=None,state=None,increment=False,value=None):
+    def __init__(self,varName,ctx,size,count=None,state=None,increment=False,value=None,uuid=None,clone=None):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(size) is int
 
+        self._clone = clone
         self.count = 0 if count is None else count
         self.varName = varName
         self.ctx = ctx
         self.size = size
         self.value = value
+        self.uuid = os.urandom(32) if uuid is None else uuid
 
         if state is not None:
             self.setState(state)
@@ -36,7 +44,9 @@ class BitVec:
             size = self.size,
             count = self.count,
             state = self.state if hasattr(self,"state") else None,
-            value = self.value
+            value = self.value,
+            uuid = self.uuid,
+            clone = self._clone.copy() if self._clone is not None else None
         )
 
 
@@ -48,21 +58,24 @@ class BitVec:
 
         self.state = state
 
+        # Pass to our clone
+        if self._clone is not None:
+            self._clone.setState(state)
+
     def increment(self):
         """
         Increment the counter
         """
+        self._clone = None
         self.value = None
         self.count += 1
         
-    def getZ3Object(self,increment=False):
+    @decorators.as_clone
+    def getZ3Object(self):
         """
         Returns the z3 object for this variable
         """
         
-        if increment:
-            self.increment()
-    
         # If we're not static    
         if self.value == None:
             return z3.BitVec("{0}{1}@{2}".format(self.count,self.varName,self.ctx),self.size,ctx=self.state.solver.ctx)
@@ -91,11 +104,18 @@ class BitVec:
 
             # Intentionally trying to unclutter the z3 solver here.
             if type(var) is int:
+                self._clone = None
                 self.value = var
                 return
 
             elif var.isStatic():
+                self._clone = None
                 self.value = var.getValue()
+                return
+
+            elif type(var) is BitVec:
+                logger.debug("BitVec {}: Setting clone to {}".format(self.varName, var.varName))
+                self._clone = var
                 return
 
         if type(var) is int:
@@ -108,7 +128,7 @@ class BitVec:
         self.value = None
         self.state.addConstraint(self.getZ3Object() == obj)
 
-
+    @decorators.as_clone
     def isStatic(self):
         """
         Returns True if this object is a static variety (i.e.: BitVecVal(12)).
@@ -124,7 +144,7 @@ class BitVec:
 
         return False
 
-
+    @decorators.as_clone
     def getValue(self):
         """
         Resolves the value of this BitVec. Assumes that isStatic method is called
@@ -135,6 +155,7 @@ class BitVec:
 
         return self.state.any_int(self)
 
+    @decorators.as_clone
     def __str__(self):
         """
         str will change this object into a possible representation by calling state.any_int
@@ -142,7 +163,7 @@ class BitVec:
         #return str(self.state.any_int(self))
         return str(self.getValue())
 
-
+    @decorators.as_clone
     def canBe(self,var):
         """
         Test if this BitVec can be equal to the given variable
@@ -165,6 +186,7 @@ class BitVec:
 
         return False
 
+    @decorators.as_clone
     def mustBe(self,var):
         """
         Test if this BitVec must be equal to another variable
