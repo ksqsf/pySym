@@ -12,7 +12,7 @@ class Int:
     def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False):
         assert type(varName) is str
         assert type(ctx) is int
-        assert type(value) in [type(None),int]
+        assert type(value) in [type(None),int], "Unexpected value type of {}".format(type(value))
 
         self.count = 0 if count is None else count
         self.varName = varName
@@ -129,7 +129,10 @@ class Int:
 
             # If var is static and not being used in any expressions
             elif type(var) in [Int, Char] and var.isStatic():
-                self.value = var.getValue()
+                if type(var) is Int:
+                    self.value = var.getValue()
+                else:
+                    self.value = ord(var.getValue())
                 return
 
         ## At this point, we know that our own variable is in the solver already, need to add this to the solver        

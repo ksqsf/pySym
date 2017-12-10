@@ -47,6 +47,6 @@ TODO:
    - t = z3.Tactic('ctx-solver-simplify')
    - t(z3.And(*s.solver.assertions()))[0] # These would be the new solver assertions. Do on copy?
  - Add static optimization for Char.
-   - If we're setting to static, remove the bounds from solver.
+   - [DONE] If we're setting to static, remove the bounds from solver.
    - Further, check if we're relying on any other variable. If not, fully remove this variable from the solver and store it in pyObjectManager object.
  

@@ -28,12 +28,16 @@ class Char:
         if increment:
             self.increment()
 
+    def __z3_bounds_constraint(self):
+        """Returns the z3 bounds constraint for use in adding and removing it."""
+        z3_obj = self.variable.getZ3Object() # This is hackish... But if I call my own getZ3Object it will recurse forever.
+        return z3.And(z3_obj <= 0xff, z3_obj >= 0)
+
     def _add_variable_bounds(self):
         """Adds variable bounds to the solver for this Int to emulate a Char."""
         assert self.state is not None, "Char: Trying to add bounds without a state..."
 
-        z3_obj = self.variable.getZ3Object() # This is hackish... But if I call my own getZ3Object it will recurse forever.
-        bounds = z3.And(z3_obj <= 0xff, z3_obj >= 0)
+        bounds = self.__z3_bounds_constraint()
 
         # If we don't already have those added, add them
         if bounds not in self.state.solver.assertions():
@@ -80,12 +84,18 @@ class Char:
 
         # Go ahead and add the constraints
         if type(var) is str:
+            # Remove our bounds constraints to help improve speed.
+            self.state.remove_constraints(self.__z3_bounds_constraint())
             self.variable.setTo(ord(var))
         
         else:
             if type(var) is String:
                 var = var[0]
             
+            # Remove our bounds constraints to help improve speed.
+            if var.isStatic():
+                self.state.remove_constraints(self.__z3_bounds_constraint())
+
             self.variable.setTo(var)
 
 
