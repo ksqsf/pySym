@@ -212,5 +212,18 @@ class BitVec:
         # We CAN be the same, and neither of us can be different. We MUST be the same
         return True
 
+    @property
+    @decorators.as_clone_property
+    def is_unconstrained(self):
+        """bool: Returns True if this BitVec has no external constraints applied to it. False otherwise."""
+        return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver)
+
+    @property
+    @decorators.as_clone_property
+    def is_constrained(self):
+        """bool: Opposite of is_unconstrained."""
+        return not self.is_unconstrained
+
         
 from .Int import Int
+from ..pyState import z3Helpers
