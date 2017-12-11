@@ -9,8 +9,8 @@ TODO:
    - tests
  - [DONE] Add pySym project class (just to make things easier to load)
    - [DONE] tests
- - Implement random.randint
-   - tests
+ - [DONE] Implement random.randint
+   - [DONE] tests
  - [DONE] Implement symbolic Char for ord
    - [DONE] tests
  - [DONE] Implement __int__ for Int object
@@ -68,3 +68,5 @@ TODO:
    - Char (treat base char constraints as unconstrained)
    - BitVec
  - [DONE] Add is_unconstrained handling to setTo of Char. If Char itself is unconstrained and setting to another Char object, then use clone approch
+ - Double check that all functions are using the variables state, rather than their own!!!
+   - Somehow make sure this always happens... If we're not doing it this way, constraints will just disappear on us.

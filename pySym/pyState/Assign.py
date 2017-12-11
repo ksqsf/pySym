@@ -13,7 +13,7 @@ from ..pyObjectManager.Char import Char
 logger = logging.getLogger("pyState:Assign")
 
 
-def _handleAssignNum(target,value,state):
+def _handleAssignNum(target,value):
     """
     Handle assigning a number to a variable (i.e.: x = 1)
     Update local variable dict and return
@@ -21,8 +21,8 @@ def _handleAssignNum(target,value,state):
     """
 
     # Implicitly taking value's state
-    #state = value.state#.copy()
-    state = state.copy()
+    state = value.state.copy()
+    #state = state.copy()
 
     logger.debug("_handleAssignNum: Handling {0} = {1}".format(type(target),type(value)))
 
@@ -181,7 +181,7 @@ def handle(state,element):
     for value in values:
 
         if type(value) in [Int, Real, BitVec]:
-            ret += _handleAssignNum(target,value,state)
+            ret += _handleAssignNum(target,value)
     
         elif type(value) is List:
             ret += _handleAssignList(target,value)

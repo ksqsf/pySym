@@ -53,13 +53,13 @@ def handle(state,call,obj,ctx=None):
 
 
             # Grab a new var to work with
-            ret = state.getVar("tmpChrVal",ctx=1,varType=String,kwargs={'increment':True})
+            ret = obj.state.getVar("tmpChrVal",ctx=1,varType=String,kwargs={'increment':True})
             ret.setTo(chr(int(obj)),clear=True)
 
         # If it's symbolic, we need help from z3
         else:
             # Grab a new var to work with
-            ret = state.getVar("tmpChrVal",ctx=1,varType=String,kwargs={'increment':True})
+            ret = obj.state.getVar("tmpChrVal",ctx=1,varType=String,kwargs={'increment':True})
             ret.setTo(obj, clear=True)
 
         retList.append(ret.copy())

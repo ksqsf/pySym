@@ -194,6 +194,11 @@ Lists
     * reverse (Not Implemented)
     * sort (Not Implemented)
 
+Python Common Libraries
+========================
+* random
+   * randint (Partially Implemented)
+
 
 Dictionaries
 ========================
