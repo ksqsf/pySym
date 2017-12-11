@@ -243,8 +243,19 @@ class Int:
         
         return False
 
+    @property
+    @decorators.as_clone_property
+    def is_unconstrained(self):
+        """bool: Returns True if this Int has no external constraints applied to it. False otherwise."""
+        return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver)
+
+    @property
+    @decorators.as_clone_property
+    def is_constrained(self):
+        """bool: Opposite of is_unconstrained."""
+        return not self.is_unconstrained
+
 from .BitVec import BitVec
 from .Char import Char
 from .Ctx import Ctx
-#import pySym.pyState.z3Helpers as z3Helpers
 from ..pyState import z3Helpers

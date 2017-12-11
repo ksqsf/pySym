@@ -45,6 +45,24 @@ l = [0,1,2,3,4,5]
 x = l[i]
 """
 
+def test_pyObjectManager_Int_is_unconstrained():
+    b = ast_parse.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.copy()
+    x = s.getVar('x')
+
+    assert x.is_unconstrained
+    
+    # add a real constraint
+    s.addConstraint(x.getZ3Object() > 5)
+    assert x.is_constrained
+
+
 def test_pyObjectManager_Int_PostSet():
     b = ast_parse.parse(test5).body
     p = Path(b,source=test5)
