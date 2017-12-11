@@ -227,13 +227,13 @@ class Int:
         Returns True or False
         """
         
-        if type(var) not in [Int, BitVec,int]:
+        if type(var) not in [Int, BitVec, Char, int]:
             return False
         
         # Ask the solver
         s = self.state.copy()
 
-        if type(var) in [Int, BitVec]:
+        if type(var) in [Int, BitVec, Char]:
             s.addConstraint(self.getZ3Object() == var.getZ3Object())
         else:
             s.addConstraint(self.getZ3Object() == var)
