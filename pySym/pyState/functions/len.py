@@ -30,9 +30,9 @@ def handle(state,call,obj,ctx=None):
         i = state.getVar("tmpLenValue",ctx=1, varType=Int)
         i.increment()
     
-        # Tell Z3 about our value
-        state.addConstraint(i.getZ3Object() == l)
+        i.setTo(l)
     
-        ret.append(i.copy())
+        #ret.append(i.copy())
+        ret.append(i)
 
     return ret

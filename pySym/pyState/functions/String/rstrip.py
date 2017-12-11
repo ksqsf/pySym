@@ -44,7 +44,8 @@ def _rstrip(state,newString,chars):
         else:
             break
 
-    return [newString.copy()]
+    #return [newString.copy()]
+    return [newString]
     
 
 
