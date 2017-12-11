@@ -13,6 +13,7 @@ from pySym.pyPathGroup import PathGroup
 from pySym.pyObjectManager.Int import Int
 from pySym.pyObjectManager.Real import Real
 from pySym.pyObjectManager.BitVec import BitVec
+from pySym.pyState import z3Helpers
 
 test1 = "x = 1"
 test2 = "x = 2"
@@ -46,6 +47,31 @@ x = "testt".rstrip(s)[-1]
 test10 = """
 i = pyState.Int()
 """
+
+def test_var_used_in_z3_ignore():
+    b = ast_parse.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.copy()
+    i = s.getVar('i')
+    z3_obj = i.getZ3Object()
+
+    # Not in here to begin with
+    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+
+    # Now it will be in there
+    s.addConstraint(z3_obj > 3)
+    assert z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+
+    # Now try ignoring it
+    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=z3_obj > 3)
+    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=[z3_obj > 3])
+
 
 def test_remove_constraints():
     b = ast_parse.parse(test10).body

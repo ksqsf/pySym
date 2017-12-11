@@ -17,16 +17,25 @@ logger = logging.getLogger("pyState:z3Helpers")
 Z3_DEFAULT_BITVEC_SIZE = 64
 Z3_MAX_STRING_LENGTH = 256
 
-def varIsUsedInSolver(var,solver):
+def varIsUsedInSolver(var,solver,ignore=None):
     """
-    Determine if the given var (z3 object) is used in solver
+    Determine if the given var (z3 object) is used in solver. Optionally ignore a list of constraints.
     """
+
+    ignore = [] if ignore is None else ignore
+
+    # If it's a solo constraint, make it a list
+    if type(ignore) is not None and type(ignore) not in [list, tuple]:
+        ignore = [ignore]
 
     # Sanity check
-    assert isZ3Object(var)
-    assert isinstance(solver,z3.Solver)
+    assert isZ3Object(var), "Expected var to be z3 object, got type {} instead".format(type(var))
+    assert isinstance(solver,z3.Solver), "Solver must be type z3.Solver, got type {}".format(type(z3.Solver))
 
-    for ass in solver.assertions():
+    # Remove any ignored assertions
+    assertions = [ass for ass in solver.assertions() if ass not in ignore]
+
+    for ass in assertions:
         if var.get_id() in [x.get_id() for x in pyState.get_all(ass)]:
             return True
 
