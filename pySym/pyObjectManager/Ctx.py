@@ -123,9 +123,9 @@ class Ctx:
             #self.variables[key] = Char('{0}'.format(key),ctx=self.ctx,count=count,state=self.state)
             self.variables[key] = value
             # Don't add a constraint if it's the same thing!
-            if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
-                #self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
-                self.variables[key].setTo(value)
+            #if self.variables[key].getZ3Object().get_id() != value.getZ3Object().get_id():
+            #    #self.state.addConstraint(self.variables[key].getZ3Object() == value.getZ3Object())
+            #    self.variables[key].setTo(value)
 
         else:
             err = "__setitem__: Don't know how to set object '{0}'".format(value)

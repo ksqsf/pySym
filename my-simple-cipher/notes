@@ -41,19 +41,15 @@ TODO:
    - [DONE] tests
    - [DONE] doc
  - Update docs
- - Get away from using recursive copy... It's SSA! Need to keep track of context somewhere outside the solver.
  - Add options ability. Be able to specify options on proj build
  - Add option to run simplification passes
    - t = z3.Tactic('ctx-solver-simplify')
    - t(z3.And(*s.solver.assertions()))[0] # These would be the new solver assertions. Do on copy?
- - Add static optimization for Char.
+ - [DONE] Add static optimization for Char.
    - [DONE] If we're setting to static, remove the bounds from solver.
    - Further, check if we're relying on any other variable. If not, fully remove this variable from the solver and store it in pyObjectManager object.
- - Implement on-increment option to change var name and ctx on increment.
-   - This _should_ allow a cloning of the variable without requiring to add it to the solver.. It's a hack tho 
  - pyObjectManager getVar ends up double creating a new value.
    - __init__ creates one, then Ctx setitem ends up creating a duplicate of that one... This is wasteful.
-
  - [DONE] Add uuid and clone_uuid to other objects
    - [DONE] Char
    - [DONE] String
@@ -61,17 +57,14 @@ TODO:
    - [DONE] List
    - [DONE] tests
  - Create "find_by_uuid" for pyObjectManager to return object with that uuid.
- - Update clone decorator to find by uuid
  - Capture reference counts to the variables. When they get to zero, if the only thing in the solver is Char's bounds, remove it.
- - Recursive copy still ending up in the solver...
-
+ - [DONE] Recursive copy still ending up in the solver...
  - [DONE] Remove increment option from getZ3Object
  - Returning of type None from functions is failing.
    - tests
  - [DONE] Update pyState.remove_constraints to check that constraints exist in solver before attempting to remove. Removing is COSTLY!
- - Reverse clone? For example: x has char constraints, y has no constraints yet. x.setTo(y) ends up adding a constraint, maybe switch to y.setTo(x)?
- - Add is_unconstrained
+ - [DONE] Add is_unconstrained
    - Int
    - Char (treat base char constraints as unconstrained)
    - BitVec
- - Add is_unconstrained handling to setTo of Char. If Char itself is unconstrained and setting to another Char object, then use clone approch
+ - [DONE] Add is_unconstrained handling to setTo of Char. If Char itself is unconstrained and setting to another Char object, then use clone approch
