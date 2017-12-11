@@ -36,6 +36,29 @@ d = "Test"
 e = "Feet"
 """
 
+def test_pyObjectManager_Char_is_unconstrained():
+    b = ast_parse.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.copy()
+    c = s.getVar('s')[0]
+
+    assert c.is_unconstrained
+    
+    # For now, this will add bounded int constraints to the solver...
+    z3_obj = c.getZ3Object()
+    # Those bounds should not count as constrained
+    assert c.is_unconstrained
+
+    # Now let's add a real constraint
+    s.addConstraint(z3_obj > 5)
+    assert c.is_constrained
+
+
 def test_pyObjectManager_Char_mustBe():
     b = ast_parse.parse(test4).body
     p = Path(b,source=test4)

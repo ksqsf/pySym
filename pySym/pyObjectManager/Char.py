@@ -212,10 +212,21 @@ class Char:
             #    return True
             #return False
 
+    @property
+    def is_unconstrained(self):
+        """bool: Returns True if this Char has no external constraints applied to it. False otherwise."""
+        
+        # Consider it unconstrained if the only constraints are possibly the base ones that we have for Char
+        return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver,ignore=self.__z3_bounds_constraint())
+
+    @property
+    def is_constrained(self):
+        """bool: Opposite of is_unconstrained."""
+        return not self.is_unconstrained
 
 
 # Circular importing problem. Don't hate :-)
 from .BitVec import BitVec
 from .Int import Int
 from .String import String
-
+from ..pyState import z3Helpers
