@@ -188,7 +188,7 @@ Lists
     * count (Not Implemented)
     * extend (Not Implemented)
     * index (Not Implemented)
-    * insert (Not Implemented)
+    * insert (Partially Implemented -- No symbolic index)
     * pop (Not Implemented)
     * remove (Not Implemented)
     * reverse (Not Implemented)

@@ -127,6 +127,50 @@ class List:
             logger.error(err)
             raise Exception(err)
 
+    def insert(self, index, object, kwargs=None):
+        """Emulate the list insert method, just on this object."""
+
+        assert type(index) in [int, Int], "Unexpected index of type {}".format(type(index))
+        assert type(object) in [Int, Real, Char, BitVec, List, String], "Unexpected type for object of {}".format(type(object))
+
+        # Use concrete int
+        if type(index) is Int:
+            assert index.isStatic(), "Insert got symbolic index value. Not supported."
+            index = index.getValue()
+
+        # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
+        
+        logger.debug("insert: inserting {} at {}".format(type(object), index))
+
+        if type(object) is Int:
+            var = Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state,**kwargs if kwargs is not None else {})
+            var.setTo(object)
+            self.variables.insert(index, var)
+
+        elif type(object) is Real:
+            var = Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state)
+            var.setTo(object)
+            self.variables.insert(index, var)
+
+        elif type(object) is BitVec:
+            kwargs = {'size': object.size} if kwargs is None else kwargs
+            var = BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state,**kwargs if kwargs is not None else {})
+            var.setTo(object)
+            self.variables.insert(index, var)
+        
+        elif type(object) is Char:
+            var = Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state)
+            var.setTo(object)
+            self.variables.insert(index, var)
+
+        elif type(object) in [List, String]:
+            self.variables.insert(index, object)
+
+        else:
+            err = "append: Don't know how to append/resolve object '{0}'".format(type(var))
+            logger.error(err)
+            raise Exception(err)
+
 
     def _isSame(self):
         """
