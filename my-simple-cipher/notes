@@ -73,3 +73,14 @@ TODO:
  - Add bytes ability to setTo of Char
  - Add compare left var string support (i.e.: assert s[0] == 12).
    - probably need to add right var for that too
+ - Add ability to resolve a function as an argument. i.e.:
+    def test(x):
+        x()
+    def test2():
+        blerg
+    test(test2)
+ - All grabbing of variables from out of function inside function
+    q = 12
+    def test():
+        print(q)
+    test()

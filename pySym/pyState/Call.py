@@ -19,10 +19,9 @@ def _resolveArgs(state,element):
         caller_args = [caller_args] if type(caller_args) is not list else caller_args
 
         # Check for return object. Return all applicable
-        retObjs = [x.state for x in caller_args if type(x) is pyState.ReturnObject]
+        retObjs = [x for x in caller_args if type(x) is pyState.ReturnObject]
         if len(retObjs) > 0:
             return retObjs
-
         
         ret.append(caller_args)
 
@@ -39,7 +38,7 @@ def _resolveKeywords(state,element):
         caller_args = [caller_args] if type(caller_args) is not list else caller_args
         
         # Check for return object. Return all applicable
-        retObjs = [x.state for x in caller_args if type(x) is pyState.ReturnObject]
+        retObjs = [x for x in caller_args if type(x) is pyState.ReturnObject]
         if len(retObjs) > 0:
             return retObjs
 
@@ -89,7 +88,19 @@ def handle(state,element,retObj=None):
     assert type(element) == ast.Call
 
     argElements = list(_resolveArgs(state,element))
+
+    # Check for return object. Return all applicable
+    retObjs = [x for x in argElements if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
     keywordElements = list(_resolveKeywords(state,copy(element)))
+
+    # Check for return object. Return all applicable
+    retObjs = [x for x in keywordElements if type(x) is pyState.ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
     ret = [] 
 
     # Yeah, this is a hack. But when we're soft matching, this number can help us identify the right thing.
