@@ -206,6 +206,19 @@ class Int:
         Test if this Int must be equal to another variable
         Returns True or False
         """
+
+        # TODO: Clean this up...
+        # Concrete answer
+        if self.isStatic():
+            if type(var) is int:
+                return self.getValue() == var
+            elif var.isStatic():
+                var = var.getValue()
+                if type(var) is str:
+                    var = ord(var)
+                assert type(var) is int
+                return self.getValue() == var
+
         if not self.canBe(var):
             return False
 
@@ -229,6 +242,17 @@ class Int:
         
         if type(var) not in [Int, BitVec, Char, int]:
             return False
+
+        # Concrete answer
+        if self.isStatic():
+            if type(var) is int:
+                return self.getValue() == var
+            elif var.isStatic():
+                var = var.getValue()
+                if type(var) is str:
+                    var = ord(var)
+                assert type(var) is int
+                return self.getValue() == var
         
         # Ask the solver
         s = self.state.copy()

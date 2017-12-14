@@ -79,8 +79,15 @@ TODO:
     def test2():
         blerg
     test(test2)
- - All grabbing of variables from out of function inside function
+ - [DONE] All grabbing of variables from out of function inside function
     q = 12
     def test():
         print(q)
     test()
+ - for (x,y) in zip(l1, l2) doesn't work.
+ - Implement List.setTo for non-clear.
+ - Handle var referenced before assignment.. Right now it will happily set.
+    q = 12
+    def test():
+        q += 4
+    This should end in an error

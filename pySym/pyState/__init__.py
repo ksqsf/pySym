@@ -1078,7 +1078,35 @@ class State():
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))
-            return [self.getVar(obj.id,ctx=ctx,varType=varType,kwargs=kwargs)]
+
+            # Try resolving a variable that's already defined in the current ctx
+            var = self.getVar(obj.id,ctx=ctx,varType=varType,kwargs=kwargs,softFail=True)
+
+            # If we resolved it return it
+            if var is not None:
+                return [var]
+            
+            # If we failed to resolve this variable, python will look upwards in the call tree
+            for call in self.callStack[::-1]:
+                var = self.getVar(obj.id,ctx=call['ctx'],varType=varType,kwargs=kwargs,softFail=True)
+                
+                # Did we find it in this context?
+                if var is not None:
+
+                    # We need to clone it so we don't mess with the original
+                    t, kwargs = duplicateSort(var)
+                    cloned_var = self.getVar("varInParentCtx", ctx=ctx, varType=t, kwargs=kwargs)
+                    cloned_var.increment()
+                    cloned_var.setTo(var)
+
+                    return [cloned_var]
+                    
+            else:
+                err = "resolveObject: Could not resolve object named {}".format(obj.id)
+                logger.error(err)
+                raise Exception(err)
+                
+            #return [self.getVar(obj.id,ctx=ctx,varType=varType,kwargs=kwargs)]
         
         elif t == ast.Num:
             logger.debug("resolveObject: Resolving object type Num: {0}".format(obj.n))

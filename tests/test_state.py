@@ -48,6 +48,45 @@ test10 = """
 i = pyState.Int()
 """
 
+test11 = """
+def test():
+    return VAR
+
+def test2():
+    q = 12
+    def test3():
+        return q
+    return test3()
+
+def test4():
+    z = 1337
+    def test5():
+        def test6():
+            return z
+        return test6()
+    return test5()
+
+VAR = "blerg"
+ret = test() # Should be 'blerg'
+ret2 = test2() # Should be 12
+ret3 = test4() # Should be 1337
+"""
+
+def test_state_variable_inheritance():
+    b = ast_parse.parse(test11).body
+    p = Path(b,source=test11)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.copy()
+    ret = s.getVar('ret')
+    assert ret.mustBe('blerg')
+    assert s.getVar('ret2').mustBe(12)
+    assert s.getVar('ret3').mustBe(1337)
+
 def test_var_used_in_z3_ignore():
     b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
