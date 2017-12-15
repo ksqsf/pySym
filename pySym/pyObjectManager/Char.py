@@ -81,7 +81,7 @@ class Char:
 
     @decorators.as_clone
     def __int__(self):
-        return self.state.any_int(self)
+        return ord(self.getValue())
 
     def setTo(self,var):
         """
@@ -164,10 +164,6 @@ class Char:
         Also returns True if object has only one possibility
         """
         return self.variable.isStatic()
-        #if len(self.state.any_n_int(self,2)) == 1:
-        #    return True
-
-        #return False
 
     @decorators.as_clone
     def getValue(self):
@@ -175,8 +171,10 @@ class Char:
         Resolves the value of this Char. Assumes that isStatic method is called
         before this is called to ensure the value is not symbolic
         """
-        #return chr(self.state.any_int(self))
-        return chr(self.variable.getValue())
+        if self.isStatic():
+            return chr(self.variable.getValue())
+
+        return chr(self.state.any_int(self))
 
     @decorators.as_clone
     def mustBe(self,var):

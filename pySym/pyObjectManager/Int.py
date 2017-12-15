@@ -198,7 +198,7 @@ class Int:
     @decorators.as_clone
     def __int__(self):
         """int: Possible integer value of this object."""
-        return self.state.any_int(self)
+        return self.getValue()
 
     @decorators.as_clone
     def mustBe(self,var):
