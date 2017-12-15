@@ -29,6 +29,24 @@ test3 = """
 x = pyState.BVV(1234,32)
 """
 
+test4 = """
+x = pyState.BVS(32)
+assert x == 1234
+"""
+
+def test_pyObjectManager_BitVec_as_int():
+    b = ast_parse.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+
+    s = pg.completed[0].state.copy()
+    x = s.getVar('x')
+    assert int(x) == 1234
+
+
 def test_pyObjectManager_BitVec_is_unconstrained():
     b = ast_parse.parse(test2).body
     p = Path(b,source=test2)

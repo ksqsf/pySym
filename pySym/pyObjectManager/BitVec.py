@@ -160,8 +160,11 @@ class BitVec:
         """
         str will change this object into a possible representation by calling state.any_int
         """
-        #return str(self.state.any_int(self))
         return str(self.getValue())
+
+    @decorators.as_clone
+    def __int__(self):
+        return self.getValue()
 
     @decorators.as_clone
     def canBe(self,var):
@@ -172,6 +175,17 @@ class BitVec:
         if type(var) not in [Int, BitVec,int]:
             return False
 
+        # Concrete answer
+        if self.isStatic():
+            if type(var) is int:
+                return self.getValue() == var
+            elif var.isStatic():
+                var = var.getValue()
+                if type(var) is str:
+                    var = ord(var)
+                assert type(var) is int
+                return self.getValue() == var
+        
         # Ask the solver
         s = self.state.copy()
 
@@ -192,9 +206,20 @@ class BitVec:
         Test if this BitVec must be equal to another variable
         Returns True or False
         """
+
+        # Concrete answer
+        if self.isStatic():
+            if type(var) is int:
+                return self.getValue() == var
+            elif var.isStatic():
+                var = var.getValue()
+                if type(var) is str:
+                    var = ord(var)
+                assert type(var) is int
+                return self.getValue() == var
+
         if not self.canBe(var):
             return False
-
 
         # Can we be something else?
         if len(self.state.any_n_int(self,2)) == 2:
