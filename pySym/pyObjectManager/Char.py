@@ -83,7 +83,7 @@ class Char:
     def __int__(self):
         return ord(self.getValue())
 
-    def setTo(self,var):
+    def setTo(self,var,*args,**kwargs):
         """
         Sets this Char to the variable. Raises exception on failure.
         """

@@ -1097,7 +1097,7 @@ class State():
                     t, kwargs = duplicateSort(var)
                     cloned_var = self.getVar("varInParentCtx", ctx=ctx, varType=t, kwargs=kwargs)
                     cloned_var.increment()
-                    cloned_var.setTo(var)
+                    cloned_var.setTo(var,clear=True)
 
                     return [cloned_var]
                     

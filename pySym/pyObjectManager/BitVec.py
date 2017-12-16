@@ -91,7 +91,7 @@ class BitVec:
         return True if size == self.size else False
 
 
-    def setTo(self,var):
+    def setTo(self,var,*args,**kwargs):
         """
         Sets this BitVec object to be equal/copy of another. Type can be int, or BitVec
         """

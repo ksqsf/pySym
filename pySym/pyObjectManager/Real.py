@@ -98,7 +98,7 @@ class Real:
 
         return self.state.any_real(self)
 
-    def setTo(self,var):
+    def setTo(self,var,*args,**kwargs):
         """
         Sets this Real object to be equal/copy of another. Type can be float, Real, Int, or int
         """

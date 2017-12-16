@@ -66,10 +66,15 @@ def test4():
         return test6()
     return test5()
 
+def test7():
+    return VAR_LIST
+
+VAR_LIST = [1,2,3,4]
 VAR = "blerg"
 ret = test() # Should be 'blerg'
 ret2 = test2() # Should be 12
 ret3 = test4() # Should be 1337
+ret4 = test7() # Should be [1,2,3,4]
 """
 
 def test_state_variable_inheritance():
@@ -86,6 +91,10 @@ def test_state_variable_inheritance():
     assert ret.mustBe('blerg')
     assert s.getVar('ret2').mustBe(12)
     assert s.getVar('ret3').mustBe(1337)
+    assert s.getVar('ret4')[0].mustBe(1)
+    assert s.getVar('ret4')[1].mustBe(2)
+    assert s.getVar('ret4')[2].mustBe(3)
+    assert s.getVar('ret4')[3].mustBe(4)
 
 def test_var_used_in_z3_ignore():
     b = ast_parse.parse(test10).body

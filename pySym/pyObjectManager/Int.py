@@ -127,7 +127,7 @@ class Int:
         
         return self.state.any_int(self)
 
-    def setTo(self,var):
+    def setTo(self,var,*args,**kwargs):
         """
         Sets this Int object to be equal/copy of another. Type can be int or Int
         """
