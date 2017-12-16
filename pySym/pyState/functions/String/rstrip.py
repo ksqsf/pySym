@@ -91,17 +91,20 @@ def handle(state,call,chars=None,ctx=None):
             # Change input to always be a String object
             if type(chars) is Char:
                 oldChars = chars
-                chars = state.getVar(varName='tempRstripstr',ctx=1,varType=String,kwargs={'increment': True})
+                #chars = state.getVar(varName='tempRstripstr',ctx=1,varType=String,kwargs={'increment': True})
+                chars = chars.state.getVar(varName='tempRstripstr',ctx=1,varType=String,kwargs={'increment': True})
                 chars.append(oldChars)
 
     
             # Get new str
-            newString = state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True}).copy()
+            #newString = state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True}).copy()
+            newString = chars.state.getVar('temprStripStr',ctx=1,varType=String,kwargs={'increment':True}).copy()
         
             # Set new str to be the same as the old str
             newString.setTo(root,clear=True)
 
             # Perform the strip
-            ret += _rstrip(state,newString,chars)
+            #ret += _rstrip(state,newString,chars)
+            ret += _rstrip(chars.state,newString,chars)
 
     return ret

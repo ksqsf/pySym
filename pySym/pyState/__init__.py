@@ -855,8 +855,11 @@ class State():
         
         # Get a temporary variable created
         newString = self.getVar('tmpResolveString',ctx=ctx,varType=String,kwargs={'string':stringObject.s})
+        #newString = self.getVar('tmpResolveString',ctx=ctx,varType=String)
+        #newString.increment()
+        #newString.setTo(stringObject.s)
         
-        return newString
+        return newString.copy()
 
     def _resolveList(self,listObject,ctx=None,i=0):
         """
@@ -897,7 +900,7 @@ class State():
         # Make sure we get a fresh list variable
         var.increment()
    
-        varList.append(var)
+        varList.append(var.copy())
  
         # TODO: This will probably fail on ReturnObjects
         for elm in listObject.elts:
@@ -1074,7 +1077,7 @@ class State():
 
         # If the object is already resolved, just return it
         if t in [Int, Real, BitVec, List, Ctx, String, Char]:
-            return obj
+            return [obj]
         
         if t == ast.Name:
             logger.debug("resolveObject: Resolving object type var named {0}".format(obj.id))

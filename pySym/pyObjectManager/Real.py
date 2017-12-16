@@ -1,5 +1,6 @@
 import z3
 import logging
+import os
 from .. import pyState
 
 logger = logging.getLogger("ObjectManager:Real")
@@ -9,7 +10,7 @@ class Real:
     Define a Real
     """
     
-    def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False):
+    def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
         assert type(ctx) is int
         assert type(value) in [type(None),float,int]
@@ -18,6 +19,7 @@ class Real:
         self.varName = varName
         self.ctx = ctx
         self.value = value
+        self.uuid = os.urandom(32) if uuid is None else uuid
         
         if state is not None:
             self.setState(state)
@@ -37,7 +39,8 @@ class Real:
             ctx = self.ctx,
             count = self.count,
             value = self.value,
-            state = self.state if hasattr(self,"state") else None
+            state = self.state if hasattr(self,"state") else None,
+            uuid = self.uuid
         )
 
 
@@ -53,6 +56,7 @@ class Real:
     def increment(self):
         self.value = None
         self.count += 1
+        self.uuid = os.urandom(32)
 
     def getZ3Object(self,increment=False):
         """

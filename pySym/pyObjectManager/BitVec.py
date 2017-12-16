@@ -69,6 +69,7 @@ class BitVec:
         self._clone = None
         self.value = None
         self.count += 1
+        self.uuid = os.urandom(32)
         
     @decorators.as_clone
     def getZ3Object(self):

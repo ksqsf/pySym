@@ -115,6 +115,46 @@ x = "_"
 x += "testt".rstrip(s)
 """
 
+test17 = """
+l1 = [1,2,3]
+l2 = [4,5,6]
+l1 += l2
+"""
+
+test18 = """
+l1 = [1,2,3]
+l1 *= 3
+"""
+
+def test_pySym_AugAssign_MultList():
+    b = ast_parse.parse(test18).body
+    p = Path(b,source=test18)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+    l1 = s.getVar('l1')
+    assert s.any_list(l1) == [1,2,3]*3
+
+def test_pySym_AugAssign_AddLists():
+    b = ast_parse.parse(test17).body
+    p = Path(b,source=test17)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+    l1 = s.getVar('l1')
+    assert l1.length() == 6
+    assert l1[0].mustBe(1)
+    assert l1[1].mustBe(2)
+    assert l1[2].mustBe(3)
+    assert l1[3].mustBe(4)
+    assert l1[4].mustBe(5)
+    assert l1[5].mustBe(6)
+
+
 def test_pySym_AugAssign_StateTracking():
     b = ast_parse.parse(test16).body
     p = Path(b,source=test16)

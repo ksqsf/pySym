@@ -108,18 +108,21 @@ def _handleAssignString(target,stringObject):
     ret = []
 
     for target in targets:
+        state = target.state.copy()
+        state.path.pop(0)
 
         parent = state.objectManager.getParent(target)
         index = parent.index(target)
 
         # Set the new list
         parent[index] = stringObject.copy()
+        #target.setTo(stringObject.copy(),clear=True)
 
-        target.state = target.state.copy()
+        #target.state = target.state.copy()
+        #target.state.path.pop(0)
 
-        target.state.path.pop(0)
-
-        ret += [target.state]
+        #ret += [target.state]
+        ret += [state.copy()]
     
     return ret
 
@@ -179,7 +182,6 @@ def handle(state,element):
     
     # For every possible assign value, get the state
     for value in values:
-
         if type(value) in [Int, Real, BitVec]:
             ret += _handleAssignNum(target,value)
     

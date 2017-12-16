@@ -7,29 +7,40 @@ from ..pyObjectManager.Int import Int
 from ..pyObjectManager.Real import Real
 from ..pyObjectManager.BitVec import BitVec
 from ..pyObjectManager.String import String
+from ..pyObjectManager.List import List
 
 logger = logging.getLogger("pyState:AugAssign")
 
-def _handleNum(state,element,value,op):
+def _handleNum(element,oldTarget):
     """
     Handle the case where we're AugAssigning numbers
     """
 
-    # Find the parent object
-    oldTargets = state.resolveObject(element.target)
+    state = oldTarget.state
 
-    # Normalize
-    oldTargets = [oldTargets] if type(oldTargets) is not list else oldTargets
-
-    # Resolve calls if we need to
-    retObjs = [x for x in oldTargets if type(x) is ReturnObject]
+    # Value is what to set them to
+    value = state.resolveObject(element.value)
+    
+    # Normalize the input
+    values = [value] if type(value) is not list else value
+    
+    # Check for return object. Return all applicable
+    retObjs = [x.state for x in values if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
+
+    # The operations to do (Add/Mul/etc)
+    op = element.op    
 
     ret = []
 
     # Loop through resolved objects
-    for oldTarget in oldTargets:
+    for value in values:
+        state = value.state.copy()
+
+        # Pop the instruction off
+        state.path.pop(0)
+
         parent = state.objectManager.getParent(oldTarget)
         index = parent.index(oldTarget)
     
@@ -157,37 +168,38 @@ def _handleNum(state,element,value,op):
             logger.error(err)
             raise Exception(err)
 
-        ret.append(state)
+        ret.append(state.copy())
 
-    # Pop the instruction off
-    state.path.pop(0)
 
     # Return the state
     return ret
 
-def _handleString(state,element,value,op):
+def _handleString(element,oldTarget):
     """
     Handle the case where we're AugAssigning Strings
     """
+    state = oldTarget.state
 
-    # Find the parent object
-    oldTargets = state.resolveObject(element.target)
-
-    # Normalize
-    oldTargets = [oldTargets] if type(oldTargets) is not list else oldTargets
-
-    # Resolve calls if we need to
-    retObjs = [x for x in oldTargets if type(x) is ReturnObject]
+    # Value is what to set them to
+    value = state.resolveObject(element.value)
+    
+    # Normalize the input
+    values = [value] if type(value) is not list else value
+    
+    # Check for return object. Return all applicable
+    retObjs = [x.state for x in values if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
 
+    # The operations to do (Add/Mul/etc)
+    op = element.op    
     ret = []
 
-    state.path.pop(0)
-
     # Loop through possible old targets
-    
-    for oldTarget in oldTargets:
+    for value in values:
+
+        state = value.state.copy()
+        state.path.pop(0)
 
         parent = state.objectManager.getParent(oldTarget)
         index = parent.index(oldTarget)
@@ -196,13 +208,93 @@ def _handleString(state,element,value,op):
         newString = state.getVar("AugAssignTempString",ctx=1,varType=String)
         newString.increment()
     
-        # Set the new string
-        newString.variables = oldTarget.variables + value.variables
+        # Handle Add
+        if type(op) == ast.Add:
+            assert type(value) is String, "Unexpected AugAssign Add for String of {}".format(type(value))
 
-        # Assign the new string
-        parent[index] = newString.copy()
+            # Set the new string
+            newString.variables = oldTarget.variables + value.variables
 
-        ret.append(state.copy())
+            # Assign the new string
+            parent[index] = newString.copy()
+
+            ret.append(state.copy())
+
+        else:
+            error = "Unhandled String AugAssign operation of {}".format(type(op))
+            logger.error(error)
+            raise Exception(error)
+
+    # Return the state
+    return ret
+
+def _handleList(element,oldTarget):
+    """
+    Handle the case where we're AugAssigning Lists
+    """
+    state = oldTarget.state
+
+    # Value is what to set them to
+    value = state.resolveObject(element.value)
+    
+    # Normalize the input
+    values = [value] if type(value) is not list else value
+    
+    # Check for return object. Return all applicable
+    retObjs = [x.state for x in values if type(x) is ReturnObject]
+    if len(retObjs) > 0:
+        return retObjs
+
+    # The operations to do (Add/Mul/etc)
+    op = element.op    
+    ret = []
+
+    # Loop through possible old targets
+    for value in values:
+
+        state = value.state.copy()
+        state.path.pop(0)
+
+        parent = state.objectManager.getParent(oldTarget)
+        index = parent.index(oldTarget)
+
+        # Create a new list
+        newList = state.getVar("AugAssignTempList",ctx=1,varType=List)
+        newList.increment()
+
+        # Handle Add
+        if type(op) == ast.Add:
+            assert type(value) is List, "Unexpected AugAssign Add value of type {}".format(type(value))
+
+            # Set the new list
+            newList.setTo(oldTarget + value, clear=True)
+
+            # Assign the new string
+            parent[index] = newList.copy()
+
+            ret.append(state.copy())
+
+        # Handle Multiplication
+        elif type(op) == ast.Mult:
+            assert type(value) is Int, "Unexpected AugAssign Mult value of type {}".format(type(value))
+            assert value.isStatic(), "AugAssign List of symbolic multiplication not supported yet."
+            value = value.getValue()
+
+            # Set the new list
+            # TODO: Should update List proper to do mult as well
+            newList.variables = oldTarget.variables * value
+
+            # Assign the new string
+            parent[index] = newList.copy()
+
+            ret.append(state.copy())
+
+
+        else:
+            error = "Unhandled List AugAssign operation of {}".format(type(op))
+            logger.error(error)
+            raise Exception(error)
+
 
     # Return the state
     return ret
@@ -233,34 +325,33 @@ def handle(state,element):
     -------
     Example of ast.Assign is: x += 1
     """
+    # Find the parent object
+    oldTargets = state.resolveObject(element.target)
 
-    # Value is what to set them to
-    value = state.resolveObject(element.value)
-    
-    # Normalize the input
-    values = [value] if type(value) is not list else value
-    
-    # Check for return object. Return all applicable
-    retObjs = [x.state for x in values if type(x) is ReturnObject]
+    # Normalize
+    oldTargets = [oldTargets] if type(oldTargets) is not list else oldTargets
+
+    # Resolve calls if we need to
+    retObjs = [x for x in oldTargets if type(x) is ReturnObject]
     if len(retObjs) > 0:
         return retObjs
-
-    # The operations to do (Add/Mul/etc)
-    op = element.op    
 
     ret = []
 
     # Loop through possible values, creating states as we go
-    for value in values:
+    for oldTarget in oldTargets:
 
-        if type(value) in [Int, BitVec, Real]:
-            ret += _handleNum(state.copy(),element,value,op)
+        if type(oldTarget) in [Int, BitVec, Real]:
+            ret += _handleNum(element,oldTarget)
 
-        elif type(value) is String:
-            ret += _handleString(state.copy(),element,value,op)
+        elif type(oldTarget) is String:
+            ret += _handleString(element,oldTarget)
+
+        elif type(oldTarget) is List:
+            ret += _handleList(element,oldTarget)
 
         else:
-            err = "handle: Don't know how to handle type {0}".format(type(value))
+            err = "handle: Don't know how to handle type {0}".format(type(oldTarget))
             logger.error(err)
             raise Exception(err)
 

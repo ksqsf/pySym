@@ -33,11 +33,16 @@ def handle(state,call,var,ctx=None):
         
         s.path.pop(0)
 
-        # Resolve Root
-        root = s.resolveObject(call.func.value,ctx=ctx)
+        # If we are given a List object, use that as root
+        if type(call) is List:
+            root = call
 
-        assert len(root) == 1
-        root = root.pop()
+        # Resolve Root
+        else:
+            root = s.resolveObject(call.func.value,ctx=ctx)
+
+            assert len(root) == 1
+            root = root.pop()
 
         assert type(root) is List
 

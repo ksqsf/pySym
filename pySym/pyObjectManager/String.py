@@ -69,18 +69,12 @@ class String:
 
     def increment(self):
         self.count += 1
-        #length = self.length()
-        # reset variable list if we're incrementing our count
-        #self.variables = []
-
-        # Add generic characters to this string
-        #if length is not None:
-        #    for x in range(length):
-        #        self._addChar()
 
         # increment all the chars
         for c in self:
             c.increment()
+
+        self.uuid = os.urandom(32)
     
     def _addChar(self):
         """

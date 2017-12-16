@@ -48,8 +48,8 @@ class Ctx:
         Returns "index" of the given element. Raises exception if it's not found
         For a pseudo dict class, this is just the key for the key,val pair
         """
-        val = [k for k,v in self.variables.items() if v is elm]
-        assert len(val) == 1
+        val = [k for k,v in self.variables.items() if v.uuid is elm.uuid]
+        assert len(val) == 1, "Expected one item to be found. Found {} instead".format(len(val))
         return val[0]
 
     def __getitem__(self,index):
@@ -73,6 +73,12 @@ class Ctx:
             count = self.variables[key].count + 1
         else:
             count = 0
+
+        #try:
+        #    self.index(value)
+        #    raise Exception("Trying to make duplicate variable uuid.")
+        #except:
+        #    pass
 
         # If the variable comes in with a higher count, that's the one to use
         #count = max(count,

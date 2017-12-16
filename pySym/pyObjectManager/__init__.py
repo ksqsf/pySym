@@ -131,7 +131,7 @@ class ObjectManager:
 
         if type(haystack) in [dict, Ctx]:
             for k,v in haystack.items():
-                if v == key:
+                if hasattr(v,'uuid') and v.uuid == key.uuid:
                     return haystack
                 elif type(v) in [dict, List, Ctx,String]:
                     p = self.getParent(key,v)
@@ -139,14 +139,14 @@ class ObjectManager:
                         return p
         elif isinstance(haystack,(List,String)):
             for v in haystack:
-                if v == key:
+                if hasattr(v,'uuid') and v.uuid == key.uuid:
                     return haystack
                 elif type(v) in [dict,List,String]:
                     p = self.getParent(key,v)
                     if p:
                         return p
         elif isinstance(haystack,Char):
-            if haystack.variable == key:
+            if haystack.variable.uuid == key.uuid:
                 return haystack
 
 

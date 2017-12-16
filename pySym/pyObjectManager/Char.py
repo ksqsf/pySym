@@ -143,6 +143,7 @@ class Char:
         self._clone = None
         self.count += 1
         self.variable = self.__make_variable()
+        self.uuid = os.urandom(32)
     
     def _isSame(self,**args):
         """

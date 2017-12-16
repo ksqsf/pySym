@@ -78,6 +78,7 @@ class List:
         self.count += 1
         # reset variable list if we're incrementing our count
         self.variables = []
+        self.uuid = os.urandom(32)
 
         
     def append(self,var,kwargs=None):
@@ -183,6 +184,15 @@ class List:
         """
         Returns index of the given element. Raises exception if it's not found
         """
+        # Lookup our own variables by uuid
+        if type(elm) in [String, Int, BitVec, Char, Real]:
+            i = 0
+            for var in self.variables:
+                if var.uuid == elm.uuid:
+                    return i
+                i += 1
+            raise Exception("Could not find object {}".format(elm))
+            
         return self.variables.index(elm)
 
     def __getitem__(self,index):
@@ -277,6 +287,16 @@ class List:
 
     def __str__(self):
         return str(self.state.any_list(self))
+
+    def __add__(self, other):
+        assert type(other) is List, "Unsupported add of List and {}".format(type(other))
+
+        # Build a new List to return
+        new_list = List("tmpListAddList", ctx=self.ctx, state=self.state, increment=True)
+        # Just set the variables directly
+        new_list.variables = self.variables + other.variables
+
+        return new_list
 
     def getValue(self):
         """

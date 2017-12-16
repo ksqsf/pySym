@@ -79,6 +79,33 @@ s = pyState.String(8)
 l = ["test",s.index('a')]
 """
 
+test13 = """
+l1 = [1,2,3]
+l2 = [4,5,6]
+"""
+
+def test_pyObjectManager_List_addList():
+    b = ast_parse.parse(test13).body
+    p = Path(b,source=test13)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+    
+    s = pg.completed[0].state.copy()
+    l1 = s.getVar('l1')
+    l2 = s.getVar('l2')
+    l3 = l1 + l2
+
+    # Because I don't have List.mustBe working rn
+    assert l3[0].mustBe(1)
+    assert l3[1].mustBe(2)
+    assert l3[2].mustBe(3)
+    assert l3[3].mustBe(4)
+    assert l3[4].mustBe(5)
+    assert l3[5].mustBe(6)
+
+
 def test_pyObjectManager_List_StateSplit():
     b = ast_parse.parse(test12).body
     p = Path(b,source=test12)
