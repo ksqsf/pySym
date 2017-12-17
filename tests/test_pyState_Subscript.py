@@ -91,7 +91,43 @@ i = pyState.Int()
 x = l[i]
 """
 
-def test_pyState_symbolic_index():
+test14 = """
+l = [1,2,3,4]
+x = l[-1:]
+y = l[-3:-1]
+
+s = "test"
+a = s[-1:]
+b = s[-3:-1]
+"""
+
+def test_pyState_Subscript_negative_slices():
+    b = ast_parse.parse(test14).body
+    p = Path(b,source=test14)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    
+    s = pg.completed[0].state.copy()
+
+    a = s.getVar('a')
+    b = s.getVar('b')
+    x = s.getVar('x')
+    y = s.getVar('y')
+
+    assert a.mustBe("test"[-1:])
+    assert b.mustBe("test"[-3:-1])
+    
+    assert x.length() == 1
+    assert x[0].mustBe(4)
+
+    assert y.length() == 2
+    assert y[0].mustBe(2)
+    assert y[1].mustBe(3)
+
+def test_pyState_Subscript_symbolic_index():
     b = ast_parse.parse(test12).body
     p = Path(b,source=test12)
     pg = PathGroup(p)

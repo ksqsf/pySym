@@ -176,6 +176,10 @@ def _handleSlice(state,sub_object,sub_slice):
         if type(lower) not in [int,type(None)]:
             if lower.isStatic():
                 lower = lower.getValue()
+
+                # If we're have a negative in our slice
+                if lower < 0:
+                    lower = sub_object.length() + lower
     
             else:
                 err = "_handleSlice: Don't know how to handle symbolic lower slice integers at the moment"
@@ -190,6 +194,10 @@ def _handleSlice(state,sub_object,sub_slice):
         if type(upper) not in [int,type(None)]:
             if upper.isStatic():
                 upper = upper.getValue()
+
+                # If we're have a negative in our slice
+                if upper < 0:
+                    upper = sub_object.length() + upper
     
             else:
                 err = "_handleSlice: Don't know how to handle symbolic upper slice integers at the moment"
