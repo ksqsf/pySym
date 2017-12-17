@@ -96,7 +96,18 @@ class BitVec:
         """
         Sets this BitVec object to be equal/copy of another. Type can be int, or BitVec
         """
-        assert type(var) in [int, BitVec]
+        assert type(var) in [int, BitVec, Int], "Unhandled BitVec setTo type of {}".format(type(var))
+
+        # Normalize Int to int if it's static, error otherwise
+        if type(var) is Int:
+            
+            if var.isStatic():
+                var = var.getValue()
+            
+            else:
+                error = "Not handling symbolic Int value in setTo right now."
+                logger.error(error)
+                raise Exception(error)
 
         # Add the constraints
 
