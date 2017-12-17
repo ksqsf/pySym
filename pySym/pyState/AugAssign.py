@@ -220,6 +220,19 @@ def _handleString(element,oldTarget):
 
             ret.append(state.copy())
 
+        # Handle Multiplication
+        elif type(op) == ast.Mult:
+            assert type(value) is Int, "Unhandled value type for String AugAssign Mult of {}".format(type(value))
+            assert value.isStatic(), "Symbolic value for String AugAssign Mult is not supported right now."
+
+            value = value.getValue()
+            newString.variables = oldTarget.variables * value
+
+            # Assign the new string
+            parent[index] = newString.copy()
+
+            ret.append(state.copy())
+
         else:
             error = "Unhandled String AugAssign operation of {}".format(type(op))
             logger.error(error)

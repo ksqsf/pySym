@@ -126,6 +126,23 @@ l1 = [1,2,3]
 l1 *= 3
 """
 
+test19 = """
+s = "test"
+s *= 3
+"""
+
+def test_pySym_AugAssign_MultString():
+    b = ast_parse.parse(test19).body
+    p = Path(b,source=test19)
+    pg = PathGroup(p)
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+    st = s.getVar('s')
+
+    assert st.mustBe('test'*3)
+
 def test_pySym_AugAssign_MultList():
     b = ast_parse.parse(test18).body
     p = Path(b,source=test18)

@@ -1,6 +1,7 @@
 import logging
 import z3, z3.z3util as z3util
 import ast
+import os
 #from . import hasRealComponent, ReturnObject, duplicateSort
 #from pySym import pyState.BinOp, pyState.Call
 from ..pyObjectManager.Int import Int
@@ -115,7 +116,11 @@ def _handleAssignString(target,stringObject):
         index = parent.index(target)
 
         # Set the new list
-        parent[index] = stringObject.copy()
+        new_obj = stringObject.copy()
+        # HACK! Sometimes the string doesn't end up with a new unique uuid... This is a hack around that for now.
+        new_obj.uuid = os.urandom(32) 
+        #parent[index] = stringObject.copy()
+        parent[index] = new_obj
         #target.setTo(stringObject.copy(),clear=True)
 
         #target.state = target.state.copy()
