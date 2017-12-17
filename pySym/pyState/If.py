@@ -84,10 +84,39 @@ def handle(state,element):
     elif type(element.test) == ast.BoolOp:
         trueConstraint = BoolOp.handle(state, element.test)
     
-
     elif type(element.test) == ast.Call:
         trueConstraint = state.resolveObject(element.test)
 
+    elif type(element.test) == ast.Subscript:
+        #trueConstraint = state.resolveObject(element.test)
+        objs = state.resolveObject(element.test)
+
+        # Check for return object. Return all applicable
+        retObjs = [x.state for x in objs if type(x) is ReturnObject]
+        if len(retObjs) > 0:
+            return retObjs
+
+        trueConstraint = []
+
+        # Usually will only be one, but you never know
+        for obj in objs:
+
+            # If it's an int of some sort
+            if type(obj) in [Int, BitVec]:
+
+                # Python defines 0 as being False for an int, everything else is True
+                
+                # If it's static, determine directly if we're true or not
+                if obj.isStatic():
+                    trueConstraint.append(obj.getValue() != 0)
+
+                else:
+                    trueConstraint.append(obj.getZ3Object() != 0)
+
+            else:
+                error = "Unhandled If Subscript object type of {}".format(type(obj))
+                logger.error(error)
+                raise Exception(error)
 
     #elif type(element.test) == ast.UnaryOp:
     #    trueConstraint = pyState.UnaryOp.handle(state, element.test)
@@ -122,3 +151,6 @@ def handle(state,element):
         ret += _handleConstraints(stateIf.copy(),stateElse.copy(),tc,element)
     
     return ret
+
+from ..pyObjectManager.Int import Int
+from ..pyObjectManager.BitVec import BitVec

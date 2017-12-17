@@ -43,6 +43,59 @@ if x == y or s.index('a') == 2:
     z += 1
 """
 
+test5 = """
+i = pyState.Int()
+l = [0,i,2]
+
+x = 0
+y = 0
+
+if l[0]:
+    y = 1
+
+if l[2]:
+    y = 2
+
+if l[1]:
+    x = 1
+"""
+
+def test_pySym_If_Subscript_Int():
+    b = ast_parse.parse(test5).body
+    p = Path(b,source=test5)
+    pg = PathGroup(p)
+
+    pg.explore()
+    
+    # Splits into 8 possibilities and then if splits again
+    assert len(pg.completed) == 2
+    assert len(pg.deadended) == 2
+
+    s = pg.completed[0].state.copy()
+    x = s.getVar('x')
+    y = s.getVar('y')
+    i = s.getVar('i')
+
+    assert y.mustBe(2)
+    
+    if i.mustBe(0):
+        assert x.mustBe(0)
+    else:
+        assert not x.canBe(0)
+
+    s = pg.completed[1].state.copy()
+    x = s.getVar('x')
+    y = s.getVar('y')
+    i = s.getVar('i')
+
+    assert y.mustBe(2)
+    
+    if i.mustBe(0):
+        assert x.mustBe(0)
+    else:
+        assert not x.canBe(0)
+
+
 def test_pySym_If_StateSplit():
     b = ast_parse.parse(test3).body
     p = Path(b,source=test3)
