@@ -193,6 +193,9 @@ class String:
         """
         return self.state.any_str(self)
 
+    def __len__(self):
+        return len(self.variables)
+
     def mustBe(self,var):
         """
         Test if this string must be equal to the given variable. This means there's no other options and it's not symbolic
@@ -226,7 +229,7 @@ class String:
         # If we're dealing with a python string
         if type(var) is str:
             # It can't be equal if it's a different length...
-            if self.length() != len(var):
+            if len(self) != len(var):
                 return False
             
             # Ask the solver...
