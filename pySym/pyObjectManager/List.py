@@ -275,7 +275,7 @@ class List:
             return False
         
         # If not the same length, we can't be the same
-        if self.length() != var.length():
+        if len(self) != len(var):
             return False
         
         # Compare pairwise Chars
@@ -297,6 +297,9 @@ class List:
         new_list.variables = self.variables + other.variables
 
         return new_list
+
+    def __len__(self):
+        return len(self.variables)
 
     def getValue(self):
         """
