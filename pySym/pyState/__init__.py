@@ -1227,15 +1227,16 @@ class State():
             return 0
 
         self.solver = self.__new_solver()
-        self.solver.add(*new_constraints)
+        #self.solver.add(*new_constraints)
+        self.addConstraint(*new_constraints)
 
         return ret_code
 
 
-    def addConstraint(self,constraint):
+    def addConstraint(self,*constraints):
         """
         Input:
-            constraint = A z3 expression to use as a constraint
+            constraints = Any number of z3 expressions to use as a constraint
         Action:
             Add constraint given
         Returns:
@@ -1243,14 +1244,18 @@ class State():
         """
 
         # Sanity checks
-        assert "z3." in str(type(constraint)) or type(constraint) is bool
+        for constraint in constraints:
+            assert "z3." in str(type(constraint)) or type(constraint) is bool
         
         # No point in adding tautologies
-        if type(constraint) is bool and constraint == True:
-            return
+        constraints = [constraint for constraint in constraints if type(constraint) is not bool or (type(constraint) is bool and constraint == False)]
+
+        # If we're only adding True statements, ignore
+        if constraints == []:
+            return constraints
 
         # Add our new constraint to the solver
-        self.solver.add(constraint)
+        self.solver.add(*constraints)
         
 
     def isSat(self):
@@ -1263,6 +1268,7 @@ class State():
         Returns:
             Boolean True or False
         """
+
         # Get and clear our solver
         s = self.solver
 
@@ -1710,7 +1716,7 @@ class State():
             loop=copy(self.loop),
             maxRetID=self.maxRetID,
             maxCtx=self.maxCtx,
-            objectManager=self.objectManager.copy()
+            objectManager=self.objectManager.copy(),
             )
         
         # Make sure to give the objectManager the new state

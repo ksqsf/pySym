@@ -77,6 +77,24 @@ ret3 = test4() # Should be 1337
 ret4 = test7() # Should be [1,2,3,4]
 """
 
+def test_state_add_multiple_constraints():
+    b = ast_parse.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+    i = s.getVar('i')
+    z = i.getZ3Object()
+
+    s.addConstraint(z > 12, z < 14)
+
+    assert len(s.solver.assertions()) == 2
+    assert int(i) == 13
+
+
 def test_state_variable_inheritance():
     b = ast_parse.parse(test11).body
     p = Path(b,source=test11)
