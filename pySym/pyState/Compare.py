@@ -32,7 +32,7 @@ def _handleLeftVarInt(state,element,left):
         #left = left.getZ3Object()
     
     # If this is a String, let's hope it's only one char...
-    elif type(left) is String and left.length() == 1:
+    elif type(left) is String and len(left) == 1:
         #left = left[0].getZ3Object()
         left = left[0]
     
@@ -73,7 +73,7 @@ def _handleLeftVarInt(state,element,left):
             pass #r = r.getZ3Object()
 
         # If this is a String, let's hope it's only one char...
-        elif type(r) is String and r.length() == 1:
+        elif type(r) is String and len(r) == 1:
             r = r[0]
             #r = r[0].getZ3Object()
 

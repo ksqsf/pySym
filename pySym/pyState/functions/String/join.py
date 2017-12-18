@@ -60,9 +60,9 @@ def handle(state,call,elem,ctx=None):
                 logger.error(err)
                 raise Exception(err)
 
-        if root.length() > 0:
+        if len(root) > 0:
             # Remove the excess chars that may have built up
-            newString = newString[:-root.length()]
+            newString = newString[:-len(root)]
     
         ret.append(newString.copy())
 

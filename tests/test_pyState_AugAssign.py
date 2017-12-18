@@ -163,7 +163,7 @@ def test_pySym_AugAssign_AddLists():
     assert len(pg.completed) == 1
     s = pg.completed[0].state.copy()
     l1 = s.getVar('l1')
-    assert l1.length() == 6
+    assert len(l1) == 6
     assert l1[0].mustBe(1)
     assert l1[1].mustBe(2)
     assert l1[2].mustBe(3)

@@ -50,7 +50,7 @@ def _handleIndex(state,sub_object,sub_slice):
             oldVarType = None
 
             # Loop through all values of list, check to see if they could be returned as well as their type
-            for i in range(sub_object.length()):
+            for i in range(len(sub_object)):
                 if sub_index.canBe(i):
                     varCount += 1
                     varType, kwargs = pyState.duplicateSort(sub_object[i])
@@ -78,7 +78,7 @@ def _handleIndex(state,sub_object,sub_slice):
                 expr = z3.Bool(False)
 
                 # Build the z3 if then else statement in reverse
-                for i in range(sub_object.length()):
+                for i in range(len(sub_object)):
                     # Can we be this value?
                     if sub_index.canBe(i):
                         # Add it to our z3 expression
@@ -99,7 +99,7 @@ def _handleIndex(state,sub_object,sub_slice):
             else:
 
                 logger.info("Symbolic index into list with possible multi-type returns... Falling back to state splitting :-(")
-                logger.debug("Symbolic index into list of size {0}. Global max is {1}".format(sub_object.length(),Config.PYSYM_MAX_SYM_LIST_SPLIT))
+                logger.debug("Symbolic index into list of size {0}. Global max is {1}".format(len(sub_object),Config.PYSYM_MAX_SYM_LIST_SPLIT))
                 
                 # Split off up to our max allowed
                 added = 0
@@ -107,7 +107,7 @@ def _handleIndex(state,sub_object,sub_slice):
                 # TODO: This might get TOO big... Large input arrays could crush pySym..
                 
                 # Instead of asking for valid values, walk the index of the list and see if our symbolic input can be that
-                for i in range(sub_object.length()):
+                for i in range(len(sub_object)):
                     # Can this symbolic value be this index?
                     if sub_index.canBe(i):
                         # Add it, increment our count
@@ -179,7 +179,7 @@ def _handleSlice(state,sub_object,sub_slice):
 
                 # If we're have a negative in our slice
                 if lower < 0:
-                    lower = sub_object.length() + lower
+                    lower = len(sub_object) + lower
     
             else:
                 err = "_handleSlice: Don't know how to handle symbolic lower slice integers at the moment"
@@ -197,7 +197,7 @@ def _handleSlice(state,sub_object,sub_slice):
 
                 # If we're have a negative in our slice
                 if upper < 0:
-                    upper = sub_object.length() + upper
+                    upper = len(sub_object) + upper
     
             else:
                 err = "_handleSlice: Don't know how to handle symbolic upper slice integers at the moment"
@@ -228,9 +228,9 @@ def _handleSlice(state,sub_object,sub_slice):
     
         if upper is None:
             if step > 0:
-                upper = sub_object.length()
+                upper = len(sub_object)
             else:
-                upper = -sub_object.length() - 1
+                upper = -len(sub_object) - 1
     
         if type(sub_object) is List:
             # Get slice

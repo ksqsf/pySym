@@ -39,7 +39,7 @@ def _handle(state,element,newIter):
     # Assuming it's a list for now
 
     # If we're out of things to iterate, take the else
-    if newIter.length() == 0:
+    if len(newIter) == 0:
         cs = copy(state.path) #[copy(x) for x in state.path]
         if len(cs) > 0:
             state.pushCallStack(path=cs)

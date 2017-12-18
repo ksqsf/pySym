@@ -127,10 +127,10 @@ class String:
     def getZ3Object(self):
         """Convenience function. Will return z3 object for Chr if this is a string of length 1, else error."""
 
-        if self.length() == 1:
+        if len(self) == 1:
             return self.variables[0].getZ3Object()
 
-        raise Exception("String: getZ3Object with String of length {0} makes no sense.".format(self.length()))
+        raise Exception("String: getZ3Object with String of length {0} makes no sense.".format(len(self)))
 
 
     def _isSame(self,length=None,**args):
@@ -138,7 +138,7 @@ class String:
         Checks if variables for this object are the same as those entered.
         Assumes checks of type will be done prior to calling.
         """
-        if length is not self.length():
+        if length is not len(self):
             return False
         return True
 
@@ -173,10 +173,6 @@ class String:
         err = "String type does not support item assignment"
         logger.error(err)
         raise Exception(err)
-
-
-    def length(self):
-        return len(self.variables)
 
     def pop(self,index=None):
         """
@@ -247,7 +243,7 @@ class String:
         # if we're dealing with a String object
         if type(var) is String:
             # It can't be equal if it's a different length...
-            if self.length() != var.length():
+            if len(self) != len(var):
                 return False
 
             # Ask the solver...

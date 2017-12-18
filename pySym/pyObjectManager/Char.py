@@ -92,7 +92,7 @@ class Char:
             logger.error(err)
             raise Exception(err)
 
-        if (type(var) is String and var.length() != 1) or (type(var) is str and len(var) != 1):
+        if (type(var) is String and len(var) != 1) or (type(var) is str and len(var) != 1):
             err = "setTo: Cannot set Char element to more than 1 length"
             logger.error(err)
             raise Exception(err)

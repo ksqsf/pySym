@@ -60,12 +60,12 @@ def handle(state,call,width,ctx=None):
         newString.setTo(root,clear=True)
     
         # If we're already at our length, just return
-        if newString.length() >= width:
+        if len(newString) >= width:
             ret.append(newString.copy())
             continue
 
         # Add as many "0"s as needed
-        while newString.length() < width:
+        while len(newString) < width:
             # Create the new Char
             c = state.getVar('tempCharZfill',ctx=1,varType=Char)
             c.increment()

@@ -120,10 +120,10 @@ def test_pyState_Subscript_negative_slices():
     assert a.mustBe("test"[-1:])
     assert b.mustBe("test"[-3:-1])
     
-    assert x.length() == 1
+    assert len(x) == 1
     assert x[0].mustBe(4)
 
-    assert y.length() == 2
+    assert len(y) == 2
     assert y[0].mustBe(2)
     assert y[1].mustBe(3)
 

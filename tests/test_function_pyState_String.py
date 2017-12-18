@@ -34,6 +34,6 @@ def test_function_pyState_String():
     s = pg.completed[0].state.getVar('s')
     s2 = pg.completed[0].state.getVar('s2')
 
-    assert s.length() == 32
-    assert s2.length() == Z3_MAX_STRING_LENGTH
+    assert len(s) == 32
+    assert len(s2) == Z3_MAX_STRING_LENGTH
     

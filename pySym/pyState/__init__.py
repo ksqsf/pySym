@@ -189,7 +189,7 @@ def duplicateSort(obj):
 
     if type(obj) is String:
         # Create a string with the same length
-        return type(obj), {'string': "A"*obj.length() if obj.length() > 0 else None}
+        return type(obj), {'string': "A"*len(obj) if len(obj) > 0 else None}
 
     if type(obj) is List:
         return type(obj), None

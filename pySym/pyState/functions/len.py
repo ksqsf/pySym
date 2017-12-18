@@ -25,7 +25,7 @@ def handle(state,call,obj,ctx=None):
     for obj in objs:
     
         # Just calling the length function on the object..
-        l = obj.length()
+        l = len(obj)
     
         i = state.getVar("tmpLenValue",ctx=1, varType=Int)
         i.increment()

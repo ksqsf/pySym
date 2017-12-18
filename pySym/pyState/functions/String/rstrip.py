@@ -13,9 +13,9 @@ logger = logging.getLogger("pyState:SimFunction:String.rstrip")
 def _rstrip(state,newString,chars):
 
     # Look char by char in reverse order to find target char
-    for c in range(newString.length()-1,-1,-1):#[::-1]:
+    for c in range(len(newString)-1,-1,-1):#[::-1]:
         c = newString[c]
-        for f in range(chars.length()):
+        for f in range(len(chars)):
             f = chars[f]
             # If we must be, pop and move on
             if c.mustBe(f):

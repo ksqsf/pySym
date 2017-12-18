@@ -61,19 +61,19 @@ def handle(state,call,sub,start=None,end=None,ctx=None):
         start = 0
     
     if end is None:
-        end = root.length()
+        end = len(root)
     
     subStr = root[start:end]
     ret = []
 
     # Move the size window through the input
-    for i in range(0,subStr.length() - sub.length() + 1):
+    for i in range(0,len(subStr) - len(sub) + 1):
         # If it is possible to have this index here, add it
-        if subStr[i:i+sub.length()].canBe(sub):
+        if subStr[i:i+len(sub)].canBe(sub):
             ret.append(Int('tempStrIndex',1,value=i,state=state))
         
         # If this is the only possible place, we must stop
-        if subStr[i:i+sub.length()].mustBe(sub):
+        if subStr[i:i+len(sub)].mustBe(sub):
             break
 
     return ret

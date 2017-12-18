@@ -57,7 +57,7 @@ def test_function_List_insert():
     l = s.getVar('l')
     
     assert type(l[0]) == Real
-    assert type(l[1]) == String and l[1].length() == 1
+    assert type(l[1]) == String and len(l[1]) == 1
     assert type(l[2]) == String
     assert type(l[3]) == BitVec
     my_list = s.any_list(l)

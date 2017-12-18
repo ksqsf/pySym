@@ -33,7 +33,7 @@ def handle(state,call,obj,ctx=None):
     for obj in objs:
 
         # This is probably a script problem, not us
-        if (type(obj) not in [String, Char]) or (type(obj) is String and obj.length() != 1):
+        if (type(obj) not in [String, Char]) or (type(obj) is String and len(obj) != 1):
             err = "handle: Invalid param for ord type {0}".format(type(obj))
             logger.error(err)
             raise Exception(err)
