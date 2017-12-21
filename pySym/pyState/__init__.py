@@ -321,7 +321,7 @@ class State():
 
     def __new_solver(self):
         """Generates a new solver."""
-        return z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver()
+        return z3.OrElse('smt', z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver()
 
 
     def setVar(self,varName,var,ctx=None):
