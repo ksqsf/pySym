@@ -17,4 +17,4 @@ def handle(state,call,size=ast.Num(Z3_DEFAULT_BITVEC_SIZE),ctx=None):
     bvs = bvs[0]
     bvs.increment()
 
-    return bvs.copy()
+    return [bvs.copy()]

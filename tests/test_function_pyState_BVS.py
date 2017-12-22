@@ -21,6 +21,21 @@ s1 = pyState.BVS(1)
 s2 = pyState.BVS(1)
 """
 
+test2 = """
+l = []
+
+for i in range(24):
+    l.append(pyState.BVS(1))
+"""
+
+def test_function_pyState_BVS_ret_as_list():
+    b = ast_parse.parse(test2).body
+    p = Path(b,source=test2)
+    pg = PathGroup(p)
+
+    pg.explore()
+    assert len(pg.completed) == 1
+
 def test_function_pyState_BVS_basic():
     b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
