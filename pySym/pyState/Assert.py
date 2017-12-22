@@ -68,12 +68,7 @@ def handle(state,element,ctx=None):
     if len(retObjs) > 0:
         return retObjs
 
-    # Add any constraints that aren't simply True
-    for constraint in constraints:
-        if constraint == True:
-            continue
-
-        state.addConstraint(constraint)
+    state.addConstraint(*constraints)
 
     # Not waiting on anything, move forward
     state.path.pop(0)
