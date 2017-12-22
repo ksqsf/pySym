@@ -50,6 +50,28 @@ else:
 q = 5
 """
 
+test4 = """
+s = "A"*16
+
+for c in s:
+    if c == "A":
+        q = 1
+    else:
+        q = 2
+"""
+
+def test_pyPathGroup_ignore_paths():
+    b = ast_parse.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p,ignore_groups=['deadended'])
+
+    # Execute to the end
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    assert len(pg.deadended) == 0
+
+
 def test_pyPathGroup_exploreFunctionCompare():
     b = ast_parse.parse(test3).body
     p = Path(b,source=test3)

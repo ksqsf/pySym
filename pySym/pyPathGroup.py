@@ -4,11 +4,10 @@ from .pyPath import Path
 
 class PathGroup:
 
-    def __init__(self,path=None,discardFailures=None,discardCompleted=None):
+    def __init__(self,path=None,ignore_groups=None):
         """
         (optional) path = starting path object for path group
-        (optional) discardFailure = Should we throw away bad paths to save on memory?
-        (optional) discardCompleted = Should we discard completed paths to save on memory?
+        (optional) discard_groups = List/set of path groups to ignore (i.e.: don't save) as we execute. Defaults to saving everything.
         """
 
         # Init the groups
@@ -17,8 +16,15 @@ class PathGroup:
         self.completed = []
         self.errored = []
         self.found = []
-        self.discardFailures = False if discardFailures is None else discardFailures
-        self.discardCompleted = False if discardCompleted is None else discardCompleted
+        
+        if ignore_groups is None:
+            self.ignore_groups = set()
+        elif type(ignore_groups) is str:
+            self.ignore_groups = set([ignore_groups])
+        elif type(ignore_groups) in [list, tuple]:
+            self.ignore_groups = set(ignore_groups)
+        else:
+            raise Exception("Unsupported type of argument for ignore_groups of {}".format(type(ignore_groups)))
 
 
     def __str__(self):
@@ -60,15 +66,13 @@ class PathGroup:
             # Step the things
             self.step()
 
-            # Blow away failed paths to save on memory
-            if self.discardFailures:
-                self.deadended = []
-                self.errored = []
+            # Prune out paths that we don't care to look at
+            for path_group_name in self.ignore_groups:
 
-            # If we're really looking for something, throw away completed too
-            if self.discardCompleted:
-                self.completed = []
-            
+                # If we don't have a path like that, just ignore it
+                if hasattr(self, path_group_name):
+                    setattr(self, path_group_name,[])
+
             if find:
                 # Check for any path that has made it here
                 for path in self.active:
