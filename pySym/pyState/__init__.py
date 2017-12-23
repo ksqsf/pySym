@@ -233,7 +233,7 @@ def get_all(f,rs=[]):
     [x, y, a, b]
     """
     if __debug__:
-        assert z3util.is_expr(f)
+        assert z3util.is_expr(f), "Unexpected non-expression of type {}".format(type(f))
 
     if z3util.is_const(f):
         return z3util.vset(rs + [f],str)
@@ -288,20 +288,18 @@ class State():
     Defines the state of execution at any given point.
     """
 
-    def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None):
+    def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None,vars_in_solver=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
+        (optional) vars_in_solver = list/set/tuple of variable strings that are in the solver. Do not set this manually.
         """
  
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
-        #self.solver = z3.Solver() if solver is None else solver
-        #self.solver = z3.Then("simplify","solve-eqs","smt").solver() if solver is None else solver
-        #self.solver = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver() if solver is None else solver
-        #self.solver = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver() if solver is None else solver
         self.solver = self.__new_solver() if solver is None else solver
+        self._vars_in_solver = vars_in_solver if vars_in_solver is not None else set()
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
@@ -1227,8 +1225,13 @@ class State():
             return 0
 
         self.solver = self.__new_solver()
-        #self.solver.add(*new_constraints)
         self.addConstraint(*new_constraints)
+
+        # Remove the vars from our set tracker
+        for constraint in constraints:
+            for var in get_all(constraint):
+                if str(var) in self._vars_in_solver:
+                    self._vars_in_solver.remove(str(var))
 
         return ret_code
 
@@ -1256,6 +1259,17 @@ class State():
 
         # Add our new constraint to the solver
         self.solver.add(*constraints)
+
+        # Record that they are now in the solver somewhere
+        for constraint in constraints:
+            if type(constraint) is bool:
+                continue
+
+            for var in get_all(constraint):
+
+                # Don't keep track of plain numbers. Only vars
+                if type(var) not in [z3.z3.IntNumRef, z3.z3.BitVecNumRef]:
+                    self._vars_in_solver.add(str(var))
         
 
     def isSat(self):
@@ -1685,8 +1699,6 @@ class State():
         # Made it! Return it as a real/float
         return float(eval(value.as_string()))
 
-
- 
     def copy(self):
         """
         Return a copy of the current state
@@ -1717,11 +1729,31 @@ class State():
             maxRetID=self.maxRetID,
             maxCtx=self.maxCtx,
             objectManager=self.objectManager.copy(),
+            vars_in_solver=copy(self._vars_in_solver),
             )
         
         # Make sure to give the objectManager the new state
         newState.objectManager.setState(newState)
         
         return newState
+
+    ##############
+    # Properties #
+    ##############
+
+    @property
+    def _vars_in_solver(self):
+        """set: String representations of all the vars in the solver."""
+        return self.__vars_in_solver
+
+    @_vars_in_solver.setter
+    def _vars_in_solver(self, vars):
+        
+        if type(vars) in [tuple, list]:
+            vars = set(vars)
+
+        assert type(vars) is set, "Unhandled _vars_in_solver type of {}".format(type(vars))
+
+        self.__vars_in_solver = vars
         
 from . import BinOp, Pass, While, Break, Subscript, For, ListComp, UnaryOp, GeneratorExp, Assign, AugAssign, FunctionDef, Expr, Return, If, Assert

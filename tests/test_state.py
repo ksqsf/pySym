@@ -77,6 +77,27 @@ ret3 = test4() # Should be 1337
 ret4 = test7() # Should be [1,2,3,4]
 """
 
+def test_state_track_var():
+    b = ast_parse.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+    
+    # Add a new constraint
+    x = s.getVar('x')
+    z3_obj = x.getZ3Object()
+    s.addConstraint(z3_obj > 5)
+    assert str(z3_obj) in s._vars_in_solver
+
+    # Remove the constraint
+    s.remove_constraints(z3_obj > 5)
+    assert str(z3_obj) not in s._vars_in_solver
+
+
 def test_state_add_multiple_constraints():
     b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
