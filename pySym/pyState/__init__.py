@@ -1601,14 +1601,29 @@ class State():
             if type(extra_constraints) not in [tuple, list]:
                 extra_constraints = (extra_constraints,)
 
-            solver = self.solver.translate(self.solver.ctx)
+            # Try push/pop first
+            try:
+                solver = self.solver
+                solver.push()
+                pushed = True
+
+            # Fall back to translate
+            except:
+                solver = self.solver.translate(self.solver.ctx)
+                pushed = False
+
             solver.add(*extra_constraints)
 
             # Make sure this new situation is possible
             if solver.check() != z3.sat:
+                if pushed:
+                    solver.pop()
                 return None
 
             m = solver.model()
+
+            if pushed:
+                solver.pop()
         
         else:
             m = self.solver.model()
