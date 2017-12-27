@@ -40,7 +40,7 @@ def _rstrip(state,newString,chars):
                 state_eq.addConstraint(f.getZ3Object() == c.getZ3Object())
 
                 # Take both
-                return _rstrip(state_notEqual,newString_notEqual,chars_notEqual) + _rstrip(state_eq,newString_eq,chars_eq)
+                return _rstrip(state_notEqual.copy(),newString_notEqual.copy(),chars_notEqual.copy()) + _rstrip(state_eq.copy(),newString_eq.copy(),chars_eq.copy())
         else:
             break
 

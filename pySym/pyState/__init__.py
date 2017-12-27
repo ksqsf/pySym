@@ -1434,6 +1434,7 @@ class State():
 
         assert type(n) is int
 
+        """
         # Doing this on a copy of the state since we're modifying it
         s = self.copy()
         #s = self
@@ -1442,6 +1443,9 @@ class State():
         out = []
 
         for i in range(n):
+            print("assertions",s.solver.assertions())
+            #if len(s.solver.assertions()) == 2 and str(s.solver.assertions()[1]) == '010pyStateStringTemp[0]@1 != 1':
+            #    assert False
             try:
                 myInt = s.any_int(var,ctx=ctx)
             except:
@@ -1455,11 +1459,8 @@ class State():
             s.addConstraint(varZ3Object != myInt)
             #solver.add(varZ3Object != myInt)
 
+        print("Returning",out)
         return out
-
-        #
-        # For some reason, the below approach is causing things to not work right... need to figure out why.
-        #
 
         """
 
@@ -1470,6 +1471,10 @@ class State():
         except:
             pushed = False
 
+        s = self
+        varZ3Object = s.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
+        out = []
+
         #
         # Push method preferred
         #
@@ -1477,6 +1482,7 @@ class State():
             logger.debug("any_n_int: Using push/pop method.")
 
             for i in range(n):
+
                 try:
                     myInt = s.any_int(var,ctx=ctx)
                 except:
@@ -1487,24 +1493,22 @@ class State():
                     break
                 
                 out.append(myInt)
-                #s.addConstraint(varZ3Object != myInt)
                 solver.add(varZ3Object != myInt)
 
             solver.pop()
 
         #
-        # Fall back to other method (broken??)
+        # Fall back to other method TODO: Update this to use translate instead.
         # 
 
         else:
-            logger.debug("any_n_int: Using legacy (buggy) method.")
+            logger.debug("any_n_int: Using legacy method.")
 
             extra_constraints = []
 
             for i in range(n):
                 try:
                     myInt = s.any_int(var,ctx=ctx,extra_constraints=extra_constraints)
-                    #myInt = s.any_int(var,ctx=ctx)
                 except:
                     #Looks like we're done
                     break
@@ -1513,11 +1517,9 @@ class State():
                     break
                 
                 out.append(myInt)
-                #s.addConstraint(varZ3Object != myInt)
                 extra_constraints.append(varZ3Object != myInt)
 
         return out
-        """
 
     def any_n_real(self,var,n,ctx=None):
         """

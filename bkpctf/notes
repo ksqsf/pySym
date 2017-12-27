@@ -4,6 +4,8 @@ https://dowsll.github.io/writeups/tokyowesternctf2017/mysimplecipher
 
 TODO:
  - Update any_n_int (and others) to use push/pop if possible. state copy adds a lot of expense.
+  - [DONE] any_n_int
+  - any_n_real
  - [DONE] Add assert handling
    - tests
  - Add string.encode('hex') handling
