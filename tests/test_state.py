@@ -77,6 +77,28 @@ ret3 = test4() # Should be 1337
 ret4 = test7() # Should be [1,2,3,4]
 """
 
+def test_state_is_sat_extra_constraints():
+    b = ast_parse.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+
+    i = s.getVar('i')
+
+    assert len(s.solver.assertions()) == 0
+    assert s.isSat()
+    assert s.isSat(extra_constraints=[i.getZ3Object() > 5])
+    assert not s.isSat(extra_constraints=[i.getZ3Object() > 5, i.getZ3Object() == 3])
+    assert len(s.solver.assertions()) == 0
+    s.addConstraint(i.getZ3Object() > 5)
+    assert len(s.solver.assertions()) == 1
+    assert not s.isSat(extra_constraints=[i.getZ3Object() == 1])
+    assert len(s.solver.assertions()) == 1
+
 def test_state_track_var():
     b = ast_parse.parse(test4).body
     p = Path(b,source=test4)

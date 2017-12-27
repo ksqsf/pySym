@@ -176,19 +176,11 @@ class Real:
         if type(var) not in [Real, float]:
             return False
 
-        # Ask the solver
-        s = self.state.copy()
-
         if type(var) is Real:
-            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var.getZ3Object()])
+
         else:
-            s.addConstraint(self.getZ3Object() == var)
-
-        if s.isSat():
-            return True
-
-        return False
-
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var])
 
 
 # Circular importing problem. Don't hate :-)

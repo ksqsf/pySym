@@ -1275,6 +1275,7 @@ class State():
 
         # Record that they are now in the solver somewhere
         for constraint in constraints:
+
             if type(constraint) is bool:
                 continue
 
@@ -1291,12 +1292,10 @@ class State():
                     self._vars_in_solver[var].add(str(constraint))
 
 
-        
-
-    def isSat(self):
+    def isSat(self,extra_constraints=None):
         """
         Input:
-            Nothing
+            extra_constraints: Optional list of extra constraints to temporarily add before checking for sat.
         Action:
             Checks if the current state is satisfiable
             Note, it uses the local and global vars to create the solver on the fly
@@ -1304,13 +1303,41 @@ class State():
             Boolean True or False
         """
 
-        # Get and clear our solver
-        s = self.solver
+        solver = self.solver
 
-        # Changing how I manage constraints. They're all going into the solver directly now
-        # Just need to ask for updated SAT
-        return s.check() == z3.sat
+        if extra_constraints == None:
+            return solver.check() == z3.sat
+
+        if type(extra_constraints) not in [list, tuple]:
+            extra_constraints = [extra_constraints]
+
+        #
+        # Deal with extra constraints
+        #
+
+        # Determine if we can push and pop
+        try:
+            solver.push()
+            pushed = True
+        except:
+            pushed = False
+
+        # Prefer push/pop
+        if pushed:
+            # Add in the constraints
+            solver.add(*extra_constraints)
+            ret = solver.check() == z3.sat
+            # Pop off the constraints
+            solver.pop()
+            return ret
+
+        # Use translate method
+        else:
+            solver = solver.translate(solver.ctx)
+            solver.add(*extra_constraints)
+            return solver.check() == z3.sat
         
+
     def printVars(self):
         """
         Input:
@@ -1402,7 +1429,6 @@ class State():
         """
         # TODO: Optimize this... When slicing lists and needing, say, 256 values, this gets VERY slow... Silly..
 
-
         # Grab appropriate ctx
         ctx = ctx if ctx is not None else self.ctx
 
@@ -1410,6 +1436,7 @@ class State():
 
         # Doing this on a copy of the state since we're modifying it
         s = self.copy()
+        #s = self
 
         varZ3Object = s.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
         out = []
@@ -1426,8 +1453,71 @@ class State():
             
             out.append(myInt)
             s.addConstraint(varZ3Object != myInt)
+            #solver.add(varZ3Object != myInt)
 
         return out
+
+        #
+        # For some reason, the below approach is causing things to not work right... need to figure out why.
+        #
+
+        """
+
+        try:
+            solver = self.solver
+            solver.push()
+            pushed = True
+        except:
+            pushed = False
+
+        #
+        # Push method preferred
+        #
+        if pushed:
+            logger.debug("any_n_int: Using push/pop method.")
+
+            for i in range(n):
+                try:
+                    myInt = s.any_int(var,ctx=ctx)
+                except:
+                    #Looks like we're done
+                    break
+
+                if myInt == None:
+                    break
+                
+                out.append(myInt)
+                #s.addConstraint(varZ3Object != myInt)
+                solver.add(varZ3Object != myInt)
+
+            solver.pop()
+
+        #
+        # Fall back to other method (broken??)
+        # 
+
+        else:
+            logger.debug("any_n_int: Using legacy (buggy) method.")
+
+            extra_constraints = []
+
+            for i in range(n):
+                try:
+                    myInt = s.any_int(var,ctx=ctx,extra_constraints=extra_constraints)
+                    #myInt = s.any_int(var,ctx=ctx)
+                except:
+                    #Looks like we're done
+                    break
+
+                if myInt == None:
+                    break
+                
+                out.append(myInt)
+                #s.addConstraint(varZ3Object != myInt)
+                extra_constraints.append(varZ3Object != myInt)
+
+        return out
+        """
 
     def any_n_real(self,var,n,ctx=None):
         """

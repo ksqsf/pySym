@@ -257,18 +257,10 @@ class Int:
                 assert type(var) is int
                 return self.getValue() == var
         
-        # Ask the solver
-        s = self.state.copy()
-
         if type(var) in [Int, BitVec, Char]:
-            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var.getZ3Object()])
         else:
-            s.addConstraint(self.getZ3Object() == var)
-        
-        if s.isSat():
-            return True
-        
-        return False
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var])
 
     @property
     @decorators.as_clone_property
