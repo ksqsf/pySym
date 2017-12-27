@@ -91,11 +91,13 @@ def test_state_track_var():
     x = s.getVar('x')
     z3_obj = x.getZ3Object()
     s.addConstraint(z3_obj > 5)
-    assert str(z3_obj) in s._vars_in_solver
+    #assert str(z3_obj) in s._vars_in_solver
+    assert s.var_in_solver(z3_obj)
 
     # Remove the constraint
     s.remove_constraints(z3_obj > 5)
-    assert str(z3_obj) not in s._vars_in_solver
+    #assert str(z3_obj) not in s._vars_in_solver
+    assert not s.var_in_solver(z3_obj)
 
 
 def test_state_add_multiple_constraints():
@@ -149,15 +151,21 @@ def test_var_used_in_z3_ignore():
     z3_obj = i.getZ3Object()
 
     # Not in here to begin with
-    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    #assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    assert not s.var_in_solver(z3_obj)
 
     # Now it will be in there
     s.addConstraint(z3_obj > 3)
-    assert z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    #assert z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    assert s.var_in_solver(z3_obj)
 
     # Now try ignoring it
-    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=z3_obj > 3)
-    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=[z3_obj > 3])
+    s.remove_constraints(z3_obj > 3)
+    s.addConstraint(z3_obj > 3)
+    assert not s.var_in_solver(z3_obj, ignore=[z3_obj > 3])
+    assert not s.var_in_solver(z3_obj, ignore=z3_obj > 3)
+    #assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=z3_obj > 3)
+    #assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=[z3_obj > 3])
 
 
 def test_remove_constraints():

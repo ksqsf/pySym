@@ -24,6 +24,7 @@ d = pyState.String(10)
 
 test2 = """
 s = "Blerg"
+c2 = pyState.String(1)
 """
 
 test3 = """
@@ -54,10 +55,23 @@ def test_pyObjectManager_Char_is_unconstrained():
     # Those bounds should not count as constrained
     assert c.is_unconstrained
 
-    # Now let's add a real constraint
+    # This constraint should eval to True, and not be added
+    s.addConstraint(z3_obj > 5)
+    assert c.is_unconstrained
+
+    # Try with symbolic
+    c = s.getVar('c2')[0]
+    
+    assert c.is_unconstrained
+    
+    # For now, this will add bounded int constraints to the solver...
+    z3_obj = c.getZ3Object()
+    # Those bounds should not count as constrained
+    assert c.is_unconstrained
+
+    # This should add a real constraint
     s.addConstraint(z3_obj > 5)
     assert c.is_constrained
-
 
 def test_pyObjectManager_Char_mustBe():
     b = ast_parse.parse(test4).body

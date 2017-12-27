@@ -85,6 +85,8 @@ class ObjectManager:
         assert type(varName) is str
         assert type(ctx) is int
         assert varType in [None, Int, Real, BitVec, List, String, Char]
+
+        logger.debug("getVar: {} {} {} {}".format(varName,varType,kwargs,softFail))
         
         softFail = False if softFail is None else softFail
         create = False

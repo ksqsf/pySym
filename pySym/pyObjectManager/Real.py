@@ -111,7 +111,8 @@ class Real:
         # Add the constraints
 
         # If we're not in the solver, we can play some tricks to make things faster
-        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        #if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        if not self.state.var_in_solver(self.getZ3Object()):
 
             # If we're adding static, don't clutter up the solve
             if type(var) in [float, int]:

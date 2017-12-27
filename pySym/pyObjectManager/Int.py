@@ -59,7 +59,7 @@ class Int:
             value = self.value,
             state = self.state if hasattr(self,"state") else None,
             uuid = self.uuid,
-            clone = self._clone.copy() if self._clone is not None else None
+            clone = self._clone.copy() if self._clone is not None else None,
         )
 
     def setState(self,state):
@@ -146,7 +146,9 @@ class Int:
         # Add the constraints
 
         # If we're not in the solver, we can play some tricks to make things faster
-        if not z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        #if not z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        # If we're bounded, we implicitly have vars in the solver
+        if not self.state.var_in_solver(self.getZ3Object()):
 
             # If we're adding a static variety, don't clutter up the solver
             if type(var) is int:
@@ -272,7 +274,8 @@ class Int:
     @decorators.as_clone_property
     def is_unconstrained(self):
         """bool: Returns True if this Int has no external constraints applied to it. False otherwise."""
-        return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver)
+        #return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver)
+        return not self.state.var_in_solver(self.getZ3Object())
 
     @property
     @decorators.as_clone_property

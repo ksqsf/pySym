@@ -112,7 +112,8 @@ class BitVec:
         # Add the constraints
 
         # If we're not in the solver, we can play some tricks to make things faster
-        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        #if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        if not self.state.var_in_solver(self.getZ3Object()):
 
             # Intentionally trying to unclutter the z3 solver here.
             if type(var) is int:
@@ -253,7 +254,7 @@ class BitVec:
     @decorators.as_clone_property
     def is_unconstrained(self):
         """bool: Returns True if this BitVec has no external constraints applied to it. False otherwise."""
-        return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver)
+        return not self.state.var_in_solver(self.getZ3Object())
 
     @property
     @decorators.as_clone_property

@@ -1,7 +1,7 @@
 import z3, z3.z3util as z3util
 import ast
 import logging
-from copy import copy
+from copy import copy, deepcopy
 import random
 import os.path
 import importlib
@@ -292,14 +292,15 @@ class State():
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
-        (optional) vars_in_solver = list/set/tuple of variable strings that are in the solver. Do not set this manually.
+        (optional) vars_in_solver = dict of list of variable strings that are in the solver. Do not set this manually.
         """
  
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
         self.solver = self.__new_solver() if solver is None else solver
-        self._vars_in_solver = vars_in_solver if vars_in_solver is not None else set()
+        #self.solver.set("timeout", 60000) # 1 minute (in miliseconds) timeout for the solver
+        self._vars_in_solver = vars_in_solver if vars_in_solver is not None else dict()
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
@@ -1229,9 +1230,21 @@ class State():
 
         # Remove the vars from our set tracker
         for constraint in constraints:
-            for var in get_all(constraint):
-                if str(var) in self._vars_in_solver:
-                    self._vars_in_solver.remove(str(var))
+            if type(constraint) is bool:
+                continue
+
+            for var in set(get_all(constraint)):
+                if type(var) not in [z3.z3.IntNumRef, z3.z3.BitVecNumRef]:
+                    var = str(var)
+
+                    if var in self._vars_in_solver:
+                        try:
+                            self._vars_in_solver[var].remove(str(constraint))
+                            if self._vars_in_solver[var] == set():
+                                self._vars_in_solver.pop(var)
+                        except KeyError:
+                            # Ignoring attempt to remove constraint that isn't tracked.
+                            pass
 
         return ret_code
 
@@ -1265,11 +1278,19 @@ class State():
             if type(constraint) is bool:
                 continue
 
-            for var in get_all(constraint):
+            for var in set(get_all(constraint)):
 
                 # Don't keep track of plain numbers. Only vars
                 if type(var) not in [z3.z3.IntNumRef, z3.z3.BitVecNumRef]:
-                    self._vars_in_solver.add(str(var))
+                    var = str(var)
+
+                    # Init the dict if need be
+                    if var not in self._vars_in_solver:
+                        self._vars_in_solver[var] = set()
+                        
+                    self._vars_in_solver[var].add(str(constraint))
+
+
         
 
     def isSat(self):
@@ -1699,6 +1720,30 @@ class State():
         # Made it! Return it as a real/float
         return float(eval(value.as_string()))
 
+    def var_in_solver(self, var, ignore=None):
+        """Checks if the variable given is in the z3 solver."""
+        assert z3Helpers.isZ3Object(var), "Expected var to be z3 object, got type {} instead".format(type(var))
+        var = str(var)
+        
+        # No constraints for this var
+        if var not in self._vars_in_solver or self._vars_in_solver[var] is set():
+            return False
+
+        # If we're ignoring, do the filter
+        if ignore is not None:
+
+            # Standardize ignore
+            if type(ignore) not in [list, tuple]:
+                ignore = [ignore]
+
+            ignore = [str(i) for i in ignore]
+            constraints = set([constraint for constraint in self._vars_in_solver[var] if constraint not in ignore])
+
+        else:
+            constraints = self._vars_in_solver[var]
+
+        return constraints != set()
+
     def copy(self):
         """
         Return a copy of the current state
@@ -1729,7 +1774,7 @@ class State():
             maxRetID=self.maxRetID,
             maxCtx=self.maxCtx,
             objectManager=self.objectManager.copy(),
-            vars_in_solver=copy(self._vars_in_solver),
+            vars_in_solver=deepcopy(self._vars_in_solver),
             )
         
         # Make sure to give the objectManager the new state
@@ -1743,17 +1788,14 @@ class State():
 
     @property
     def _vars_in_solver(self):
-        """set: String representations of all the vars in the solver."""
+        """dict: Dict of sets of string representations of all the vars in the solver."""
         return self.__vars_in_solver
 
     @_vars_in_solver.setter
     def _vars_in_solver(self, vars):
-        
-        if type(vars) in [tuple, list]:
-            vars = set(vars)
-
-        assert type(vars) is set, "Unhandled _vars_in_solver type of {}".format(type(vars))
+        assert type(vars) is dict, "Unhandled _vars_in_solver type of {}".format(type(vars))
 
         self.__vars_in_solver = vars
         
 from . import BinOp, Pass, While, Break, Subscript, For, ListComp, UnaryOp, GeneratorExp, Assign, AugAssign, FunctionDef, Expr, Return, If, Assert
+from . import z3Helpers
