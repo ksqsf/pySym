@@ -66,13 +66,6 @@ class PathGroup:
             # Step the things
             self.step()
 
-            # Prune out paths that we don't care to look at
-            for path_group_name in self.ignore_groups:
-
-                # If we don't have a path like that, just ignore it
-                if hasattr(self, path_group_name):
-                    setattr(self, path_group_name,[])
-
             if find:
                 # Check for any path that has made it here
                 for path in self.active:
@@ -89,7 +82,7 @@ class PathGroup:
         assert type(from_stash) in [str, type(None)]
         assert type(to_stash) in [str, type(None)]
 
-        if to_stash is not None:
+        if to_stash is not None and to_stash not in self.ignore_groups:
             to_stash = getattr(self,to_stash)
             to_stash.append(path)
 

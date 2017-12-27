@@ -164,9 +164,6 @@ def test_var_used_in_z3_ignore():
     s.addConstraint(z3_obj > 3)
     assert not s.var_in_solver(z3_obj, ignore=[z3_obj > 3])
     assert not s.var_in_solver(z3_obj, ignore=z3_obj > 3)
-    #assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=z3_obj > 3)
-    #assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=[z3_obj > 3])
-
 
 def test_remove_constraints():
     b = ast_parse.parse(test10).body
