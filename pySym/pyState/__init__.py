@@ -1774,7 +1774,8 @@ class State():
             maxRetID=self.maxRetID,
             maxCtx=self.maxCtx,
             objectManager=self.objectManager.copy(),
-            vars_in_solver=deepcopy(self._vars_in_solver),
+            #vars_in_solver=deepcopy(self._vars_in_solver),
+            vars_in_solver={key:copy(self._vars_in_solver[key]) for key in self._vars_in_solver.keys()}
             )
         
         # Make sure to give the objectManager the new state
