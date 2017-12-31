@@ -37,6 +37,9 @@ for t in ['If','While','Compare']:
 
 # Create small class for keeping track of return values
 class ReturnObject:
+
+    __slots__ = ['retID', 'state']
+
     def __init__(self,retID,state=None):
         """Initialize a pySym.pyState.ReturnObject instance
     
