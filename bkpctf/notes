@@ -10,7 +10,7 @@ TODO:
   - [DONE] ReturnObject
   - [DONE] PathGroup
   - [DONE] Project
-  - Int
+  - [DONE] Int
   - Char
   - ObjectManager
   - BitVec
