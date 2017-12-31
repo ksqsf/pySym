@@ -3,6 +3,21 @@ From Tokyo Westerns 2017 CTF
 https://dowsll.github.io/writeups/tokyowesternctf2017/mysimplecipher
 
 TODO:
+ - Implement __slots__ in all objects
+  - [DONE] Path
+  - Factory
+  - State
+  - ReturnObject
+  - PathGroup
+  - Project
+  - Int
+  - Char
+  - ObjectManager
+  - BitVec
+  - Ctx
+  - List
+  - String
+  - Real
  - Update any_n_int (and others) to use push/pop if possible. state copy adds a lot of expense.
   - [DONE] any_n_int
   - any_n_real

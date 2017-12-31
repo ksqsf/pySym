@@ -5,7 +5,6 @@ from .pyState import State
 from prettytable import PrettyTable
 import sys
 from copy import copy
-#from pySym.pyState import Assign, If, pyState.AugAssign, pyState.FunctionDef, pyState.Expr, pyState.Return
 from random import random
 
 logger = logging.getLogger("Path")
@@ -14,6 +13,8 @@ class Path():
     """
     Defines a path of execution.
     """
+
+    __slots__ = ['backtrace','state','source','error']
     
     def __init__(self,path=None,backtrace=None,state=None,source=None):
         """
