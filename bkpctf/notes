@@ -14,8 +14,8 @@ TODO:
   - [DONE] Char
   - [DONE] ObjectManager
   - [DONE] BitVec
-  - Ctx
-  - List
+  - [DONE] Ctx
+  - [DONE] List
   - String
   - Real
  - Update any_n_int (and others) to use push/pop if possible. state copy adds a lot of expense.

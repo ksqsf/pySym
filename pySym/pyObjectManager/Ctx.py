@@ -16,6 +16,8 @@ class Ctx:
     Define a Ctx Object
     """
 
+    __slots__ = ['ctx', 'variables', 'state']
+
     def __init__(self,ctx,variables=None):
         assert type(ctx) is int, "Unexpected ctx type of {}".format(type(ctx))
         
