@@ -288,6 +288,12 @@ class State():
     Defines the state of execution at any given point.
     """
 
+    __slots__ = [
+            'path', 'ctx', 'objectManager', 'solver', '__vars_in_solver',
+            'functions', 'simFunctions', 'retVar', 'callStack', 'backtrace',
+            'retID', 'loop', 'maxRetID', 'maxCtx'
+            ]
+
     def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None,vars_in_solver=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.

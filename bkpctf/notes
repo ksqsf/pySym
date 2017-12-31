@@ -6,7 +6,7 @@ TODO:
  - Implement __slots__ in all objects
   - [DONE] Path
   - [DONE] Factory
-  - State
+  - [DONE] State
   - ReturnObject
   - PathGroup
   - Project
