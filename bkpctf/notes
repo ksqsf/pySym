@@ -12,7 +12,7 @@ TODO:
   - [DONE] Project
   - [DONE] Int
   - [DONE] Char
-  - ObjectManager
+  - [DONE] ObjectManager
   - BitVec
   - Ctx
   - List
