@@ -5,7 +5,7 @@ https://dowsll.github.io/writeups/tokyowesternctf2017/mysimplecipher
 TODO:
  - Implement __slots__ in all objects
   - [DONE] Path
-  - Factory
+  - [DONE] Factory
   - State
   - ReturnObject
   - PathGroup

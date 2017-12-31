@@ -10,6 +10,8 @@ from .pyPathGroup import PathGroup
 @enforce.runtime_validation
 class Factory:
 
+    __slots__ = ['__project']
+
     def __init__(self, project):
         self._project = project
 
