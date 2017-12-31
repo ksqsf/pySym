@@ -4,6 +4,9 @@ from .pyPath import Path
 
 class PathGroup:
 
+    __slots__ = ['active', 'deadended', 'completed', 'errored', 'found',
+                 'ignore_groups']
+
     def __init__(self,path=None,ignore_groups=None):
         """
         (optional) path = starting path object for path group
