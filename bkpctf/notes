@@ -11,7 +11,7 @@ TODO:
   - [DONE] PathGroup
   - [DONE] Project
   - [DONE] Int
-  - Char
+  - [DONE] Char
   - ObjectManager
   - BitVec
   - Ctx
