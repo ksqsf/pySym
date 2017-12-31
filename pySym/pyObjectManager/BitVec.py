@@ -11,6 +11,9 @@ class BitVec:
     """
     Define a BitVec
     """
+
+    __slots__ = ['_clone', 'count', 'varName', 'ctx', 'size', 'value', 'uuid',
+                 'state']
     
     def __init__(self,varName,ctx,size,count=None,state=None,increment=False,value=None,uuid=None,clone=None):
         assert type(varName) is str

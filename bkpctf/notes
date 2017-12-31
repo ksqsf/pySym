@@ -13,7 +13,7 @@ TODO:
   - [DONE] Int
   - [DONE] Char
   - [DONE] ObjectManager
-  - BitVec
+  - [DONE] BitVec
   - Ctx
   - List
   - String
