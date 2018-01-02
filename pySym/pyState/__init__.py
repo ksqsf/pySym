@@ -17,6 +17,8 @@ from ..pyObjectManager.Ctx import Ctx
 from ..pyObjectManager.String import String
 from ..pyObjectManager.Char import Char
 
+# Override z3 __copy__ so i can just use "copy()"
+z3.z3.Solver.__copy__ = lambda self: self.translate(self.ctx)
 
 # The current directory for running pySym
 SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
@@ -1871,13 +1873,11 @@ class State():
         #solverCopy = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","nlsat"),ctx=z3.Context()).solver()
         #solverCopy.add(self.solver.assertions())
 
-
-        #solverCopy = self.solver.translate(z3.Context())
-        #print(solverCopy)
-        solverCopy = self.solver.translate(self.solver.ctx)
+        #solverCopy = self.solver.translate(self.solver.ctx)
         
         newState = State(
-            solver=solverCopy,
+            #solver=solverCopy,
+            solver=copy(self.solver),
             ctx=self.ctx,
             functions=self.functions,
             simFunctions=self.simFunctions,
