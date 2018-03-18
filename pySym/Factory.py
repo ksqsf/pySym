@@ -7,7 +7,7 @@ import enforce
 from .pyPath import Path
 from .pyPathGroup import PathGroup
 
-@enforce.runtime_validation
+#@enforce.runtime_validation
 class Factory:
 
     __slots__ = ['__project','__weakref__']

@@ -1,6 +1,6 @@
 import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + '/../')
+#sys.path.insert(0, myPath + '/../')
 
 import logging
 from pySym import Colorer
@@ -175,8 +175,8 @@ def test_pySym_simpleWhile():
     b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
+    #pg.errored[0].step()
     assert pg.explore(find=6)
-
 
     assert len(pg.active) == 0
     assert len(pg.completed) == 0
