@@ -16,6 +16,7 @@ from ..pyObjectManager.List import List
 from ..pyObjectManager.Ctx import Ctx
 from ..pyObjectManager.String import String
 from ..pyObjectManager.Char import Char
+#from pyCoW import CoW
 
 # Override z3 __copy__ so i can just use "copy()"
 z3.z3.Solver.__copy__ = lambda self: self.translate(self.ctx)
@@ -288,7 +289,7 @@ def hasRealComponent(expr):
     return max([False if type(x) not in [z3.ArithRef, z3.RatNumRef] else x.is_real() for x in get_all(expr)])
 
 
-class State():
+class State:
     """
     Defines the state of execution at any given point.
     """
@@ -670,7 +671,6 @@ class State():
         Save the call stack with given variables
         Defaults to current variables if none given
         """
-
         self.callStack.append({
             'path': path if path is not None else self.path,
             'ctx': ctx if ctx is not None else self.ctx,
@@ -1894,10 +1894,16 @@ class State():
             vars_in_solver={key:copy(self._vars_in_solver[key]) for key in self._vars_in_solver.keys()}
             )
         
+        # Attempted CoW integration.. Not working right.
+        # newState = super().__copy__()
+
         # Make sure to give the objectManager the new state
         newState.objectManager.setState(newState)
-        
+
         return newState
+
+    def __copy__(self):
+        return self.copy()
 
     ##############
     # Properties #
@@ -1910,7 +1916,7 @@ class State():
 
     @_vars_in_solver.setter
     def _vars_in_solver(self, vars):
-        assert type(vars) is dict, "Unhandled _vars_in_solver type of {}".format(type(vars))
+        assert issubclass(type(vars), dict), "Unhandled _vars_in_solver type of {}".format(type(vars))
 
         self.__vars_in_solver = vars
         

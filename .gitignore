@@ -7,3 +7,4 @@ test
 docs/_build
 *.egg-info/
 .eggs/
+.coverage.pysym*

@@ -20,7 +20,7 @@ class ObjectManager:
     Object Manager will keep track of objects. Generally, Objects will be variables such as ints, lists, strings, etc.
     """
 
-    __slots__ = ['variables', 'returnObjects', 'state']
+    __slots__ = ['variables', 'returnObjects', 'state','__weakref__']
 
     def __init__(self,variables=None,returnObjects=None,state=None):
         self.variables = {CTX_GLOBAL: Ctx(CTX_GLOBAL), CTX_RETURNS: Ctx(CTX_RETURNS)} if variables is None else variables
@@ -160,6 +160,8 @@ class ObjectManager:
 
         return ObjectManager(
             variables = {key:self.variables[key].copy() for key in self.variables},
-            returnObjects = {key:self.returnObjects[key].copy() for key in self.returnObjects}
+            returnObjects = {key:self.returnObjects[key].copy() for key in self.returnObjects},
         )
 
+    def __copy__(self):
+        return self.copy()

@@ -5,7 +5,7 @@ from .pyPath import Path
 class PathGroup:
 
     __slots__ = ['active', 'deadended', 'completed', 'errored', 'found',
-                 'ignore_groups']
+                 'ignore_groups', '__weakref__']
 
     def __init__(self,path=None,ignore_groups=None):
         """

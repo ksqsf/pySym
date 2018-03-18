@@ -3,7 +3,8 @@ From Tokyo Westerns 2017 CTF
 https://dowsll.github.io/writeups/tokyowesternctf2017/mysimplecipher
 
 TODO:
- - Implement __slots__ in all objects
+ - Look into python "shelve" to save off paths/states
+ - [DONE] Implement __slots__ in all objects
   - [DONE] Path
   - [DONE] Factory
   - [DONE] State

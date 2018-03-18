@@ -14,7 +14,7 @@ class Path():
     Defines a path of execution.
     """
 
-    __slots__ = ['backtrace','state','source','error']
+    __slots__ = ['backtrace','state','source','error','__weakref__']
     
     def __init__(self,path=None,backtrace=None,state=None,source=None):
         """
@@ -85,3 +85,6 @@ class Path():
                 state=self.state.copy(),
                 source=copy(self.source),
                 )
+
+    def __copy__(self):
+        return self.copy()

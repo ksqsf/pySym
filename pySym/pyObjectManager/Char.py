@@ -14,7 +14,7 @@ class Char:
     """
 
     __slots__ = ['_clone', 'uuid', 'state', 'count', 'varName', 'ctx',
-                 'variable']
+                 'variable', '__weakref__']
 
     def __init__(self,varName,ctx,count=None,variable=None,state=None,increment=False,uuid=None,clone=None):
         assert type(varName) is str, "Unexpected varName type of {}".format(type(varName))

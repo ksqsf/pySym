@@ -10,7 +10,7 @@ class Real:
     Define a Real
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', 'state']
+    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', 'state', '__weakref__']
     
     def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False,uuid=None):
         assert type(varName) is str

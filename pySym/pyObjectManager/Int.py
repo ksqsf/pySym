@@ -13,7 +13,7 @@ class Int:
     Define an Int
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', '_clone', 'state']
+    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', '_clone', 'state', '__weakref__']
     
     def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False,uuid=None,clone=None):
         """
