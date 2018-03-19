@@ -4,11 +4,13 @@ from .pyPath import Path
 
 class PathGroup:
 
-    def __init__(self,path=None,discardFailures=None,discardCompleted=None):
+    __slots__ = ['active', 'deadended', 'completed', 'errored', 'found',
+                 'ignore_groups', '__weakref__']
+
+    def __init__(self,path=None,ignore_groups=None):
         """
         (optional) path = starting path object for path group
-        (optional) discardFailure = Should we throw away bad paths to save on memory?
-        (optional) discardCompleted = Should we discard completed paths to save on memory?
+        (optional) discard_groups = List/set of path groups to ignore (i.e.: don't save) as we execute. Defaults to saving everything.
         """
 
         # Init the groups
@@ -17,8 +19,15 @@ class PathGroup:
         self.completed = []
         self.errored = []
         self.found = []
-        self.discardFailures = False if discardFailures is None else discardFailures
-        self.discardCompleted = False if discardCompleted is None else discardCompleted
+        
+        if ignore_groups is None:
+            self.ignore_groups = set()
+        elif type(ignore_groups) is str:
+            self.ignore_groups = set([ignore_groups])
+        elif type(ignore_groups) in [list, tuple]:
+            self.ignore_groups = set(ignore_groups)
+        else:
+            raise Exception("Unsupported type of argument for ignore_groups of {}".format(type(ignore_groups)))
 
 
     def __str__(self):
@@ -60,15 +69,6 @@ class PathGroup:
             # Step the things
             self.step()
 
-            # Blow away failed paths to save on memory
-            if self.discardFailures:
-                self.deadended = []
-                self.errored = []
-
-            # If we're really looking for something, throw away completed too
-            if self.discardCompleted:
-                self.completed = []
-            
             if find:
                 # Check for any path that has made it here
                 for path in self.active:
@@ -85,7 +85,7 @@ class PathGroup:
         assert type(from_stash) in [str, type(None)]
         assert type(to_stash) in [str, type(None)]
 
-        if to_stash is not None:
+        if to_stash is not None and to_stash not in self.ignore_groups:
             to_stash = getattr(self,to_stash)
             to_stash.append(path)
 

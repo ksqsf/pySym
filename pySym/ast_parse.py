@@ -4,7 +4,12 @@ from copy import copy
 def astCopy(self):
     new = self.__class__()
 
-    new.__dict__ = {x: copy(getattr(self,x)) for x in self.__dict__}
+    #pypy has trouble writing to dict in this way :-(
+    #new.__dict__ = {x: copy(getattr(self,x)) for x in self.__dict__}
+
+    for attr in self.__dict__:
+        setattr(new, attr, copy(getattr(self,attr)))
+
     return new
 
 

@@ -17,10 +17,12 @@ logger = logging.getLogger("pyState:z3Helpers")
 Z3_DEFAULT_BITVEC_SIZE = 64
 Z3_MAX_STRING_LENGTH = 256
 
+"""
 def varIsUsedInSolver(var,solver,ignore=None):
-    """
+    " ""
     Determine if the given var (z3 object) is used in solver. Optionally ignore a list of constraints.
-    """
+    " ""
+    logger.warn("varIsUsedInSolver is deprecated. Use solver.var_in_solver instead")
 
     ignore = [] if ignore is None else ignore
 
@@ -40,7 +42,7 @@ def varIsUsedInSolver(var,solver,ignore=None):
             return True
 
     return False
-
+"""
 
 
 def isInt(x):

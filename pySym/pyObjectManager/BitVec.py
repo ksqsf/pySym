@@ -11,6 +11,9 @@ class BitVec:
     """
     Define a BitVec
     """
+
+    __slots__ = ['_clone', 'count', 'varName', 'ctx', 'size', 'value', 'uuid',
+                 'state', '__weakref__']
     
     def __init__(self,varName,ctx,size,count=None,state=None,increment=False,value=None,uuid=None,clone=None):
         assert type(varName) is str
@@ -112,7 +115,8 @@ class BitVec:
         # Add the constraints
 
         # If we're not in the solver, we can play some tricks to make things faster
-        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        #if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        if not self.state.var_in_solver(self.getZ3Object()):
 
             # Intentionally trying to unclutter the z3 solver here.
             if type(var) is int:
@@ -198,19 +202,11 @@ class BitVec:
                 assert type(var) is int
                 return self.getValue() == var
         
-        # Ask the solver
-        s = self.state.copy()
-
         if type(var) in [Int, BitVec]:
-            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var.getZ3Object()])
 
         else:
-            s.addConstraint(self.getZ3Object() == var)
-
-        if s.isSat():
-            return True
-
-        return False
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var])
 
     @decorators.as_clone
     def mustBe(self,var):
@@ -253,7 +249,7 @@ class BitVec:
     @decorators.as_clone_property
     def is_unconstrained(self):
         """bool: Returns True if this BitVec has no external constraints applied to it. False otherwise."""
-        return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver)
+        return not self.state.var_in_solver(self.getZ3Object())
 
     @property
     @decorators.as_clone_property

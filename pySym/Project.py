@@ -8,6 +8,8 @@ import os
 #@enforce.runtime_validation
 class Project:
 
+    __slots__ = ['__file_name', '__factory', '__weakref__']
+
     def __init__(self, file, debug=False):
     
         if debug:

@@ -1,6 +1,5 @@
 import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
-#sys.path.insert(0, myPath + '/../')
 
 import logging
 from pySym import Colorer
@@ -15,29 +14,29 @@ from pySym.pyObjectManager.Int import Int
 from pySym.pyObjectManager.Real import Real
 from pySym.pyObjectManager.BitVec import BitVec
 from pySym.pyObjectManager.List import List
+from pySym.pyState.z3Helpers import Z3_MAX_STRING_LENGTH
 
 test1 = """
-x = hex(12)
-y = 1337
-z = hex(y)
+s1 = pyState.BVS(1)
+s2 = pyState.BVS(1)
 """
 
 test2 = """
-s = pyState.String(8)
-x = hex(s.index('a'))
+l = []
+
+for i in range(24):
+    l.append(pyState.BVS(1))
 """
 
-def test_function_hex_StateSplit():
+def test_function_pyState_BVS_ret_as_list():
     b = ast_parse.parse(test2).body
     p = Path(b,source=test2)
     pg = PathGroup(p)
 
     pg.explore()
-    assert len(pg.completed) == 8
-    assert set([int(p.state.any_str('x'),16) for p in pg.completed]) == set(range(8))
+    assert len(pg.completed) == 1
 
-
-def test_function_hex():
+def test_function_pyState_BVS_basic():
     b = ast_parse.parse(test1).body
     p = Path(b,source=test1)
     pg = PathGroup(p)
@@ -45,6 +44,8 @@ def test_function_hex():
     pg.explore()
     assert len(pg.completed) == 1
     
-    assert pg.completed[0].state.any_str('x') == hex(12)
-    assert pg.completed[0].state.any_str('z') == hex(1337)
+    s1 = pg.completed[0].state.getVar('s1')
+    s2 = pg.completed[0].state.getVar('s2')
 
+    # Make sure that we're not duplicating variables on creation
+    assert str(s1.getZ3Object()) != str(s2.getZ3Object())

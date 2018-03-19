@@ -1,6 +1,6 @@
 import sys, os
 myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + '/../')
+#sys.path.insert(0, myPath + '/../')
 import logging
 logging.basicConfig(level=logging.DEBUG,format='%(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -77,6 +77,51 @@ ret3 = test4() # Should be 1337
 ret4 = test7() # Should be [1,2,3,4]
 """
 
+def test_state_is_sat_extra_constraints():
+    b = ast_parse.parse(test10).body
+    p = Path(b,source=test10)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+
+    i = s.getVar('i')
+
+    assert len(s.solver.assertions()) == 0
+    assert s.isSat()
+    assert s.isSat(extra_constraints=[i.getZ3Object() > 5])
+    assert not s.isSat(extra_constraints=[i.getZ3Object() > 5, i.getZ3Object() == 3])
+    assert len(s.solver.assertions()) == 0
+    s.addConstraint(i.getZ3Object() > 5)
+    assert len(s.solver.assertions()) == 1
+    assert not s.isSat(extra_constraints=[i.getZ3Object() == 1])
+    assert len(s.solver.assertions()) == 1
+
+def test_state_track_var():
+    b = ast_parse.parse(test4).body
+    p = Path(b,source=test4)
+    pg = PathGroup(p)
+    
+    pg.explore()
+
+    assert len(pg.completed) == 1
+    s = pg.completed[0].state.copy()
+    
+    # Add a new constraint
+    x = s.getVar('x')
+    z3_obj = x.getZ3Object()
+    s.addConstraint(z3_obj > 5)
+    #assert str(z3_obj) in s._vars_in_solver
+    assert s.var_in_solver(z3_obj)
+
+    # Remove the constraint
+    s.remove_constraints(z3_obj > 5)
+    #assert str(z3_obj) not in s._vars_in_solver
+    assert not s.var_in_solver(z3_obj)
+
+
 def test_state_add_multiple_constraints():
     b = ast_parse.parse(test10).body
     p = Path(b,source=test10)
@@ -128,16 +173,19 @@ def test_var_used_in_z3_ignore():
     z3_obj = i.getZ3Object()
 
     # Not in here to begin with
-    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    #assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    assert not s.var_in_solver(z3_obj)
 
     # Now it will be in there
     s.addConstraint(z3_obj > 3)
-    assert z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    #assert z3Helpers.varIsUsedInSolver(z3_obj,s.solver)
+    assert s.var_in_solver(z3_obj)
 
     # Now try ignoring it
-    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=z3_obj > 3)
-    assert not z3Helpers.varIsUsedInSolver(z3_obj,s.solver,ignore=[z3_obj > 3])
-
+    s.remove_constraints(z3_obj > 3)
+    s.addConstraint(z3_obj > 3)
+    assert not s.var_in_solver(z3_obj, ignore=[z3_obj > 3])
+    assert not s.var_in_solver(z3_obj, ignore=z3_obj > 3)
 
 def test_remove_constraints():
     b = ast_parse.parse(test10).body

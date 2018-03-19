@@ -9,6 +9,8 @@ class Real:
     """
     Define a Real
     """
+
+    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', 'state', '__weakref__']
     
     def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
@@ -111,7 +113,8 @@ class Real:
         # Add the constraints
 
         # If we're not in the solver, we can play some tricks to make things faster
-        if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        #if not pyState.z3Helpers.varIsUsedInSolver(self.getZ3Object(),self.state.solver):
+        if not self.state.var_in_solver(self.getZ3Object()):
 
             # If we're adding static, don't clutter up the solve
             if type(var) in [float, int]:
@@ -175,19 +178,11 @@ class Real:
         if type(var) not in [Real, float]:
             return False
 
-        # Ask the solver
-        s = self.state.copy()
-
         if type(var) is Real:
-            s.addConstraint(self.getZ3Object() == var.getZ3Object())
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var.getZ3Object()])
+
         else:
-            s.addConstraint(self.getZ3Object() == var)
-
-        if s.isSat():
-            return True
-
-        return False
-
+            return self.state.isSat(extra_constraints=[self.getZ3Object() == var])
 
 
 # Circular importing problem. Don't hate :-)

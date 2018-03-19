@@ -7,8 +7,10 @@ import enforce
 from .pyPath import Path
 from .pyPathGroup import PathGroup
 
-@enforce.runtime_validation
+#@enforce.runtime_validation
 class Factory:
+
+    __slots__ = ['__project','__weakref__']
 
     def __init__(self, project):
         self._project = project
@@ -26,9 +28,9 @@ class Factory:
         # Return the new path
         return Path(body,source=source)
 
-    def path_group(self) -> PathGroup:
+    def path_group(self, *args, **kwargs) -> PathGroup:
         """pySym.pyPathGroup.PathGroup: Basic PathGroup object for this project."""
-        return PathGroup(self.path())
+        return PathGroup(self.path(), *args, **kwargs)
 
     ##############
     # Properties #

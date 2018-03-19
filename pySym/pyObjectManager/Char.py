@@ -13,6 +13,9 @@ class Char:
     Define a Char (Character)
     """
 
+    __slots__ = ['_clone', 'uuid', 'state', 'count', 'varName', 'ctx',
+                 'variable', '__weakref__']
+
     def __init__(self,varName,ctx,count=None,variable=None,state=None,increment=False,uuid=None,clone=None):
         assert type(varName) is str, "Unexpected varName type of {}".format(type(varName))
         assert type(ctx) is int, "Unexpected ctx type of {}".format(type(ctx))
@@ -48,13 +51,13 @@ class Char:
 
         # If we're static, we don't need the bounds
         if self.isStatic():
-            if bounds in self.state.solver.assertions():
-                self.state.remove_constraints(bounds)
-
+            #if bounds in self.state.solver.assertions():
+            self.state.remove_constraints(bounds)
             return
 
         # If we don't already have those added, add them
         if bounds not in self.state.solver.assertions():
+            # We're ignoring these for the purpose of checking if the variable is in the solver. Sorta emulating a different var type.
             self.state.addConstraint(bounds)
 
 
@@ -228,7 +231,8 @@ class Char:
         """bool: Returns True if this Char has no external constraints applied to it. False otherwise."""
         
         # Consider it unconstrained if the only constraints are possibly the base ones that we have for Char
-        return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver,ignore=self.__z3_bounds_constraint())
+        #return not z3Helpers.varIsUsedInSolver(var=self.getZ3Object(),solver=self.state.solver,ignore=self.__z3_bounds_constraint())
+        return not self.state.var_in_solver(self.getZ3Object(),ignore=self.__z3_bounds_constraint())
 
     @property
     @decorators.as_clone_property

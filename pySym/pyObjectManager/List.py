@@ -12,6 +12,8 @@ class List:
     Define a List
     """
 
+    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__']
+
     def __init__(self,varName,ctx,count=None,variables=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
         assert type(ctx) is int

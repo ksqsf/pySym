@@ -16,6 +16,8 @@ class Ctx:
     Define a Ctx Object
     """
 
+    __slots__ = ['ctx', 'variables', 'state', '__weakref__']
+
     def __init__(self,ctx,variables=None):
         assert type(ctx) is int, "Unexpected ctx type of {}".format(type(ctx))
         
@@ -138,3 +140,5 @@ class Ctx:
             logger.error(err)
             raise Exception(err)
         
+    def __copy__(self):
+        return self.copy()

@@ -31,7 +31,7 @@ if "PYSYM_NO_Z3" not in os.environ:
 
 setup(
     name='pySym',
-    version='0.0.1',
+    version='0.0.2',
     description='Symbolic execution of python source.',
     long_description=long_description,
     # The project's main homepage.

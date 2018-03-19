@@ -12,5 +12,9 @@ def handle(state,call,size=ast.Num(Z3_DEFAULT_BITVEC_SIZE),ctx=None):
     assert type(size) is ast.Num, "Unknown size for BVS of type {}".format(type(size))
 
     bvs = state.resolveObject(ast.Name('temp',0),ctx=1,varType=BitVec,kwargs={'size': size.n})
-    
-    return bvs
+    assert len(bvs) == 1
+
+    bvs = bvs[0]
+    bvs.increment()
+
+    return [bvs.copy()]

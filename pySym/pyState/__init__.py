@@ -1,7 +1,7 @@
 import z3, z3.z3util as z3util
 import ast
 import logging
-from copy import copy
+from copy import copy, deepcopy
 import random
 import os.path
 import importlib
@@ -16,7 +16,10 @@ from ..pyObjectManager.List import List
 from ..pyObjectManager.Ctx import Ctx
 from ..pyObjectManager.String import String
 from ..pyObjectManager.Char import Char
+#from pyCoW import CoW
 
+# Override z3 __copy__ so i can just use "copy()"
+z3.z3.Solver.__copy__ = lambda self: self.translate(self.ctx)
 
 # The current directory for running pySym
 SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
@@ -37,6 +40,9 @@ for t in ['If','While','Compare']:
 
 # Create small class for keeping track of return values
 class ReturnObject:
+
+    __slots__ = ['retID', 'state']
+
     def __init__(self,retID,state=None):
         """Initialize a pySym.pyState.ReturnObject instance
     
@@ -233,7 +239,7 @@ def get_all(f,rs=[]):
     [x, y, a, b]
     """
     if __debug__:
-        assert z3util.is_expr(f)
+        assert z3util.is_expr(f), "Unexpected non-expression of type {}".format(type(f))
 
     if z3util.is_const(f):
         return z3util.vset(rs + [f],str)
@@ -283,25 +289,30 @@ def hasRealComponent(expr):
     return max([False if type(x) not in [z3.ArithRef, z3.RatNumRef] else x.is_real() for x in get_all(expr)])
 
 
-class State():
+class State:
     """
     Defines the state of execution at any given point.
     """
 
-    def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None):
+    __slots__ = [
+            'path', 'ctx', 'objectManager', 'solver', '__vars_in_solver',
+            'functions', 'simFunctions', 'retVar', 'callStack', 'backtrace',
+            'retID', 'loop', 'maxRetID', 'maxCtx'
+            ]
+
+    def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None,vars_in_solver=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
+        (optional) vars_in_solver = dict of list of variable strings that are in the solver. Do not set this manually.
         """
  
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
-        #self.solver = z3.Solver() if solver is None else solver
-        #self.solver = z3.Then("simplify","solve-eqs","smt").solver() if solver is None else solver
-        #self.solver = z3.OrElse(z3.Then("simplify","solve-eqs","smt","fail-if-undecided"),z3.Then("simplify","solve-eqs","nlsat")).solver() if solver is None else solver
-        #self.solver = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver() if solver is None else solver
         self.solver = self.__new_solver() if solver is None else solver
+        #self.solver.set("timeout", 60000) # 1 minute (in miliseconds) timeout for the solver
+        self._vars_in_solver = vars_in_solver if vars_in_solver is not None else dict()
         self.functions = {} if functions is None else functions
         self.simFunctions = {} if simFunctions is None else simFunctions
         self.retVar = self.getVar('ret',ctx=1,varType=Int) if retVar is None else retVar
@@ -321,7 +332,7 @@ class State():
 
     def __new_solver(self):
         """Generates a new solver."""
-        return z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver()
+        return z3.OrElse('smt', z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver()
 
 
     def setVar(self,varName,var,ctx=None):
@@ -660,7 +671,6 @@ class State():
         Save the call stack with given variables
         Defaults to current variables if none given
         """
-
         self.callStack.append({
             'path': path if path is not None else self.path,
             'ctx': ctx if ctx is not None else self.ctx,
@@ -1227,8 +1237,25 @@ class State():
             return 0
 
         self.solver = self.__new_solver()
-        #self.solver.add(*new_constraints)
         self.addConstraint(*new_constraints)
+
+        # Remove the vars from our set tracker
+        for constraint in constraints:
+            if type(constraint) is bool:
+                continue
+
+            for var in set(get_all(constraint)):
+                if type(var) not in [z3.z3.IntNumRef, z3.z3.BitVecNumRef]:
+                    var = str(var)
+
+                    if var in self._vars_in_solver:
+                        try:
+                            self._vars_in_solver[var].remove(str(constraint))
+                            if self._vars_in_solver[var] == set():
+                                self._vars_in_solver.pop(var)
+                        except KeyError:
+                            # Ignoring attempt to remove constraint that isn't tracked.
+                            pass
 
         return ret_code
 
@@ -1256,12 +1283,30 @@ class State():
 
         # Add our new constraint to the solver
         self.solver.add(*constraints)
-        
 
-    def isSat(self):
+        # Record that they are now in the solver somewhere
+        for constraint in constraints:
+
+            if type(constraint) is bool:
+                continue
+
+            for var in set(get_all(constraint)):
+
+                # Don't keep track of plain numbers. Only vars
+                if type(var) not in [z3.z3.IntNumRef, z3.z3.BitVecNumRef]:
+                    var = str(var)
+
+                    # Init the dict if need be
+                    if var not in self._vars_in_solver:
+                        self._vars_in_solver[var] = set()
+                        
+                    self._vars_in_solver[var].add(str(constraint))
+
+
+    def isSat(self,extra_constraints=None):
         """
         Input:
-            Nothing
+            extra_constraints: Optional list of extra constraints to temporarily add before checking for sat.
         Action:
             Checks if the current state is satisfiable
             Note, it uses the local and global vars to create the solver on the fly
@@ -1269,13 +1314,41 @@ class State():
             Boolean True or False
         """
 
-        # Get and clear our solver
-        s = self.solver
+        solver = self.solver
 
-        # Changing how I manage constraints. They're all going into the solver directly now
-        # Just need to ask for updated SAT
-        return s.check() == z3.sat
+        if extra_constraints == None:
+            return solver.check() == z3.sat
+
+        if type(extra_constraints) not in [list, tuple]:
+            extra_constraints = [extra_constraints]
+
+        #
+        # Deal with extra constraints
+        #
+
+        # Determine if we can push and pop
+        try:
+            solver.push()
+            pushed = True
+        except:
+            pushed = False
+
+        # Prefer push/pop
+        if pushed:
+            # Add in the constraints
+            solver.add(*extra_constraints)
+            ret = solver.check() == z3.sat
+            # Pop off the constraints
+            solver.pop()
+            return ret
+
+        # Use translate method
+        else:
+            solver = solver.translate(solver.ctx)
+            solver.add(*extra_constraints)
+            return solver.check() == z3.sat
         
+
     def printVars(self):
         """
         Input:
@@ -1367,19 +1440,23 @@ class State():
         """
         # TODO: Optimize this... When slicing lists and needing, say, 256 values, this gets VERY slow... Silly..
 
-
         # Grab appropriate ctx
         ctx = ctx if ctx is not None else self.ctx
 
         assert type(n) is int
 
+        """
         # Doing this on a copy of the state since we're modifying it
         s = self.copy()
+        #s = self
 
         varZ3Object = s.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
         out = []
 
         for i in range(n):
+            print("assertions",s.solver.assertions())
+            #if len(s.solver.assertions()) == 2 and str(s.solver.assertions()[1]) == '010pyStateStringTemp[0]@1 != 1':
+            #    assert False
             try:
                 myInt = s.any_int(var,ctx=ctx)
             except:
@@ -1391,6 +1468,67 @@ class State():
             
             out.append(myInt)
             s.addConstraint(varZ3Object != myInt)
+            #solver.add(varZ3Object != myInt)
+
+        print("Returning",out)
+        return out
+
+        """
+
+        try:
+            solver = self.solver
+            solver.push()
+            pushed = True
+        except:
+            pushed = False
+
+        s = self
+        varZ3Object = s.getVar(var,ctx=ctx).getZ3Object() if type(var) is str else var.getZ3Object()
+        out = []
+
+        #
+        # Push method preferred
+        #
+        if pushed:
+            logger.debug("any_n_int: Using push/pop method.")
+
+            for i in range(n):
+
+                try:
+                    myInt = s.any_int(var,ctx=ctx)
+                except:
+                    #Looks like we're done
+                    break
+
+                if myInt == None:
+                    break
+                
+                out.append(myInt)
+                solver.add(varZ3Object != myInt)
+
+            solver.pop()
+
+        #
+        # Fall back to other method TODO: Update this to use translate instead.
+        # 
+
+        else:
+            logger.debug("any_n_int: Using legacy method.")
+
+            extra_constraints = []
+
+            for i in range(n):
+                try:
+                    myInt = s.any_int(var,ctx=ctx,extra_constraints=extra_constraints)
+                except:
+                    #Looks like we're done
+                    break
+
+                if myInt == None:
+                    break
+                
+                out.append(myInt)
+                extra_constraints.append(varZ3Object != myInt)
 
         return out
 
@@ -1566,14 +1704,29 @@ class State():
             if type(extra_constraints) not in [tuple, list]:
                 extra_constraints = (extra_constraints,)
 
-            solver = self.solver.translate(self.solver.ctx)
+            # Try push/pop first
+            try:
+                solver = self.solver
+                solver.push()
+                pushed = True
+
+            # Fall back to translate
+            except:
+                solver = self.solver.translate(self.solver.ctx)
+                pushed = False
+
             solver.add(*extra_constraints)
 
             # Make sure this new situation is possible
             if solver.check() != z3.sat:
+                if pushed:
+                    solver.pop()
                 return None
 
             m = solver.model()
+
+            if pushed:
+                solver.pop()
         
         else:
             m = self.solver.model()
@@ -1685,8 +1838,30 @@ class State():
         # Made it! Return it as a real/float
         return float(eval(value.as_string()))
 
+    def var_in_solver(self, var, ignore=None):
+        """Checks if the variable given is in the z3 solver."""
+        assert z3Helpers.isZ3Object(var), "Expected var to be z3 object, got type {} instead".format(type(var))
+        var = str(var)
+        
+        # No constraints for this var
+        if var not in self._vars_in_solver or self._vars_in_solver[var] is set():
+            return False
 
- 
+        # If we're ignoring, do the filter
+        if ignore is not None:
+
+            # Standardize ignore
+            if type(ignore) not in [list, tuple]:
+                ignore = [ignore]
+
+            ignore = [str(i) for i in ignore]
+            constraints = set([constraint for constraint in self._vars_in_solver[var] if constraint not in ignore])
+
+        else:
+            constraints = self._vars_in_solver[var]
+
+        return constraints != set()
+
     def copy(self):
         """
         Return a copy of the current state
@@ -1698,13 +1873,11 @@ class State():
         #solverCopy = z3.OrElse(z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","nlsat"),ctx=z3.Context()).solver()
         #solverCopy.add(self.solver.assertions())
 
-
-        #solverCopy = self.solver.translate(z3.Context())
-        #print(solverCopy)
-        solverCopy = self.solver.translate(self.solver.ctx)
+        #solverCopy = self.solver.translate(self.solver.ctx)
         
         newState = State(
-            solver=solverCopy,
+            #solver=solverCopy,
+            solver=copy(self.solver),
             ctx=self.ctx,
             functions=self.functions,
             simFunctions=self.simFunctions,
@@ -1717,11 +1890,35 @@ class State():
             maxRetID=self.maxRetID,
             maxCtx=self.maxCtx,
             objectManager=self.objectManager.copy(),
+            #vars_in_solver=deepcopy(self._vars_in_solver),
+            vars_in_solver={key:copy(self._vars_in_solver[key]) for key in self._vars_in_solver.keys()}
             )
         
+        # Attempted CoW integration.. Not working right.
+        # newState = super().__copy__()
+
         # Make sure to give the objectManager the new state
         newState.objectManager.setState(newState)
-        
+
         return newState
+
+    def __copy__(self):
+        return self.copy()
+
+    ##############
+    # Properties #
+    ##############
+
+    @property
+    def _vars_in_solver(self):
+        """dict: Dict of sets of string representations of all the vars in the solver."""
+        return self.__vars_in_solver
+
+    @_vars_in_solver.setter
+    def _vars_in_solver(self, vars):
+        assert issubclass(type(vars), dict), "Unhandled _vars_in_solver type of {}".format(type(vars))
+
+        self.__vars_in_solver = vars
         
 from . import BinOp, Pass, While, Break, Subscript, For, ListComp, UnaryOp, GeneratorExp, Assign, AugAssign, FunctionDef, Expr, Return, If, Assert
+from . import z3Helpers
