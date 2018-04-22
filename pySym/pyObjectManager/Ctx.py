@@ -1,3 +1,5 @@
+
+from copy import copy
 import z3
 import ast
 import logging
@@ -16,18 +18,23 @@ class Ctx:
     Define a Ctx Object
     """
 
-    __slots__ = ['ctx', 'variables', 'state', '__weakref__']
+    __slots__ = ['ctx', 'variables', 'variables_need_copy', 'state', '__weakref__']
 
     def __init__(self,ctx,variables=None):
         assert type(ctx) is int, "Unexpected ctx type of {}".format(type(ctx))
         
         self.ctx = ctx
         self.variables = {} if variables is None else variables
+        self.variables_need_copy = {key: True for key in self.variables.keys()} # JIT Copy
 
     def copy(self):
+        self.variables_need_copy = {key: True for key in self.variables.keys()} # JIT Copy
+
         return Ctx(
             ctx = self.ctx,
-            variables = {key:self.variables[key].copy() for key in self.variables},
+            #variables = {key:self.variables[key].copy() for key in self.variables},
+            #variables = {key:value for key, value in self.variables.items()} # JIT copy
+            variables = self.variables
         )
 
     def setState(self,state):
@@ -37,13 +44,39 @@ class Ctx:
         assert type(state) == pyState.State
 
         self.state = state
-        for var in self.variables:
-            self.variables[var].setState(state)
+        # Pass state set to variables on JIT copy, not immediately
+
+        #for var in self.variables:
+        #    self.variables[var].setState(state)
 
 
     def __iter__(self): return iter(self.variables)
+    #def __iter__(self):
+    #    for key in self.variables.keys():
+    #        self.__ensure_copy(key)
+    #        yield key
 
-    def items(self): return self.variables.items()
+    def __ensure_copy(self, key):
+        """Perform JIT copy for the given key."""
+        # If this is the first touch, create a new dictionary object for us
+        if not any(self.variables_need_copy[key] is False for key in self.variables_need_copy):
+            self.variables = {key:value for key, value in self.variables.items()}
+
+        # If this is a first time set
+        if key not in self.variables_need_copy:
+            self.variables_need_copy[key] = True
+
+        # If we are returning to an existing key
+        elif self.variables_need_copy[key]:
+            self.variables[key] = copy(self.variables[key])
+            self.variables[key].setState(self.state) # Pass it the correct state...
+            self.variables_need_copy[key] = False
+
+    #def items(self): return self.variables.items()
+    def items(self): 
+        for key in self.variables.keys():
+            self.__ensure_copy(key)
+        return self.variables.items()
 
     def index(self,elm):
         """
@@ -58,6 +91,7 @@ class Ctx:
         """
         We want to be able to do "list[x]", so we define this.
         """
+        self.__ensure_copy(index)
         return self.variables[index]
 
     def __setitem__(self,key,value):
@@ -66,6 +100,8 @@ class Ctx:
         """
         # Attempt to return variable
         assert type(value) in [Int, Real, BitVec, List, String, Char]
+
+        self.__ensure_copy(key)
         
         # Things get weird if our variable names don't match up...
         #assert key == value.varName
