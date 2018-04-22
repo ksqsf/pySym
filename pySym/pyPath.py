@@ -42,11 +42,11 @@ class Path():
         pathList = []
 
         for state in stateList:
-            # New path
-            path = self.copy()
+            # New path. State should already be copied via state.step above.
+            path = self.copy(state=state)
 
             # New state
-            path.state = state
+            #path.state = state
 
             pathList.append(path)
 
@@ -70,10 +70,10 @@ class Path():
         
         print(table)
     
-    def copy(self):
+    def copy(self, state=None):
         """
         Input:
-            Nothing
+            (optional) state == pyState object to use instead of copying the current state.
         Action:
             Create a copy of the current Path object
         Returns:
@@ -82,7 +82,7 @@ class Path():
         # TODO: Don't think i need to copy state in this...
         return Path(
                 backtrace=copy(self.backtrace),
-                state=self.state.copy(),
+                state=self.state.copy() if state is None else state,
                 source=copy(self.source),
                 )
 

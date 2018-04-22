@@ -18,7 +18,7 @@ here = path.abspath(path.dirname(__file__))
 #    long_description = f.read()
 long_description = "See website for more info."
 
-dev_tools = ['pytest','python-coveralls','coverage','pytest-cov','pytest-xdist','ipython']
+dev_tools = ['pytest','python-coveralls','coverage','pytest-cov','pytest-xdist','ipython', 'gprof2dot']
 
 #
 # Install z3 or no?
