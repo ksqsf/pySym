@@ -12,7 +12,7 @@ class List:
     Define a List
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__']
+    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__', 'variables_need_copy']
 
     def __init__(self,varName,ctx,count=None,variables=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
@@ -22,6 +22,7 @@ class List:
         self.varName = varName
         self.ctx = ctx
         self.variables = [] if variables is None else variables
+        self.variables_need_copy = True
         self.uuid = os.urandom(32) if uuid is None else uuid
 
         if state is not None:
@@ -32,11 +33,15 @@ class List:
 
 
     def copy(self):
+        # Reset my copy requirements
+        self.variables_need_copy = True
+
         return List(
             varName = self.varName,
             ctx = self.ctx,
             count = self.count,
-            variables = [x.copy() for x in self.variables],
+            #variables = [x.copy() for x in self.variables],
+            variables = self.variables,
             state = self.state if hasattr(self,"state") else None,
             uuid = self.uuid
         )
@@ -47,11 +52,21 @@ class List:
     def __copy__(self):
         return self.copy()
 
+    def __ensure_copy(self):
+        """Small stub to ensure that we make a copy if we need to."""
+        # If we are in need of copy, do so
+        if self.variables_need_copy == True:
+            self.variables = [var.copy() for var in self.variables]
+            self.variables_need_copy = False
+
+
     def setState(self,state):
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
         """
         assert type(state) == pyState.State
+
+        self.__ensure_copy()
 
         self.state = state
         for var in self.variables:
@@ -70,7 +85,8 @@ class List:
             
             # Just copy it over
             for elm in otherList:
-                self.variables.append(elm.copy())        
+                #self.variables.append(elm.copy())        
+                self.append(elm.copy())        
         
         else:
             raise Exception("Not implemented")
@@ -80,6 +96,8 @@ class List:
         self.count += 1
         # reset variable list if we're incrementing our count
         self.variables = []
+
+        # Reset my copy requirements
         self.uuid = os.urandom(32)
 
         
@@ -94,6 +112,8 @@ class List:
             Nothing
         """
         # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
+
+        self.__ensure_copy()
 
         if type(var) is Int or var is Int:
             logger.debug("append: adding Int")
@@ -130,11 +150,14 @@ class List:
             logger.error(err)
             raise Exception(err)
 
+
     def insert(self, index, object, kwargs=None):
         """Emulate the list insert method, just on this object."""
 
         assert type(index) in [int, Int], "Unexpected index of type {}".format(type(index))
         assert type(object) in [Int, Real, Char, BitVec, List, String], "Unexpected type for object of {}".format(type(object))
+
+        self.__ensure_copy()
 
         # Use concrete int
         if type(index) is Int:
@@ -201,15 +224,16 @@ class List:
         """
         We want to be able to do "list[x]", so we define this.
         """
+        self.__ensure_copy()
+
         if type(index) is slice:
             # Build a new List object containing the sliced stuff
             newList = List("temp",ctx=self.ctx,state=self.state)
             oldList = self.variables[index]
             for var in oldList:
-                newList.append(var)
+                newList.append(var.copy())
             return newList
             
-
         return self.variables[index]
 
     def __setitem__(self,key,value):
@@ -219,6 +243,8 @@ class List:
         # Attempt to return variable
         assert type(key) is int
         assert type(value) in [Int, Real, BitVec, List, String]
+
+        self.__ensure_copy()
 
         # Get that index's current count
         count = self.variables[key].count + 1
@@ -249,7 +275,9 @@ class List:
             raise Exception(err)
 
     def pop(self,i):
-        return self.variables.pop(i)
+        self.__ensure_copy()
+        var = self.variables.pop(i)
+        return var
 
     def mustBe(self,var):
         """
@@ -293,7 +321,9 @@ class List:
         # Build a new List to return
         new_list = List("tmpListAddList", ctx=self.ctx, state=self.state, increment=True)
         # Just set the variables directly
-        new_list.variables = self.variables + other.variables
+        #new_list.variables = self.variables + other.variables
+        for var in self.variables + other.variables:
+            new_list.append(var.copy())
 
         return new_list
 
@@ -318,6 +348,7 @@ class List:
 
         return True
 
+from copy import copy
 # Circular importing problem. Don't hate :-)
 from .Int import Int
 from .Real import Real
