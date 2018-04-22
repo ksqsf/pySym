@@ -22,7 +22,7 @@ class List:
         self.varName = varName
         self.ctx = ctx
         self.variables = [] if variables is None else variables
-        self.variables_need_copy = True
+        self.variables_need_copy = [True] * len(self.variables)
         self.uuid = os.urandom(32) if uuid is None else uuid
 
         if state is not None:
@@ -34,7 +34,7 @@ class List:
 
     def copy(self):
         # Reset my copy requirements
-        self.variables_need_copy = True
+        self.variables_need_copy = [True] * len(self.variables)
 
         return List(
             varName = self.varName,
@@ -52,12 +52,28 @@ class List:
     def __copy__(self):
         return self.copy()
 
-    def __ensure_copy(self):
-        """Small stub to ensure that we make a copy if we need to."""
-        # If we are in need of copy, do so
-        if self.variables_need_copy == True:
-            self.variables = [var.copy() for var in self.variables]
-            self.variables_need_copy = False
+    def __ensure_copy(self, index):
+        """Small stub to ensure that we make a copy if we need to.
+        
+        index == Index to ensure will be a copy. If value is None, then perform full copy of list, not just index.
+        """
+        # If we're copying it all
+        if index is None:
+            self.variables = [copy(x) for x in self.variables]
+            for var in self.variables:
+                var.setState(self.state)
+            self.variables_need_copy = [False] * len(self.variables)
+
+        # If this is the first touch, create a new list object for us
+        else:
+            if not any(val is False for val in self.variables_need_copy):
+                self.variables = list(self.variables)
+
+            # If we are in need of copy, do so
+            if self.variables_need_copy[index] == True:
+                self.variables[index] = copy(self.variables[index])
+                self.variables[index].setState(self.state) # Pass it the correct state...
+                self.variables_need_copy[index] = False
 
 
     def setState(self,state):
@@ -66,11 +82,11 @@ class List:
         """
         assert type(state) == pyState.State
 
-        self.__ensure_copy()
+        #self.__ensure_copy(None)
 
         self.state = state
-        for var in self.variables:
-            var.setState(state)
+        #for var in self.variables:
+        #    var.setState(state)
 
     def setTo(self,otherList,clear=False):
         """
@@ -86,7 +102,8 @@ class List:
             # Just copy it over
             for elm in otherList:
                 #self.variables.append(elm.copy())        
-                self.append(elm.copy())        
+                #self.append(elm.copy())        
+                self.append(elm)
         
         else:
             raise Exception("Not implemented")
@@ -96,6 +113,7 @@ class List:
         self.count += 1
         # reset variable list if we're incrementing our count
         self.variables = []
+        self.variables_need_copy = []
 
         # Reset my copy requirements
         self.uuid = os.urandom(32)
@@ -113,42 +131,44 @@ class List:
         """
         # Variable names in list are "<verson><varName>[<index>]". This is in addition to base naming conventions 
 
-        self.__ensure_copy()
+        self.__ensure_copy(None)
 
         if type(var) is Int or var is Int:
             logger.debug("append: adding Int")
             self.variables.append(Int('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state,**kwargs if kwargs is not None else {}))
             # We're being given an object. Let's make sure we link it to Z3 appropriately
             if type(var) is Int:
-                self.variables[-1].setTo(var)
+                self.variables[-1].setTo(copy(var))
 
         elif type(var) is Real or var is Real:
             logger.debug("append: adding Real")
             self.variables.append(Real('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state))
             if type(var) is Real:
-                self.variables[-1].setTo(var)
+                self.variables[-1].setTo(copy(var))
 
         elif type(var) is BitVec or var is BitVec:
             logger.debug("append: adding BitVec")
             kwargs = {'size': var.size} if kwargs is None else kwargs
             self.variables.append(BitVec('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state,**kwargs if kwargs is not None else {}))
             if type(var) is BitVec:
-                self.variables[-1].setTo(var)
+                self.variables[-1].setTo(copy(var))
         
         elif type(var) is Char or var is Char:
             logger.debug("append: adding Char")
             self.variables.append(Char('{2}{0}[{1}]'.format(self.varName,len(self.variables),self.count),ctx=self.ctx,state=self.state))
             if type(var) is Char:
-                self.variables[-1].setTo(var)
+                self.variables[-1].setTo(copy(var))
 
         elif type(var) in [List, String]:
             logger.debug("append: adding {0}".format(type(var)))
-            self.variables.append(var)
+            self.variables.append(copy(var))
 
         else:
             err = "append: Don't know how to append/resolve object '{0}'".format(type(var))
             logger.error(err)
             raise Exception(err)
+
+        self.variables_need_copy.append(False)
 
 
     def insert(self, index, object, kwargs=None):
@@ -157,7 +177,7 @@ class List:
         assert type(index) in [int, Int], "Unexpected index of type {}".format(type(index))
         assert type(object) in [Int, Real, Char, BitVec, List, String], "Unexpected type for object of {}".format(type(object))
 
-        self.__ensure_copy()
+        self.__ensure_copy(None)
 
         # Use concrete int
         if type(index) is Int:
@@ -197,6 +217,8 @@ class List:
             logger.error(err)
             raise Exception(err)
 
+        self.variables_need_copy.insert(index, True)
+
 
     def _isSame(self):
         """
@@ -224,7 +246,7 @@ class List:
         """
         We want to be able to do "list[x]", so we define this.
         """
-        self.__ensure_copy()
+        self.__ensure_copy(index)
 
         if type(index) is slice:
             # Build a new List object containing the sliced stuff
@@ -244,7 +266,7 @@ class List:
         assert type(key) is int
         assert type(value) in [Int, Real, BitVec, List, String]
 
-        self.__ensure_copy()
+        self.__ensure_copy(key)
 
         # Get that index's current count
         count = self.variables[key].count + 1
@@ -275,7 +297,7 @@ class List:
             raise Exception(err)
 
     def pop(self,i):
-        self.__ensure_copy()
+        self.__ensure_copy(i)
         var = self.variables.pop(i)
         return var
 
@@ -300,6 +322,8 @@ class List:
         """
         if type(var) is not List:
             return False
+
+        self.__ensure_copy(None)
         
         # If not the same length, we can't be the same
         if len(self) != len(var):
@@ -313,9 +337,11 @@ class List:
         return True
 
     def __str__(self):
+        self.__ensure_copy(None)
         return str(self.state.any_list(self))
 
     def __add__(self, other):
+        self.__ensure_copy(None)
         assert type(other) is List, "Unsupported add of List and {}".format(type(other))
 
         # Build a new List to return
@@ -323,7 +349,7 @@ class List:
         # Just set the variables directly
         #new_list.variables = self.variables + other.variables
         for var in self.variables + other.variables:
-            new_list.append(var.copy())
+            new_list.append(var)
 
         return new_list
 
@@ -334,6 +360,7 @@ class List:
         """
         Return a possible value. You probably want to check isStatic before calling this.
         """
+        self.__ensure_copy(None)
         return self.state.any_list(self)
 
     def isStatic(self):
@@ -341,6 +368,7 @@ class List:
         Checks if this list can only have one possible value overall (including all elements).
         Returns True/False
         """
+        self.__ensure_copy(None)
         # Check each of my items for static-ness
         for var in self:
             if not var.isStatic():
