@@ -132,7 +132,7 @@ TODO:
  - Change all ObjectManager variables to use weakref.ref for state instead of actual handles.
    - [Done] BitVec
    - [DONE] Int
-   - Char
+   - [DONE] Char
    - String
    - [Done] List
    - Ctx

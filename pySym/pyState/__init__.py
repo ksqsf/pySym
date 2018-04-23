@@ -331,6 +331,10 @@ class State:
         if backtrace is None:
             self._init_simFunctions()
 
+        # Make sure the state sticks around long enough to be used.
+        global _temporary_refs
+        _temporary_refs.add(self)
+
     def __new_solver(self):
         """Generates a new solver."""
         return z3.OrElse('smt', z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","smt","fail-if-undecided"),z3.Then("simplify","propagate-ineqs","propagate-values","unit-subsume-simplify","qfnra-nlsat")).solver()
@@ -347,15 +351,8 @@ class State:
         """
         Convinence function that adds current ctx to getVar request
         """
-        global _temporary_refs
         ctx = self.ctx if ctx is None else ctx
-        obj = self.objectManager.getVar(varName,ctx,varType,kwargs,softFail=softFail)
-
-        # Make sure python doesn't kill these prematurely
-        if obj is not None:
-            _temporary_refs.add(obj.state)
-
-        return obj
+        return self.objectManager.getVar(varName,ctx,varType,kwargs,softFail=softFail)
 
     def recursiveCopy(self,var,ctx=None,varName=None):
         """
@@ -840,6 +837,7 @@ class State:
                 funcName = funcName.__class__.__name__ + "." + call.func.attr
 
             except Exception as e:
+                # TODO: Check exception type.. Don't just catch everything!
                 funcName = call.func.value.id + "." + call.func.attr
                 logger.debug("resolveCall: Resolved call name to '%s'", funcName)
 

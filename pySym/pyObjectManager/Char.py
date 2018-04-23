@@ -1,4 +1,5 @@
 import z3
+import weakref
 import ast
 import logging
 from .. import pyState
@@ -13,7 +14,7 @@ class Char:
     Define a Char (Character)
     """
 
-    __slots__ = ['_clone', 'uuid', 'state', 'count', 'varName', 'ctx',
+    __slots__ = ['_clone', 'uuid', '__state', 'count', 'varName', 'ctx',
                  'variable', '__weakref__', 'parent']
 
     def __init__(self,varName,ctx,count=None,variable=None,state=None,increment=False,uuid=None,clone=None):
@@ -23,21 +24,23 @@ class Char:
 
         self._clone = clone
         self.uuid = os.urandom(32) if uuid is None else uuid
-        self.state = state
         self.count = 0 if count is None else count
         self.varName = varName
         self.ctx = ctx
-        self.variable = self.__make_variable() if variable is None else variable
+        self.variable = self.__make_variable(state) if variable is None else variable
         self.parent = None
 
-        if state is not None:
-            self.setState(state)
+        self.state = state
+        #if state is not None:
+        #    self.setState(state)
 
         if increment:
             self.increment()
 
-    def __make_variable(self):
-        return Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,state=self.state)
+    def __make_variable(self, state=None):
+        if state == None:
+            state = self.state
+        return Int('{1}{0}'.format(self.varName,self.count),ctx=self.ctx,state=state)
 
     def __z3_bounds_constraint(self):
         """Returns the z3 bounds constraint for use in adding and removing it."""
@@ -135,9 +138,16 @@ class Char:
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
         """
-        assert type(state) == pyState.State
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
 
-        self.state = state
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        # It's weakref or None. Set it
+        else:
+            self.__state = state
+
         self.variable.setState(state)
         
         if self._clone is not None:
@@ -240,6 +250,21 @@ class Char:
     def is_constrained(self):
         """bool: Opposite of is_unconstrained."""
         return not self.is_unconstrained
+
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
+    @state.setter
+    def state(self, state):
+        # TODO: Move logic into here and remove setState method
+        self.setState(state)
 
 
 # Circular importing problem. Don't hate :-)
