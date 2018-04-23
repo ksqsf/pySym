@@ -73,7 +73,7 @@ class Int:
         """
         assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
 
-        # Turn it into a weakproxy
+        # Turn it into a weakref
         if type(state) is pyState.State:
             self.__state = weakref.ref(state)
 

@@ -133,7 +133,7 @@ TODO:
    - [Done] BitVec
    - [DONE] Int
    - [DONE] Char
-   - String
+   - [DONE] String
    - [Done] List
    - Ctx
  - Review how I'm handling references elsewhere. Likely have other circular imports

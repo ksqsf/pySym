@@ -1,4 +1,5 @@
 import z3
+import weakref
 import ast
 import logging
 from .. import pyState
@@ -12,7 +13,7 @@ class String:
     Define a String
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__', 'parent']
+    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', '__state', '__weakref__', 'parent']
 
     def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None,length=None,increment=False,uuid=None):
         assert type(varName) is str
@@ -30,8 +31,9 @@ class String:
         if increment:
             self.increment()
 
-        if state is not None:
-            self.setState(state)
+        #if state is not None:
+        #    self.setState(state)
+        self.state = state
 
 
         if string is not None:
@@ -64,9 +66,16 @@ class String:
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
         """
-        assert type(state) == pyState.State
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
 
-        self.state = state
+        # Turn it into a weakref
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        # It's weakref or None. Set it
+        else:
+            self.__state = state
+
         for var in self.variables:
             var.setState(state)
 
@@ -280,6 +289,21 @@ class String:
         before this is called to ensure the value is not symbolic
         """
         return self.state.any_str(self)
+
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
+    @state.setter
+    def state(self, state):
+        # TODO: Move logic into here and remove setState method
+        self.setState(state)
 
 
 # Circular importing problem. Don't hate :-)
