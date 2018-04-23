@@ -26,6 +26,7 @@ SCRIPTDIR = os.path.dirname(os.path.abspath(__file__))
 
 logger = logging.getLogger("State")
 
+_temporary_refs = set()
 
 """
 def astCopy(self):
@@ -297,7 +298,7 @@ class State:
     __slots__ = [
             'path', 'ctx', 'objectManager', 'solver', '__vars_in_solver',
             'functions', 'simFunctions', 'retVar', 'callStack', 'backtrace',
-            'retID', 'loop', 'maxRetID', 'maxCtx', '__weakref__'
+            'retID', 'loop', 'maxRetID', 'maxCtx', '__weakref__',
             ]
 
     def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None,vars_in_solver=None):
@@ -306,7 +307,7 @@ class State:
         (optional) backtrace = list of asts that happened before the current one
         (optional) vars_in_solver = dict of list of variable strings that are in the solver. Do not set this manually.
         """
- 
+
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
@@ -346,9 +347,15 @@ class State:
         """
         Convinence function that adds current ctx to getVar request
         """
+        global _temporary_refs
         ctx = self.ctx if ctx is None else ctx
+        obj = self.objectManager.getVar(varName,ctx,varType,kwargs,softFail=softFail)
 
-        return self.objectManager.getVar(varName,ctx,varType,kwargs,softFail=softFail)
+        # Make sure python doesn't kill these prematurely
+        if obj is not None:
+            _temporary_refs.add(obj.state)
+
+        return obj
 
     def recursiveCopy(self,var,ctx=None,varName=None):
         """
@@ -431,6 +438,8 @@ class State:
         Note, this actually makes a copy/s and returns them. The initial path isn't modified.
         Returns: A list of paths or empty list if the path is done 
         """
+        global _temporary_refs
+
         # Adding sanity checks since we are not supposed to change during execution
         h = hash(self)
 
@@ -484,6 +493,10 @@ class State:
 
         # Assert we haven't changed
         assert h == hash(self)
+
+        # TODO: This will likely break if I implement multi-processing...
+        # Clean up any temporary references
+        _temporary_refs = set()
         
         # Return the paths
         return ret_states

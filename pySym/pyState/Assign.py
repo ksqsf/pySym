@@ -84,7 +84,7 @@ def _handleAssignList(target,listObject):
         # Set the new list
         parent[index] = listObject.copy()
 
-        target.state = target.state.copy()
+        target.setState(target.state.copy())
 
         target.state.path.pop(0)
 

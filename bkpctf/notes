@@ -131,5 +131,10 @@ TODO:
    - Try pop/push first for extra constraints. Fall back to duplicating the solver if we have tactics and cannot push/pop
  - Change all ObjectManager variables to use weakref.ref for state instead of actual handles.
    - [Done] BitVec
+   - [DONE] Int
+   - Char
+   - String
+   - [Done] List
+   - Ctx
  - Review how I'm handling references elsewhere. Likely have other circular imports
  - Change "setState" to simply be "state" setter property

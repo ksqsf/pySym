@@ -13,7 +13,7 @@ class List:
     Define a List
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__', 'variables_need_copy', 'parent']
+    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', '__state', '__weakref__', 'variables_need_copy', 'parent']
 
     def __init__(self,varName,ctx,count=None,variables=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
@@ -27,8 +27,9 @@ class List:
         self.uuid = os.urandom(32) if uuid is None else uuid
         self.parent = None
 
-        if state is not None:
-            self.setState(state)
+        self.state = state
+        #if state is not None:
+        #    self.setState(state)
 
         if increment:
             self.increment()
@@ -84,13 +85,14 @@ class List:
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
         """
-        assert type(state) == pyState.State
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
 
-        #self.__ensure_copy(None)
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
 
-        self.state = state
-        #for var in self.variables:
-        #    var.setState(state)
+        else:
+            self.__state = state
 
     def setTo(self,otherList,clear=False):
         """
@@ -381,6 +383,22 @@ class List:
                 return False
 
         return True
+
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
+    @state.setter
+    def state(self, state):
+        # TODO: Move logic into here and remove setState method
+        self.setState(state)
+
 
 from copy import copy
 # Circular importing problem. Don't hate :-)

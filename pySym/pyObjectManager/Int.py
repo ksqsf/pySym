@@ -1,3 +1,4 @@
+import weakref
 import z3
 import logging
 from .. import pyState
@@ -13,7 +14,7 @@ class Int:
     Define an Int
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', '_clone', 'state', '__weakref__', 'parent']
+    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', '_clone', '__state', '__weakref__', 'parent']
     
     def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False,uuid=None,clone=None):
         """
@@ -41,8 +42,9 @@ class Int:
         self._clone = clone
         self.parent = None
         
-        if state is not None:
-            self.setState(state)
+        self.state = state
+        #if state is not None:
+        #    self.setState(state)
 
         if increment:
             self.increment()
@@ -69,12 +71,18 @@ class Int:
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
         """
-        assert type(state) == pyState.State
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
 
-        self.state = state
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        # It's weakref or None. Set it
+        else:
+            self.__state = state
+
         if self._clone is not None:
             self._clone.setState(state)
-
 
     def increment(self):
         # If we're incrementing, remove our clone
@@ -277,6 +285,21 @@ class Int:
     def is_constrained(self):
         """bool: Opposite of is_unconstrained."""
         return not self.is_unconstrained
+
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
+    @state.setter
+    def state(self, state):
+        # TODO: Move logic into here and remove setState method
+        self.setState(state)
 
 from .BitVec import BitVec
 from .Char import Char
