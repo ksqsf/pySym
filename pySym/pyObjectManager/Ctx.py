@@ -1,5 +1,6 @@
 
 from copy import copy
+import weakref
 import z3
 import ast
 import logging
@@ -68,8 +69,10 @@ class Ctx:
 
         # If we are returning to an existing key
         elif self.variables_need_copy[key]:
+            #print("CTX {} Copy".format(self.ctx))
             self.variables[key] = copy(self.variables[key])
             self.variables[key].setState(self.state) # Pass it the correct state...
+            self.variables[key].parent = weakref.proxy(self)
             self.variables_need_copy[key] = False
 
     #def items(self): return self.variables.items()
@@ -175,6 +178,8 @@ class Ctx:
             err = "__setitem__: Don't know how to set object '{0}'".format(value)
             logger.error(err)
             raise Exception(err)
+
+        self.variables_need_copy[key] = True
         
     def __copy__(self):
         return self.copy()

@@ -128,9 +128,34 @@ class ObjectManager:
         """
         Returns the parent object for any given object by recursively searching.
         """
+
+        """
+        
+        # Recursively resolve up the chain for JIT copy
+        parents = [key, key.parent]
+        while not isinstance(parents[-1], Ctx):
+            parents.append[parents[-1].parent]
+
+        # Now that we know the parents, start at the top and ensure JIT copy has happened for each step
+        parents = parents[::-1]
+        for i in range(len(parents)-1):
+            parent = parents[i]
+            child = parents[i+1]
+
+            if isinstance(parent, (Ctx, List, String)):
+                # Force JIT copy
+                index = parent.index(child)
+                parent[index]
+
+            #elif isinstance(parent, Char):
+
+        return key.parent
+        """
+
         # TODO: This might get to be a long search if there are a lot of variables...
 
-        haystack = self.variables if haystack is None else haystack
+        #haystack = self.variables if haystack is None else haystack
+        haystack = self.variables[key.state.ctx] if haystack is None else haystack
 
         if type(haystack) in [dict, Ctx]:
             for k,v in haystack.items():

@@ -1,4 +1,5 @@
 import z3
+import weakref
 import ast
 import logging
 from .. import pyState
@@ -12,7 +13,7 @@ class List:
     Define a List
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__', 'variables_need_copy']
+    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__', 'variables_need_copy', 'parent']
 
     def __init__(self,varName,ctx,count=None,variables=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
@@ -24,6 +25,7 @@ class List:
         self.variables = [] if variables is None else variables
         self.variables_need_copy = [True] * len(self.variables)
         self.uuid = os.urandom(32) if uuid is None else uuid
+        self.parent = None
 
         if state is not None:
             self.setState(state)
@@ -62,6 +64,7 @@ class List:
             self.variables = [copy(x) for x in self.variables]
             for var in self.variables:
                 var.setState(self.state)
+                var.parent = weakref.proxy(self)
             self.variables_need_copy = [False] * len(self.variables)
 
         # If this is the first touch, create a new list object for us
@@ -73,6 +76,7 @@ class List:
             if self.variables_need_copy[index] == True:
                 self.variables[index] = copy(self.variables[index])
                 self.variables[index].setState(self.state) # Pass it the correct state...
+                self.variables[index].parent = weakref.proxy(self)
                 self.variables_need_copy[index] = False
 
 
@@ -168,7 +172,7 @@ class List:
             logger.error(err)
             raise Exception(err)
 
-        self.variables_need_copy.append(False)
+        self.variables_need_copy.append(True)
 
 
     def insert(self, index, object, kwargs=None):
@@ -295,6 +299,8 @@ class List:
             err = "__setitem__: Don't know how to set object '{0}'".format(value)
             logger.error(err)
             raise Exception(err)
+
+        self.variables[key].parent = weakref.proxy(self)
 
     def pop(self,i):
         self.__ensure_copy(i)

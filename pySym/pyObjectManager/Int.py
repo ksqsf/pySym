@@ -13,7 +13,7 @@ class Int:
     Define an Int
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', '_clone', 'state', '__weakref__']
+    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', '_clone', 'state', '__weakref__', 'parent']
     
     def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False,uuid=None,clone=None):
         """
@@ -39,6 +39,7 @@ class Int:
         self.value = value
         self.uuid = os.urandom(32) if uuid is None else uuid
         self._clone = clone
+        self.parent = None
         
         if state is not None:
             self.setState(state)

@@ -14,7 +14,7 @@ class Char:
     """
 
     __slots__ = ['_clone', 'uuid', 'state', 'count', 'varName', 'ctx',
-                 'variable', '__weakref__']
+                 'variable', '__weakref__', 'parent']
 
     def __init__(self,varName,ctx,count=None,variable=None,state=None,increment=False,uuid=None,clone=None):
         assert type(varName) is str, "Unexpected varName type of {}".format(type(varName))
@@ -28,6 +28,7 @@ class Char:
         self.varName = varName
         self.ctx = ctx
         self.variable = self.__make_variable() if variable is None else variable
+        self.parent = None
 
         if state is not None:
             self.setState(state)

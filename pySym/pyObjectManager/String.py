@@ -12,7 +12,7 @@ class String:
     Define a String
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__']
+    __slots__ = ['count', 'varName', 'ctx', 'variables', 'uuid', 'state', '__weakref__', 'parent']
 
     def __init__(self,varName,ctx,count=None,string=None,variables=None,state=None,length=None,increment=False,uuid=None):
         assert type(varName) is str
@@ -25,6 +25,7 @@ class String:
         # Treating string as a list of BitVecs
         self.variables = [] if variables is None else variables
         self.uuid = os.urandom(32) if uuid is None else uuid
+        self.parent = None
 
         if increment:
             self.increment()

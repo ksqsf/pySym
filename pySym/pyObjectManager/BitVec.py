@@ -13,7 +13,7 @@ class BitVec:
     """
 
     __slots__ = ['_clone', 'count', 'varName', 'ctx', 'size', 'value', 'uuid',
-                 'state', '__weakref__']
+                 'state', '__weakref__', 'parent']
     
     def __init__(self,varName,ctx,size,count=None,state=None,increment=False,value=None,uuid=None,clone=None):
         assert type(varName) is str
@@ -27,6 +27,7 @@ class BitVec:
         self.size = size
         self.value = value
         self.uuid = os.urandom(32) if uuid is None else uuid
+        self.parent = None
 
         if state is not None:
             self.setState(state)
