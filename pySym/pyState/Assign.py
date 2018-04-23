@@ -55,7 +55,7 @@ def _handleAssignNum(target,value):
         x2.increment()
 
         x2.setTo(value)
-        x2.state = x2.state.copy()
+        x2.setState(x2.state.copy())
 
         x2.state.path.pop(0)
 

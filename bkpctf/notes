@@ -129,3 +129,7 @@ TODO:
 
  - Change how I handle solver tactics. Basically, try not to use them. If I use plain solver, it will have faster responses, better caching, and allow push and pop. Once I wonder off into tatic land, everything slows down, but allows me to get some answers that I couldn't before.
    - Try pop/push first for extra constraints. Fall back to duplicating the solver if we have tactics and cannot push/pop
+ - Change all ObjectManager variables to use weakref.ref for state instead of actual handles.
+   - [Done] BitVec
+ - Review how I'm handling references elsewhere. Likely have other circular imports
+ - Change "setState" to simply be "state" setter property

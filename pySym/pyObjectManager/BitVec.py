@@ -1,4 +1,5 @@
 import z3
+import weakref
 from .. import pyState
 from . import decorators
 
@@ -13,7 +14,7 @@ class BitVec:
     """
 
     __slots__ = ['_clone', 'count', 'varName', 'ctx', 'size', 'value', 'uuid',
-                 'state', '__weakref__', 'parent']
+                 '__state', '__weakref__', 'parent']
     
     def __init__(self,varName,ctx,size,count=None,state=None,increment=False,value=None,uuid=None,clone=None):
         assert type(varName) is str
@@ -58,9 +59,13 @@ class BitVec:
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
         """
-        assert type(state) == pyState.State
+        assert type(state) in [pyState.State, weakref.ReferenceType], "Unexpected setState type of {}".format(type(state))
 
-        self.state = state
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+        else:
+            self.__state = state
 
         # Pass to our clone
         if self._clone is not None:
@@ -258,6 +263,15 @@ class BitVec:
         """bool: Opposite of is_unconstrained."""
         return not self.is_unconstrained
 
-        
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
 from .Int import Int
 from ..pyState import z3Helpers
