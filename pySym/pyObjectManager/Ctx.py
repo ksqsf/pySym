@@ -19,7 +19,7 @@ class Ctx:
     Define a Ctx Object
     """
 
-    __slots__ = ['ctx', 'variables', 'variables_need_copy', 'state', '__weakref__']
+    __slots__ = ['ctx', 'variables', 'variables_need_copy', '__state', '__weakref__']
 
     def __init__(self,ctx,variables=None):
         assert type(ctx) is int, "Unexpected ctx type of {}".format(type(ctx))
@@ -42,14 +42,15 @@ class Ctx:
         """
         This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
         """
-        assert type(state) == pyState.State
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
 
-        self.state = state
-        # Pass state set to variables on JIT copy, not immediately
+        # Turn it into a weakref
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
 
-        #for var in self.variables:
-        #    self.variables[var].setState(state)
-
+        # It's weakref or None. Set it
+        else:
+            self.__state = state
 
     def __iter__(self): return iter(self.variables)
     #def __iter__(self):
@@ -183,3 +184,18 @@ class Ctx:
         
     def __copy__(self):
         return self.copy()
+
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
+    @state.setter
+    def state(self, state):
+        # TODO: Move logic into here and remove setState method
+        self.setState(state)
