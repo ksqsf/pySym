@@ -1,16 +1,17 @@
-
+import random
 from multiprocessing import Pool
 from .pyPath import Path
 
 class PathGroup:
 
     __slots__ = ['active', 'deadended', 'completed', 'errored', 'found',
-                 'ignore_groups', '__weakref__']
+                 'ignore_groups', '__weakref__', '__search_strategy']
 
-    def __init__(self,path=None,ignore_groups=None):
+    def __init__(self, path=None, ignore_groups=None, search_strategy=None):
         """
         (optional) path = starting path object for path group
         (optional) discard_groups = List/set of path groups to ignore (i.e.: don't save) as we execute. Defaults to saving everything.
+        (optional) search_strategy = Which paths to step? Valid: depth/breadth/random (default: breadth)
         """
 
         # Init the groups
@@ -19,6 +20,7 @@ class PathGroup:
         self.completed = []
         self.errored = []
         self.found = []
+        self.search_strategy = search_strategy
         
         if ignore_groups is None:
             self.ignore_groups = set()
@@ -95,34 +97,63 @@ class PathGroup:
 
 
     def step(self):
-            """
-            Step all active paths one step.
-            """
+        """
+        Step all active paths one step.
+        """
         #with Pool(processes=1) as pool:
+
+        # Search Strategy
+        if self.search_strategy == "breadth":
+            paths = self.active
+        elif self.search_strategy == "depth":
+            paths = [self.active[-1]]
+        # Random
+        else:
+            paths = random.sample(range(len(self.active)), random.randint(1,len(self.active)))
         
-            for currentPath in self.active:
-                # It's possible this throws an exception on us
-                try:
-                    paths_ret = currentPath.step()
-                    # Pop it off the block
-                    self.unstash(path=currentPath,from_stash="active")
+        for currentPath in paths:
+            # It's possible this throws an exception on us
+            try:
+                paths_ret = currentPath.step()
+                # Pop it off the block
+                self.unstash(path=currentPath,from_stash="active")
 
-                except Exception as e:
-                    currentPath.error = str(e)
-                    self.unstash(path=currentPath,from_stash="active",to_stash="errored")
-                    continue
+            except Exception as e:
+                currentPath.error = str(e)
+                self.unstash(path=currentPath,from_stash="active",to_stash="errored")
+                continue
 
-                # If an empty list is returned, this path must be done
-                if len(paths_ret) == 0:
-                    self.unstash(path=currentPath,to_stash="completed")
-                    continue
-            
-                # We have some return path
-                else:
-                    for returnedPath in paths_ret:
-                        # Make sure the returned path is possible
-                        if not returnedPath.state.isSat():
-                            self.unstash(path=returnedPath,to_stash="deadended")
-                        else:
-                            # We found our next step in the path
-                            self.unstash(path=returnedPath,to_stash="active")
+            # If an empty list is returned, this path must be done
+            if len(paths_ret) == 0:
+                self.unstash(path=currentPath,to_stash="completed")
+                continue
+        
+            # We have some return path
+            else:
+                for returnedPath in paths_ret:
+                    # Make sure the returned path is possible
+                    if not returnedPath.state.isSat():
+                        self.unstash(path=returnedPath,to_stash="deadended")
+                    else:
+                        # We found our next step in the path
+                        self.unstash(path=returnedPath,to_stash="active")
+
+    @property
+    def search_strategy(self):
+        """str: Strategy for searching the paths.
+
+        Valid options are:
+           - Breadth (default): Traditional searching. Step each path in order.
+           - Depth: Drill one path down as far as possible.
+           - Random: Randomize what paths get stepped and what order.
+        """
+        return self.__search_strategy
+
+    @search_strategy.setter
+    def search_strategy(self, search_strategy):
+        if search_strategy == None:
+            search_strategy = "breadth"
+        else:
+            search_strategy = search_strategy.lower()
+        assert search_strategy in ["breadth", "depth", "random"], "Search strategy '{}' is not valid.".format(search_strategy)
+        self.__search_strategy = search_strategy
