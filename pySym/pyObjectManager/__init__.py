@@ -1,4 +1,5 @@
 import z3
+import weakref
 import ast
 import logging
 from .Int import Int
@@ -20,26 +21,14 @@ class ObjectManager:
     Object Manager will keep track of objects. Generally, Objects will be variables such as ints, lists, strings, etc.
     """
 
-    __slots__ = ['variables', 'returnObjects', 'state','__weakref__']
+    __slots__ = ['variables', 'returnObjects', '__state','__weakref__']
 
     def __init__(self,variables=None,returnObjects=None,state=None):
         self.variables = {CTX_GLOBAL: Ctx(CTX_GLOBAL), CTX_RETURNS: Ctx(CTX_RETURNS)} if variables is None else variables
         self.returnObjects = returnObjects if returnObjects is not None else {}
 
         if state is not None:
-            self.setState(state)
-
-
-    def setState(self,state):
-        """
-        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
-        """
-        assert type(state) == pyState.State
-        
-        self.state = state
-        for ctx in self.variables:
-            self.variables[ctx].setState(state)
-        
+            self.state = state
 
     def newCtx(self,ctx):
         """
@@ -48,7 +37,7 @@ class ObjectManager:
         assert ctx is not None
 
         self.variables[ctx] = Ctx(ctx)
-        self.variables[ctx].setState(self.state)
+        self.variables[ctx].state = self.state
 
     def setVar(self,varName,ctx,var):
         """
@@ -190,3 +179,27 @@ class ObjectManager:
 
     def __copy__(self):
         return self.copy()
+
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
+    @state.setter
+    def state(self, state):
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected state type of {}".format(type(state))
+
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        else:
+            self.__state = state
+
+        for ctx in self.variables:
+            self.variables[ctx].state = state

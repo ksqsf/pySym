@@ -31,8 +31,6 @@ class String:
         if increment:
             self.increment()
 
-        #if state is not None:
-        #    self.setState(state)
         self.state = state
 
 
@@ -61,23 +59,6 @@ class String:
 
     def __copy__(self):
         return self.copy()
-
-    def setState(self,state):
-        """
-        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
-        """
-        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
-
-        # Turn it into a weakref
-        if type(state) is pyState.State:
-            self.__state = weakref.ref(state)
-
-        # It's weakref or None. Set it
-        else:
-            self.__state = state
-
-        for var in self.variables:
-            var.setState(state)
 
     def increment(self):
         self.count += 1
@@ -302,9 +283,18 @@ class String:
 
     @state.setter
     def state(self, state):
-        # TODO: Move logic into here and remove setState method
-        self.setState(state)
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected state type of {}".format(type(state))
 
+        # Turn it into a weakref
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        # It's weakref or None. Set it
+        else:
+            self.__state = state
+
+        for var in self.variables:
+            var.state = self.state
 
 # Circular importing problem. Don't hate :-)
 from .Int import Int

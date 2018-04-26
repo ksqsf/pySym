@@ -30,7 +30,7 @@ def handle(state,call,obj,ctx=None):
 
         s = obj.state.copy()
 
-        obj.setState(s)
+        obj.state = s
 
         if type(obj) not in [Int, Real, BitVec]:
             err = "handle: This shouldn't happen. Possibly a target program bug? Got obj type {0}".format(type(obj))

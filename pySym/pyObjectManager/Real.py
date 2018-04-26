@@ -1,4 +1,5 @@
 import z3
+import weakref
 import logging
 import os
 from .. import pyState
@@ -10,7 +11,7 @@ class Real:
     Define a Real
     """
 
-    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', 'state', '__weakref__', 'parent']
+    __slots__ = ['count', 'varName', 'ctx', 'value', 'uuid', '__state', '__weakref__', 'parent']
     
     def __init__(self,varName,ctx,count=None,value=None,state=None,increment=False,uuid=None):
         assert type(varName) is str
@@ -23,9 +24,7 @@ class Real:
         self.value = value
         self.uuid = os.urandom(32) if uuid is None else uuid
         self.parent = None
-        
-        if state is not None:
-            self.setState(state)
+        self.state = state
 
         if increment:
             self.increment()
@@ -46,16 +45,6 @@ class Real:
             uuid = self.uuid
         )
 
-
-    def setState(self,state):
-        """
-        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
-        """
-        assert type(state) == pyState.State
-
-        self.state = state
-
-        
     def increment(self):
         self.value = None
         self.count += 1
@@ -184,6 +173,27 @@ class Real:
 
         else:
             return self.state.isSat(extra_constraints=[self.getZ3Object() == var])
+
+    @property
+    def state(self):
+        """Returns the state assigned to this object."""
+
+        if self.__state is None:
+            return None
+
+        # Using weakref magic here
+        return self.__state()
+
+    @state.setter
+    def state(self, state):
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected state type of {}".format(type(state))
+
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        else:
+            self.__state = state
 
 
 # Circular importing problem. Don't hate :-)

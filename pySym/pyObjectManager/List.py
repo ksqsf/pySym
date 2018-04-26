@@ -26,10 +26,7 @@ class List:
         self.variables_need_copy = [True] * len(self.variables)
         self.uuid = os.urandom(32) if uuid is None else uuid
         self.parent = None
-
         self.state = state
-        #if state is not None:
-        #    self.setState(state)
 
         if increment:
             self.increment()
@@ -64,7 +61,7 @@ class List:
         if index is None:
             self.variables = [copy(x) for x in self.variables]
             for var in self.variables:
-                var.setState(self.state)
+                var.state = self.state
                 var.parent = weakref.proxy(self)
             self.variables_need_copy = [False] * len(self.variables)
 
@@ -76,23 +73,10 @@ class List:
             # If we are in need of copy, do so
             if self.variables_need_copy[index] == True:
                 self.variables[index] = copy(self.variables[index])
-                self.variables[index].setState(self.state) # Pass it the correct state...
+                self.variables[index].state = self.state # Pass it the correct state...
                 self.variables[index].parent = weakref.proxy(self)
                 self.variables_need_copy[index] = False
 
-
-    def setState(self,state):
-        """
-        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
-        """
-        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
-
-        # Turn it into a weakproxy
-        if type(state) is pyState.State:
-            self.__state = weakref.ref(state)
-
-        else:
-            self.__state = state
 
     def setTo(self,otherList,clear=False):
         """
@@ -396,8 +380,14 @@ class List:
 
     @state.setter
     def state(self, state):
-        # TODO: Move logic into here and remove setState method
-        self.setState(state)
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected state type of {}".format(type(state))
+
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        else:
+            self.__state = state
 
 
 from copy import copy

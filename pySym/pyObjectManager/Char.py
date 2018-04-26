@@ -29,10 +29,7 @@ class Char:
         self.ctx = ctx
         self.variable = self.__make_variable(state) if variable is None else variable
         self.parent = None
-
         self.state = state
-        #if state is not None:
-        #    self.setState(state)
 
         if increment:
             self.increment()
@@ -133,25 +130,6 @@ class Char:
                     # Make sure we have our bounds set
                     self._add_variable_bounds()
                     self.variable.setTo(var)
-
-    def setState(self,state):
-        """
-        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
-        """
-        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
-
-        # Turn it into a weakref
-        if type(state) is pyState.State:
-            self.__state = weakref.ref(state)
-
-        # It's weakref or None. Set it
-        else:
-            self.__state = state
-
-        self.variable.setState(state)
-        
-        if self._clone is not None:
-            self._clone.setState(state)
 
     def increment(self):
         self._clone = None
@@ -263,8 +241,20 @@ class Char:
 
     @state.setter
     def state(self, state):
-        # TODO: Move logic into here and remove setState method
-        self.setState(state)
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected state type of {}".format(type(state))
+
+        # Turn it into a weakref
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        # It's weakref or None. Set it
+        else:
+            self.__state = state
+
+        self.variable.state = state
+        
+        if self._clone is not None:
+            self._clone.state = state
 
 
 # Circular importing problem. Don't hate :-)

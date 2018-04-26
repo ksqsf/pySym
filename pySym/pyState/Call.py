@@ -128,8 +128,11 @@ def handle(state,element,retObj=None):
             assert pyState.replaceObjectWithObject(s.path[0],element,retObj)
 
             # Ensure everything has a correct state
-            [a.setState(s) for a in elm.args]
-            [a.value.setState(s) for a in keyword]
+            for a in elm.args:
+                a.state = s
+
+            for a in keyword:
+                a.value.state = s
 
             # Call
             ret += [s.Call(elm,retObj=retObj)]

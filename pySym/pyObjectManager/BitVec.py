@@ -29,9 +29,7 @@ class BitVec:
         self.value = value
         self.uuid = os.urandom(32) if uuid is None else uuid
         self.parent = None
-
-        if state is not None:
-            self.setState(state)
+        self.state = state
 
         if increment:
             self.increment()
@@ -53,23 +51,6 @@ class BitVec:
             uuid = self.uuid,
             clone = self._clone.copy() if self._clone is not None else None
         )
-
-
-    def setState(self,state):
-        """
-        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
-        """
-        assert type(state) in [pyState.State, weakref.ReferenceType], "Unexpected setState type of {}".format(type(state))
-
-        # Turn it into a weakproxy
-        if type(state) is pyState.State:
-            self.__state = weakref.ref(state)
-        else:
-            self.__state = state
-
-        # Pass to our clone
-        if self._clone is not None:
-            self._clone.setState(state)
 
     def increment(self):
         """
@@ -272,6 +253,20 @@ class BitVec:
 
         # Using weakref magic here
         return self.__state()
+
+    @state.setter
+    def state(self, state):
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected state type of {}".format(type(state))
+
+        # Turn it into a weakproxy
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+        else:
+            self.__state = state
+
+        # Pass to our clone
+        if self._clone is not None:
+            self._clone.state = state
 
 from .Int import Int
 from ..pyState import z3Helpers

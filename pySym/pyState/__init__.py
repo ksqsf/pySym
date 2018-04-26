@@ -16,7 +16,6 @@ from ..pyObjectManager.List import List
 from ..pyObjectManager.Ctx import Ctx
 from ..pyObjectManager.String import String
 from ..pyObjectManager.Char import Char
-#from pyCoW import CoW
 
 # Override z3 __copy__ so i can just use "copy()"
 z3.z3.Solver.__copy__ = lambda self: self.translate(self.ctx)
@@ -1909,7 +1908,7 @@ class State:
         # newState = super().__copy__()
 
         # Make sure to give the objectManager the new state
-        newState.objectManager.setState(newState)
+        newState.objectManager.state = newState
 
         return newState
 

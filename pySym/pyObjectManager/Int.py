@@ -41,10 +41,7 @@ class Int:
         self.uuid = os.urandom(32) if uuid is None else uuid
         self._clone = clone
         self.parent = None
-        
         self.state = state
-        #if state is not None:
-        #    self.setState(state)
 
         if increment:
             self.increment()
@@ -66,23 +63,6 @@ class Int:
             uuid = self.uuid,
             clone = self._clone.copy() if self._clone is not None else None,
         )
-
-    def setState(self,state):
-        """
-        This is a bit strange, but State won't copy correctly due to Z3, so I need to bypass this a bit by setting State each time I copy
-        """
-        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected setState type of {}".format(type(state))
-
-        # Turn it into a weakref
-        if type(state) is pyState.State:
-            self.__state = weakref.ref(state)
-
-        # It's weakref or None. Set it
-        else:
-            self.__state = state
-
-        if self._clone is not None:
-            self._clone.setState(state)
 
     def increment(self):
         # If we're incrementing, remove our clone
@@ -298,8 +278,18 @@ class Int:
 
     @state.setter
     def state(self, state):
-        # TODO: Move logic into here and remove setState method
-        self.setState(state)
+        assert type(state) in [pyState.State, weakref.ReferenceType, type(None)], "Unexpected state type of {}".format(type(state))
+
+        # Turn it into a weakref
+        if type(state) is pyState.State:
+            self.__state = weakref.ref(state)
+
+        # It's weakref or None. Set it
+        else:
+            self.__state = state
+
+        if self._clone is not None:
+            self._clone.state = state
 
 from .BitVec import BitVec
 from .Char import Char

@@ -25,18 +25,18 @@ def _rstrip(state,newString,chars):
             elif c.canBe(f):
                 state_notEqual = state.copy()
                 newString_notEqual = newString.copy()
-                newString_notEqual.setState(state_notEqual)
+                newString_notEqual.state = state_notEqual
                 chars_notEqual = chars.copy()
-                chars_notEqual.setState(state_notEqual)
+                chars_notEqual.state = state_notEqual
                 state_notEqual.addConstraint(f.getZ3Object() != c.getZ3Object())
                 
                 # Equal side
                 newString.pop()
                 state_eq = state.copy()
                 newString_eq = newString.copy()
-                newString_eq.setState(state_eq)
+                newString_eq.state = state_eq
                 chars_eq = chars.copy()
-                chars_eq.setState(state_eq)
+                chars_eq.state = state_eq
                 state_eq.addConstraint(f.getZ3Object() == c.getZ3Object())
 
                 # Take both
