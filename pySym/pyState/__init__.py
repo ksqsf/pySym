@@ -478,7 +478,7 @@ class State:
         inst = state.path[0]
 
         # Check for hooks, give them the first shot at this
-        if inst.lineno in self._project._hooks:
+        if self._project is not None and inst.lineno in self._project._hooks:
             self._project._hooks[inst.lineno](state)
 
         # Generically handle any instruction we know about

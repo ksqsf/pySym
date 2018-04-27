@@ -9,6 +9,7 @@ CRC_POLY = to_bits(65, (2**64) + 0xeff67c77d13835f7)
 CONST = to_bits(64, 0xabaddeadbeef1dea)
 
 def crc(mesg):
+  print(len(mesg))
   mesg += CONST
   shift = 0
   while shift < len(mesg) - 64:

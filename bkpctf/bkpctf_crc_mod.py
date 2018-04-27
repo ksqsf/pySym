@@ -16,7 +16,7 @@ pass
 
 def crc(mesg):
   mesg += CONST
-  shift = 0
+  shift = 151 # 0
   while shift < len(mesg) - 64:
     pass
     #if mesg[shift]:
@@ -61,6 +61,7 @@ def xor(x, y):
   l = []
   for i in range(len(x)):
       l.append(x[i] ^ y[i])
+  pass
   return l
 
 """

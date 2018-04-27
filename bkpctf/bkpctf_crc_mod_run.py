@@ -2,6 +2,7 @@
 from copy import copy
 import z3
 import pySym
+import IPython
 
 proj = pySym.Project("./bkpctf_crc_mod.py")
 
@@ -14,6 +15,7 @@ def hook_crc(state):
     If = copy(mesg[shift]).getZ3Object() != 0
 
     print("Hit hook. Shift == " + str(shift))
+    print("Len msg == " + str(len(mesg)))
 
     for i in range(65):
         old_c = copy(mesg[shift+i])
@@ -23,8 +25,13 @@ def hook_crc(state):
         Else.append(new_c.getZ3Object() == old_c.getZ3Object())
 
     state.addConstraint(z3.If(If, z3.And(Then), z3.And(Else)))
+    print(state.getVar('mesg')[-64:])
+
+def hook_interactive(state):
+    IPython.embed()
 
 proj.hook(21, hook_crc)
+#proj.hook(64, hook_interactive)
 pg = proj.factory.path_group(ignore_groups='deadended')
 
 pg.explore()
