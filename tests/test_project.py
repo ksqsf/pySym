@@ -14,3 +14,10 @@ def test_basic_project():
     assert len(pg.completed) == 1
     assert pg.completed[0].state.any_int('x') == 1
 
+    # Make sure we're passing the project through fully
+    assert pg._project is proj
+    assert pg.deadended[0]._project is proj
+    assert pg.deadended[0].state._project is proj
+    assert pg.completed[0]._project is proj
+    assert pg.completed[0].state._project is proj
+

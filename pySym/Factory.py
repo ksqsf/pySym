@@ -26,10 +26,11 @@ class Factory:
         body = ast.parse(source).body
 
         # Return the new path
-        return Path(body,source=source)
+        return Path(body,source=source,project=self._project)
 
     def path_group(self, *args, **kwargs) -> PathGroup:
         """pySym.pyPathGroup.PathGroup: Basic PathGroup object for this project."""
+        kwargs['project'] = self._project
         return PathGroup(self.path(), *args, **kwargs)
 
     ##############

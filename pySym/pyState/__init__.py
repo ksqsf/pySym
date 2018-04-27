@@ -16,6 +16,7 @@ from ..pyObjectManager.List import List
 from ..pyObjectManager.Ctx import Ctx
 from ..pyObjectManager.String import String
 from ..pyObjectManager.Char import Char
+from ..Project import Project
 
 # Override z3 __copy__ so i can just use "copy()"
 z3.z3.Solver.__copy__ = lambda self: self.translate(self.ctx)
@@ -297,16 +298,18 @@ class State:
     __slots__ = [
             'path', 'ctx', 'objectManager', 'solver', '__vars_in_solver',
             'functions', 'simFunctions', 'retVar', 'callStack', 'backtrace',
-            'retID', 'loop', 'maxRetID', 'maxCtx', '__weakref__',
+            'retID', 'loop', 'maxRetID', 'maxCtx', '__weakref__', '__project',
             ]
 
-    def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None,vars_in_solver=None):
+    def __init__(self,path=None,solver=None,ctx=None,functions=None,simFunctions=None,retVar=None,callStack=None,backtrace=None,retID=None,loop=None,maxRetID=None,maxCtx=None,objectManager=None,vars_in_solver=None,project=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
         (optional) vars_in_solver = dict of list of variable strings that are in the solver. Do not set this manually.
+        (optional) project = pySym project file associated with this group. This will be auto-filled.
         """
 
+        self._project = project
         self.path = [] if path is None else path
         self.ctx = 0 if ctx is None else ctx
         self.objectManager = objectManager if objectManager is not None else ObjectManager(state=self)
@@ -1901,11 +1904,9 @@ class State:
             maxCtx=self.maxCtx,
             objectManager=self.objectManager.copy(),
             #vars_in_solver=deepcopy(self._vars_in_solver),
-            vars_in_solver={key:copy(self._vars_in_solver[key]) for key in self._vars_in_solver.keys()}
+            vars_in_solver={key:copy(self._vars_in_solver[key]) for key in self._vars_in_solver.keys()},
+            project=self._project
             )
-        
-        # Attempted CoW integration.. Not working right.
-        # newState = super().__copy__()
 
         # Make sure to give the objectManager the new state
         newState.objectManager.state = newState
@@ -1929,6 +1930,16 @@ class State:
         assert issubclass(type(vars), dict), "Unhandled _vars_in_solver type of {}".format(type(vars))
 
         self.__vars_in_solver = vars
+
+    @property
+    def _project(self):
+        """pySym Project that this is associated with."""
+        return self.__project
+
+    @_project.setter
+    def _project(self, project):
+        assert isinstance(project, (Project, type(None))), "Invalid type for Project of {}".format(type(project))
+        self.__project = project
         
 from . import BinOp, Pass, While, Break, Subscript, For, ListComp, UnaryOp, GeneratorExp, Assign, AugAssign, FunctionDef, Expr, Return, If, Assert
 from . import z3Helpers

@@ -2,6 +2,7 @@ import z3
 import ast
 import logging
 from .pyState import State
+from .Project import Project
 from prettytable import PrettyTable
 import sys
 from copy import copy
@@ -14,19 +15,21 @@ class Path():
     Defines a path of execution.
     """
 
-    __slots__ = ['backtrace','state','source','error','__weakref__']
+    __slots__ = ['backtrace','state','source','error','__weakref__','__project']
     
-    def __init__(self,path=None,backtrace=None,state=None,source=None):
+    def __init__(self,path=None,backtrace=None,state=None,source=None,project=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
         (optional) backtrace = list of asts that happened before the current one
         (optional) state = State object for current path
         (optional) source = source code that we're looking at. This can make things prettier
+        (optional) project = pySym project file associated with this group. This will be auto-filled.
         """
         
+        self._project = project
         path = [] if path is None else path
         self.backtrace = [] if backtrace is None else backtrace
-        self.state = State(path=path) if state is None else state
+        self.state = State(path=path,project=self._project) if state is None else state
         self.source = source
 
     def step(self):
@@ -84,7 +87,18 @@ class Path():
                 backtrace=copy(self.backtrace),
                 state=self.state.copy() if state is None else state,
                 source=copy(self.source),
+                project=self._project
                 )
 
     def __copy__(self):
         return self.copy()
+
+    @property
+    def _project(self):
+        """pySym Project that this is associated with."""
+        return self.__project
+
+    @_project.setter
+    def _project(self, project):
+        assert isinstance(project, (Project, type(None))), "Invalid type for Project of {}".format(type(project))
+        self.__project = project

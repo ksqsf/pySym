@@ -1,17 +1,19 @@
 import random
 from multiprocessing import Pool
 from .pyPath import Path
+from .Project import Project
 
 class PathGroup:
 
     __slots__ = ['active', 'deadended', 'completed', 'errored', 'found',
-                 'ignore_groups', '__weakref__', '__search_strategy']
+                 'ignore_groups', '__weakref__', '__search_strategy', '__project']
 
-    def __init__(self, path=None, ignore_groups=None, search_strategy=None):
+    def __init__(self, path=None, ignore_groups=None, search_strategy=None, project=None):
         """
         (optional) path = starting path object for path group
         (optional) discard_groups = List/set of path groups to ignore (i.e.: don't save) as we execute. Defaults to saving everything.
         (optional) search_strategy = Which paths to step? Valid: depth/breadth/random (default: breadth)
+        (optional) project = pySym project file associated with this group. This will be auto-filled.
         """
 
         # Init the groups
@@ -21,6 +23,7 @@ class PathGroup:
         self.errored = []
         self.found = []
         self.search_strategy = search_strategy
+        self._project = project
         
         if ignore_groups is None:
             self.ignore_groups = set()
@@ -157,3 +160,13 @@ class PathGroup:
             search_strategy = search_strategy.lower()
         assert search_strategy in ["breadth", "depth", "random"], "Search strategy '{}' is not valid.".format(search_strategy)
         self.__search_strategy = search_strategy
+
+    @property
+    def _project(self):
+        """pySym Project that this is associated with."""
+        return self.__project
+
+    @_project.setter
+    def _project(self, project):
+        assert isinstance(project, (Project, type(None))), "Invalid type for Project of {}".format(type(project))
+        self.__project = project
