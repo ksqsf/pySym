@@ -8,6 +8,7 @@ from ..pyObjectManager.BitVec import BitVec
 from ..pyObjectManager.List import List
 from ..pyObjectManager.String import String
 import itertools
+from copy import copy
 
 logger = logging.getLogger("pyState:Subscript")
 
@@ -234,8 +235,10 @@ def _handleSlice(state,sub_object,sub_slice):
     
         if type(sub_object) is List:
             # Get slice
-            newObject = state.recursiveCopy(sub_object[lower:upper:step])
+            #newObject = state.recursiveCopy(sub_object[lower:upper:step])
+            newObject = sub_object[lower:upper:step].copy()
     
+            """
             j = 0
             for i in range(lower,upper,step):
                 if type(sub_object[i]) in [Int, Real, BitVec]:
@@ -244,6 +247,7 @@ def _handleSlice(state,sub_object,sub_slice):
                 else:
                     newObject[j] = state.recursiveCopy(sub_object[i])
                 j += 1
+            """
     
         elif type(sub_object) is String:
             newObject = sub_object[lower:upper:step].copy()
