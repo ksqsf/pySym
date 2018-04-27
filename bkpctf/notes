@@ -146,4 +146,7 @@ TODO:
   - Calling remove_constraints on a char every time is a HUGE time suck...
  - Provide mechanism for easy hooking, similar to angr and others
   - @hook(lineno)
-  - proj.hook(lineno)
+  - [In progress] proj.hook(lineno)
+ - Save path (both source and ast) into project
+  - Use this to check if the hook location exists
+  - Raise error/warning also if the hooked instruction is not the "pass" statement. Actual hitting of the instruction can be different than expected. Pass helps allieviate this.

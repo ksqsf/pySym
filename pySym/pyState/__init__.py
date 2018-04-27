@@ -477,6 +477,10 @@ class State:
         # Get the current instruction
         inst = state.path[0]
 
+        # Check for hooks, give them the first shot at this
+        if inst.lineno in self._project._hooks:
+            self._project._hooks[inst.lineno](state)
+
         # Generically handle any instruction we know about
         if type(inst) in instructions:
             ret_states = instructions[type(inst)].handle(state,inst)

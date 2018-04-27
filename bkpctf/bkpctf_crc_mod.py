@@ -12,15 +12,42 @@ def from_bits(N):
 CRC_POLY = to_bits(65, (2**64) + 0xeff67c77d13835f7)
 CONST = to_bits(64, 0xabaddeadbeef1dea)
 
+pass
+
 def crc(mesg):
   mesg += CONST
   shift = 0
   while shift < len(mesg) - 64:
-    if mesg[shift]:
-      for i in range(65):
-        mesg[shift + i] ^= CRC_POLY[i]
+    pass
+    #if mesg[shift]:
+    #  for i in range(65):
+    #    mesg[shift + i] ^= CRC_POLY[i]
     shift += 1
   return mesg[-64:]
+
+"""
+from copy import copy
+import z3
+import pySym
+
+proj = pySym.Project("./bkpctf_crc_mod.py")
+
+
+shift = int(state.getVar('shift'))
+CRC_POLY = state.getVar('CRC_POLY', ctx=0)
+Then = []
+Else = []
+If = copy(mesg[shift]).getZ3Object() != 0
+
+for i in range(65):
+    old_c = copy(mesg[shift+i])
+    new_c = mesg[shift+i]
+    new_c.increment()
+    Then.append(new_c.getZ3Object() == old_c.getZ3Object() ^ CRC_POLY[i].getZ3Object())
+    Else.append(new_c.getZ3Object() == old_c.getZ3Object())
+
+state.addConstraint(z3.If(If, z3.And(Then), z3.And(Else)))
+"""
 
 INNER = to_bits(8, 0x36) * 8
 OUTER = to_bits(8, 0x5c) * 8
