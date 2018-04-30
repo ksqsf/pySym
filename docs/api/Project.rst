@@ -1,7 +1,7 @@
-pyPath
-=============
+Project
+=======
 
-.. automodule:: pySym.pyPath
+.. automodule:: pySym.Project
     :members:
     :undoc-members:
     :show-inheritance:

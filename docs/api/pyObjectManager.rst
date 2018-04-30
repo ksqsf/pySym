@@ -7,7 +7,7 @@ Submodules
 pyObjectManager.BitVec module
 -----------------------------
 
-.. automodule:: pyObjectManager.BitVec
+.. automodule:: pySym.pyObjectManager.BitVec
     :members:
     :undoc-members:
     :show-inheritance:
@@ -15,7 +15,7 @@ pyObjectManager.BitVec module
 pyObjectManager.Char module
 ---------------------------
 
-.. automodule:: pyObjectManager.Char
+.. automodule:: pySym.pyObjectManager.Char
     :members:
     :undoc-members:
     :show-inheritance:
@@ -23,7 +23,7 @@ pyObjectManager.Char module
 pyObjectManager.Ctx module
 --------------------------
 
-.. automodule:: pyObjectManager.Ctx
+.. automodule:: pySym.pyObjectManager.Ctx
     :members:
     :undoc-members:
     :show-inheritance:
@@ -31,7 +31,7 @@ pyObjectManager.Ctx module
 pyObjectManager.Int module
 --------------------------
 
-.. automodule:: pyObjectManager.Int
+.. automodule:: pySym.pyObjectManager.Int
     :members:
     :undoc-members:
     :show-inheritance:
@@ -39,7 +39,7 @@ pyObjectManager.Int module
 pyObjectManager.List module
 ---------------------------
 
-.. automodule:: pyObjectManager.List
+.. automodule:: pySym.pyObjectManager.List
     :members:
     :undoc-members:
     :show-inheritance:
@@ -47,7 +47,7 @@ pyObjectManager.List module
 pyObjectManager.Real module
 ---------------------------
 
-.. automodule:: pyObjectManager.Real
+.. automodule:: pySym.pyObjectManager.Real
     :members:
     :undoc-members:
     :show-inheritance:
@@ -55,7 +55,7 @@ pyObjectManager.Real module
 pyObjectManager.String module
 -----------------------------
 
-.. automodule:: pyObjectManager.String
+.. automodule:: pySym.pyObjectManager.String
     :members:
     :undoc-members:
     :show-inheritance:
@@ -64,7 +64,7 @@ pyObjectManager.String module
 Module contents
 ---------------
 
-.. automodule:: pyObjectManager
+.. automodule:: pySym.pyObjectManager
     :members:
     :undoc-members:
     :show-inheritance:

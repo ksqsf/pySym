@@ -11,8 +11,33 @@ your virtual environment and load up a source::
    $ workon pySym
    (pySym)$ ipython
 
-For the moment, loading is done through a string mechanism. You can either copy
-and paste the script you want to execute or load it using file:
++++++++++++++++++
+Automated Loading
++++++++++++++++++
+
+Assuming you have a program you want to symbolically execute called
+`my_test_program.py`, you can do so with the following lines:
+
+.. code-block:: python
+
+   In [1]: import pySym
+
+   In [2]: proj = pySym.Project("my_test_program.py")
+
+   In [3]: pg = proj.factory.path_group()
+
+You can now run it by simply executing:
+
+.. code-block:: python
+    
+    In [4]: pg.explore()
+
++++++++++++++++++++++
+Manually From Strings
++++++++++++++++++++++
+
+You can also load your script directly via python string. The following example
+loads it from a file:
 
 .. code-block:: python
 

@@ -238,3 +238,8 @@ Mostly implemented. Arbitrary function declaration. Keyword arguments, positiona
 
 Some nested call limitations at the moment. If unsure if it'll work, just try it and let me know.
 
+Symbolic Hooking
+================
+There often times is a need to hook symbolic execution. This is most often used
+to flatten a group of statements into a single expression or otherwise change
+the execution flow. See `hooking <hooking.html>`_ for more information.

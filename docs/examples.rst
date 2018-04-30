@@ -2,6 +2,10 @@
 Examples
 ========================
 
+Tokyo Westerns CTF 2017: My Simple Cipher
+=========================================
+External Writeup: `BannSecurity.com <https://bannsecurity.com/index.php/home/10-ctf-writeups/44-tokyo-westerns-ctf-2017-my-simple-cipher>`_
+
 Prime Finder
 ========================
 
@@ -93,3 +97,5 @@ variable named 'x'. We can do many things with this variable at this point,
 however for the purposes of this example, we simply print out the variable. It
 will pause for a few moments as z3 solves constraints for us and `pySym` puts
 it into the proper representation (a list).
+
+

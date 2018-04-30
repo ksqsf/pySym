@@ -12,7 +12,7 @@ Subpackages
 pyState.Assign
 ---------------------
 
-.. automodule:: pyState.Assign
+.. automodule:: pySym.pyState.Assign
     :members:
     :undoc-members:
     :show-inheritance:
@@ -21,7 +21,7 @@ pyState.Assign
 pyState.AugAssign 
 ------------------------
 
-.. automodule:: pyState.AugAssign
+.. automodule:: pySym.pyState.AugAssign
     :members:
     :undoc-members:
     :show-inheritance:
@@ -29,7 +29,7 @@ pyState.AugAssign
 pyState.BinOp 
 --------------------
 
-.. automodule:: pyState.BinOp
+.. automodule:: pySym.pyState.BinOp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -37,7 +37,7 @@ pyState.BinOp
 pyState.BoolOp
 ---------------------
 
-.. automodule:: pyState.BoolOp
+.. automodule:: pySym.pyState.BoolOp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -45,7 +45,7 @@ pyState.BoolOp
 pyState.Break 
 --------------------
 
-.. automodule:: pyState.Break
+.. automodule:: pySym.pyState.Break
     :members:
     :undoc-members:
     :show-inheritance:
@@ -53,7 +53,7 @@ pyState.Break
 pyState.Call 
 -------------------
 
-.. automodule:: pyState.Call
+.. automodule:: pySym.pyState.Call
     :members:
     :undoc-members:
     :show-inheritance:
@@ -61,7 +61,7 @@ pyState.Call
 pyState.Compare 
 ----------------------
 
-.. automodule:: pyState.Compare
+.. automodule:: pySym.pyState.Compare
     :members:
     :undoc-members:
     :show-inheritance:
@@ -69,7 +69,7 @@ pyState.Compare
 pyState.Expr 
 -------------------
 
-.. automodule:: pyState.Expr
+.. automodule:: pySym.pyState.Expr
     :members:
     :undoc-members:
     :show-inheritance:
@@ -77,7 +77,7 @@ pyState.Expr
 pyState.For 
 ------------------
 
-.. automodule:: pyState.For
+.. automodule:: pySym.pyState.For
     :members:
     :undoc-members:
     :show-inheritance:
@@ -85,7 +85,7 @@ pyState.For
 pyState.FunctionDef 
 --------------------------
 
-.. automodule:: pyState.FunctionDef
+.. automodule:: pySym.pyState.FunctionDef
     :members:
     :undoc-members:
     :show-inheritance:
@@ -93,7 +93,7 @@ pyState.FunctionDef
 pyState.GeneratorExp 
 ---------------------------
 
-.. automodule:: pyState.GeneratorExp
+.. automodule:: pySym.pyState.GeneratorExp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -101,7 +101,7 @@ pyState.GeneratorExp
 pyState.If 
 -----------------
 
-.. automodule:: pyState.If
+.. automodule:: pySym.pyState.If
     :members:
     :undoc-members:
     :show-inheritance:
@@ -109,7 +109,7 @@ pyState.If
 pyState.ListComp 
 -----------------------
 
-.. automodule:: pyState.ListComp
+.. automodule:: pySym.pyState.ListComp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -117,7 +117,7 @@ pyState.ListComp
 pyState.Pass 
 -------------------
 
-.. automodule:: pyState.Pass
+.. automodule:: pySym.pyState.Pass
     :members:
     :undoc-members:
     :show-inheritance:
@@ -125,7 +125,7 @@ pyState.Pass
 pyState.Return 
 ---------------------
 
-.. automodule:: pyState.Return
+.. automodule:: pySym.pyState.Return
     :members:
     :undoc-members:
     :show-inheritance:
@@ -133,7 +133,7 @@ pyState.Return
 pyState.Subscript 
 ------------------------
 
-.. automodule:: pyState.Subscript
+.. automodule:: pySym.pyState.Subscript
     :members:
     :undoc-members:
     :show-inheritance:
@@ -141,7 +141,7 @@ pyState.Subscript
 pyState.UnaryOp 
 ----------------------
 
-.. automodule:: pyState.UnaryOp
+.. automodule:: pySym.pyState.UnaryOp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -149,7 +149,7 @@ pyState.UnaryOp
 pyState.While 
 --------------------
 
-.. automodule:: pyState.While
+.. automodule:: pySym.pyState.While
     :members:
     :undoc-members:
     :show-inheritance:
@@ -157,7 +157,7 @@ pyState.While
 pyState.z3Helpers 
 ------------------------
 
-.. automodule:: pyState.z3Helpers
+.. automodule:: pySym.pyState.z3Helpers
     :members:
     :undoc-members:
     :show-inheritance:
@@ -166,7 +166,7 @@ pyState.z3Helpers
 Module contents
 ---------------
 
-.. automodule:: pyState
+.. automodule:: pySym.pyState
     :members:
     :undoc-members:
     :show-inheritance:

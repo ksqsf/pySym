@@ -19,4 +19,5 @@ Getting Started
    quickstart
    examples
    what_is_implemented
+   hooking
    api/index

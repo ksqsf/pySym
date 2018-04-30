@@ -7,7 +7,7 @@ Submodules
 pyState.functions.abs module
 ----------------------------
 
-.. automodule:: pyState.functions.abs
+.. automodule:: pySym.pyState.functions.abs
     :members:
     :undoc-members:
     :show-inheritance:
@@ -15,7 +15,7 @@ pyState.functions.abs module
 pyState.functions.bin module
 ----------------------------
 
-.. automodule:: pyState.functions.bin
+.. automodule:: pySym.pyState.functions.bin
     :members:
     :undoc-members:
     :show-inheritance:
@@ -23,7 +23,7 @@ pyState.functions.bin module
 pyState.functions.hex module
 ----------------------------
 
-.. automodule:: pyState.functions.hex
+.. automodule:: pySym.pyState.functions.hex
     :members:
     :undoc-members:
     :show-inheritance:
@@ -31,7 +31,7 @@ pyState.functions.hex module
 pyState.functions.int module
 ----------------------------
 
-.. automodule:: pyState.functions.int
+.. automodule:: pySym.pyState.functions.int
     :members:
     :undoc-members:
     :show-inheritance:
@@ -39,7 +39,7 @@ pyState.functions.int module
 pyState.functions.len module
 ----------------------------
 
-.. automodule:: pyState.functions.len
+.. automodule:: pySym.pyState.functions.len
     :members:
     :undoc-members:
     :show-inheritance:
@@ -47,7 +47,7 @@ pyState.functions.len module
 pyState.functions.ord module
 ----------------------------
 
-.. automodule:: pyState.functions.ord
+.. automodule:: pySym.pyState.functions.ord
     :members:
     :undoc-members:
     :show-inheritance:
@@ -55,7 +55,7 @@ pyState.functions.ord module
 pyState.functions.print module
 ------------------------------
 
-.. automodule:: pyState.functions.print
+.. automodule:: pySym.pyState.functions.print
     :members:
     :undoc-members:
     :show-inheritance:
@@ -63,7 +63,7 @@ pyState.functions.print module
 pyState.functions.range module
 ------------------------------
 
-.. automodule:: pyState.functions.range
+.. automodule:: pySym.pyState.functions.range
     :members:
     :undoc-members:
     :show-inheritance:
@@ -71,7 +71,7 @@ pyState.functions.range module
 pyState.functions.str module
 ----------------------------
 
-.. automodule:: pyState.functions.str
+.. automodule:: pySym.pyState.functions.str
     :members:
     :undoc-members:
     :show-inheritance:
@@ -79,7 +79,7 @@ pyState.functions.str module
 pyState.functions.zip module
 ----------------------------
 
-.. automodule:: pyState.functions.zip
+.. automodule:: pySym.pyState.functions.zip
     :members:
     :undoc-members:
     :show-inheritance:
@@ -88,7 +88,7 @@ pyState.functions.zip module
 Module contents
 ---------------
 
-.. automodule:: pyState.functions
+.. automodule:: pySym.pyState.functions
     :members:
     :undoc-members:
     :show-inheritance:
