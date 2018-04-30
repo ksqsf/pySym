@@ -26,7 +26,8 @@ dev_tools = ['pytest','python-coveralls','coverage','pytest-cov','pytest-xdist',
 
 install_requires=['prettytable','enforce']
 
-if "PYSYM_NO_Z3" not in os.environ:
+# Defaulting RTD builds to use pip z3 solver
+if "PYSYM_NO_Z3" not in os.environ or os.environ.get('READTHEDOCS', None) == 'True':
     install_requires.append('z3-solver')
 
 setup(
