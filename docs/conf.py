@@ -17,6 +17,8 @@ import sys
 import os
 import builtins
 
+here = os.path.dirname(os.path.realpath(__file__))
+
 sys.path.append('../')
 
 #####
@@ -26,8 +28,10 @@ sys.path.append('../')
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # Append Z3 path
-sys.path.append('z3-4.6.0-x64-ubuntu-16.04/bin/python/')
-builtins.Z3_LIB_DIRS = ['./z3-4.6.0-x64-ubuntu-16.04/bin/libz3.so']
+sys.path.append(os.path.abspath(os.path.join(here, 'z3-4.6.0-x64-ubuntu-16.04/bin/python/')))
+sys.path.append(os.path.abspath(os.path.join(here, 'z3-4.6.0-x64-ubuntu-16.04/bin/')))
+os.environ['LD_LIBRARY_PATH'] = os.path.abspath(os.path.join(here, 'z3-4.6.0-x64-ubuntu-16.04/bin/'))
+os.environ['PATH'] += ":" + os.path.abspath(os.path.join(here, 'z3-4.6.0-x64-ubuntu-16.04/bin/'))
 
 # Need to import this so that we don't get cicular importing
 from pySym import pyState
