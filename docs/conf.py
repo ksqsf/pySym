@@ -25,7 +25,7 @@ sys.path.append('../')
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # Append Z3 path
-sys.path.append('z3-4.4.1-x64-ubuntu-14.04/bin/')
+sys.path.append('z3-4.6.0-x64-ubuntu-16.04/bin/python/')
 
 
 # Need to import this so that we don't get cicular importing
