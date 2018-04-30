@@ -25,7 +25,9 @@ def hook_crc(state):
         Else.append(new_c.getZ3Object() == old_c.getZ3Object())
 
     state.addConstraint(z3.If(If, z3.And(Then), z3.And(Else)))
-    print(state.getVar('mesg')[-64:])
+    mesg = state.getVar('mesg')[-64:]
+    #print([c.state for c in mesg])
+    #print(state)
 
 def hook_interactive(state):
     IPython.embed()

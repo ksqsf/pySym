@@ -18,10 +18,10 @@ def crc(mesg):
   mesg += CONST
   shift = 151 # 0
   while shift < len(mesg) - 64:
-    pass
-    #if mesg[shift]:
-    #  for i in range(65):
-    #    mesg[shift + i] ^= CRC_POLY[i]
+    #pass
+    if mesg[shift]:
+      for i in range(65):
+        mesg[shift + i] ^= CRC_POLY[i]
     shift += 1
   return mesg[-64:]
 

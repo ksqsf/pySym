@@ -150,3 +150,4 @@ TODO:
  - Save path (both source and ast) into project
   - Use this to check if the hook location exists
   - Raise error/warning also if the hooked instruction is not the "pass" statement. Actual hitting of the instruction can be different than expected. Pass helps allieviate this.
+ - Add List.setTo to allow an actual list (not just ObjectManager.List)

@@ -236,6 +236,12 @@ def _handleSlice(state,sub_object,sub_slice):
         if type(sub_object) is List:
             # Get slice
             #newObject = state.recursiveCopy(sub_object[lower:upper:step])
+
+            # The following line fixes a race condition. Wasn't able to track down the root cause of the condition
+            # and it stopped occuring, so leaving this in here for now...
+            temporary_fix = [x.state for x in sub_object] # So does this.. This is being hit in Return statement, but somehow state is being lost?
+
+
             newObject = sub_object[lower:upper:step].copy()
     
             """
