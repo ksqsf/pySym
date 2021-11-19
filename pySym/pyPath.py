@@ -16,7 +16,7 @@ class Path():
     """
 
     __slots__ = ['backtrace','state','source','error','__weakref__','__project']
-    
+
     def __init__(self,path=None,backtrace=None,state=None,source=None,project=None):
         """
         (optional) path = list of sequential actions. Derived by ast.parse. Passed to state.
@@ -25,7 +25,7 @@ class Path():
         (optional) source = source code that we're looking at. This can make things prettier
         (optional) project = pySym project file associated with this group. This will be auto-filled.
         """
-        
+
         self._project = project
         path = [] if path is None else path
         self.backtrace = [] if backtrace is None else backtrace
@@ -36,12 +36,12 @@ class Path():
         """
         Move the current path forward by one step
         Note, this actually makes a copy/s and returns them. The initial path isn't modified.
-        Returns: A list of paths or empty list if the path is done 
+        Returns: A list of paths or empty list if the path is done
         """
-        
+
         # Step-it
         stateList = self.state.step()
-        
+
         pathList = []
 
         for state in stateList:
@@ -54,25 +54,25 @@ class Path():
             pathList.append(path)
 
         return pathList
-    
+
     def printBacktrace(self):
         """
         Convinence function to print out what we've executed so far
         """
         source = self.source
         source = source.split("\n") if source != None else None
-        
+
         table = PrettyTable(header=False,border=False,field_names=["lineno","line","element"])
         table.align = 'l'
-        
+
         for inst in self.state.backtrace[::-1]:
             table.add_row([
                 "Line {0}".format(inst.lineno),
                 source[inst.lineno-1] if source != None else " ",
                 inst])
-        
+
         print(table)
-    
+
     def copy(self, state=None):
         """
         Input:

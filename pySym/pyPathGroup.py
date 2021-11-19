@@ -24,7 +24,7 @@ class PathGroup:
         self.found = []
         self.search_strategy = search_strategy
         self._project = project
-        
+
         if ignore_groups is None:
             self.ignore_groups = set()
         elif type(ignore_groups) is str:
@@ -53,7 +53,7 @@ class PathGroup:
             attr.append("{0} errored".format(len(self.errored)))
         if len(self.found) > 0:
             attr.append("{0} found".format(len(self.found)))
-        
+
         return s.format(', '.join(attr))
 
     def __repr__(self):
@@ -69,7 +69,7 @@ class PathGroup:
             True if found, False if not
         """
         assert type(find) in [int,type(None)]
-        
+
         while len(self.active) > 0:
             # Step the things
             self.step()
@@ -113,7 +113,7 @@ class PathGroup:
         # Random
         else:
             paths = random.sample(range(len(self.active)), random.randint(1,len(self.active)))
-        
+
         for currentPath in paths:
             # It's possible this throws an exception on us
             try:
@@ -130,7 +130,7 @@ class PathGroup:
             if len(paths_ret) == 0:
                 self.unstash(path=currentPath,to_stash="completed")
                 continue
-        
+
             # We have some return path
             else:
                 for returnedPath in paths_ret:

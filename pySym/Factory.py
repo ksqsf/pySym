@@ -2,7 +2,7 @@ import logging
 logger = logging.getLogger("Factory")
 
 import ast
-import enforce
+#import enforce
 
 from .pyPath import Path
 from .pyPathGroup import PathGroup

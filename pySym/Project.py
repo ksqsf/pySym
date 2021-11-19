@@ -2,7 +2,7 @@ import logging
 logger = logging.getLogger("Project")
 from . import Colorer
 
-import enforce
+#import enforce
 import os
 import types
 
@@ -12,7 +12,7 @@ class Project:
     __slots__ = ['__file_name', '__factory', '__weakref__', '__hooks']
 
     def __init__(self, file, debug=False):
-    
+
         if debug:
             logging.basicConfig(level=logging.DEBUG)
 
@@ -74,7 +74,7 @@ class Project:
         # Make sure this is a real file.
         if not os.path.isfile(file_name):
             raise Exception("Not a valid file: {file_name:s}".format(file_name=file_name))
-        
+
         self.__file_name = file_name
 
 from .Factory import Factory
